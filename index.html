@@ -1,112 +1,121 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ur">
+<html lang="ur" dir="rtl">
 <head>
-  <meta property="og:image" content="https://alraqi-app.github.io/Al-raqi/og-banner.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="application-name" content="الراقی">
-  <meta name="apple-mobile-web-app-title" content="الراقی">
-  <meta name="theme-color" content="#0b1936">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="الراقی — روحانی تشخیص، استخارہ و قرآنی علاج">
-  <meta property="og:description" content="علم الاعداد، استخارہ، مستند قرآنی وظائف، عنصری نقوش اور تعبیر الرؤیا کا جامع ڈیجیٹل پورٹل۔">
-  <meta property="og:image" content="https://alraqi-app.github.io/Al-raqi/Code_Generated_Image.png">
-  <title>الراقی</title>
-  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="preconnect" href="https://script.google.com">
-  <link rel="preconnect" href="https://script.googleusercontent.com">
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>الراقی — روحانی شفاء و رابطہ</title>
+  <meta name="theme-color" content="#065f46" />
+  <meta name="description" content="مریض اور سائل کے لیے الراقی کی محفوظ، تیز اور مفت ایپ" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
   <style>
-    *{box-sizing:border-box}
-    body,html{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#0b1936;font-family:'Noto Nastaliq Urdu','Jameel Noori Nastaleeq',Tahoma,sans-serif}
-    #alRaqiSplash{position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at 50% 35%,#1e3a8a 0%,#0b1936 74%);color:#fef08a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;direction:rtl;text-align:center;transition:opacity 0.35s ease}
-    .rq-logo{width:142px;height:142px;border-radius:50%;object-fit:contain;margin-bottom:14px;box-shadow:0 14px 36px rgba(0,0,0,0.55);border:2px solid rgba(212,175,55,0.6)}
-    .rq-ar-title{font-family:'Amiri','Noto Nastaliq Urdu',serif;font-size:3rem;font-weight:700;margin:0 0 6px;background:linear-gradient(180deg,#fff8db 0%,#eac870 50%,#b88628 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2}
-    .rq-tagline{color:#e2e8f0;font-size:0.95rem;margin:0 0 24px;opacity:0.92}
-    .rq-loader-wrap{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(212,175,55,0.45);padding:8px 18px;border-radius:999px;font-size:0.86rem;color:#fef08a}
-    .rq-spin{width:16px;height:16px;border:2.5px solid rgba(254,240,138,0.28);border-top-color:#fef08a;border-radius:50%;animation:rqRot 0.75s linear infinite}
-    @keyframes rqRot{to{transform:rotate(360deg)}}
-    #alRaqiFullFrame{position:fixed;top:-34px;left:0;width:100vw;height:calc(100vh + 34px);border:0;z-index:10;background:#0b1936}
-    #rqFloatingInstall{position:fixed;bottom:14px;left:14px;z-index:9998;background:linear-gradient(135deg,#facc15,#d4af37);color:#0b1936;border:2px solid #0b1936;padding:8px 16px;border-radius:999px;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:inherit;box-shadow:0 8px 24px rgba(0,0,0,0.45);display:none;align-items:center;gap:6px}
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(155deg, #042f2e 0%, #064e3b 55%, #065f46 100%);
+      color: #fef3c7;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      text-align: center;
+    }
+    .splash-card {
+      max-width: 420px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid rgba(212, 175, 55, 0.8);
+      border-radius: 24px;
+      padding: 26px 20px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(8px);
+    }
+    .logo {
+      width: 112px;
+      height: 112px;
+      border-radius: 50%;
+      border: 3px solid #d4af37;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      margin-bottom: 12px;
+    }
+    h1 { margin: 4px 0 6px; font-size: 1.85rem; color: #fef08a; }
+    p { margin: 0 0 14px; font-size: 0.92rem; color: #d1fae5; line-height: 1.7; }
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #d4af37, #b45309);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 11px 20px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 900;
+      cursor: pointer;
+      margin: 6px 4px;
+    }
+    .status { font-size: 0.84rem; color: #fde68a; margin-top: 10px; font-weight: 700; }
   </style>
 </head>
 <body>
-  <div id="alRaqiSplash">
-    <img id="rqSplashLogoImg" class="rq-logo" src="./icon-512.png" alt="الراقی">
-    <h1 class="rq-ar-title">الراقی</h1>
-    <p class="rq-tagline">روحانی تشخیص، استخارہ و قرآنی علاج</p>
-    <div class="rq-loader-wrap">
-      <span class="rq-spin"></span>
-      <span>خوش آمدید...</span>
-    </div>
+  <div class="splash-card" id="shifaSplash">
+    <img class="logo" src="icon-192.png" alt="الراقی" />
+    <h1>الراقی</h1>
+    <p>روحانی شفاء، منتخب وظائف اور اپنے معالج سے براہِ راست محفوظ رابطہ</p>
+    <button type="button" id="installShifaBtn" class="btn" style="display:none;">📲 موبائل میں ایپ انسٹال کریں</button>
+    <div class="status" id="shifaLoadStatus">⏳ آپ کا محفوظ پورٹل لوڈ ہو رہا ہے...</div>
   </div>
 
-  <button type="button" id="rqFloatingInstall" onclick="window.triggerAlRaqiInstall()">📲 ایپ انسٹال کریں</button>
-  <iframe id="alRaqiFullFrame" allow="clipboard-read; clipboard-write; fullscreen"></iframe>
-
   <script>
-    (function () {
-      var GAS_LIVE_URL = "https://script.google.com/macros/s/AKfycbzKlQ08MZlyKir8IvIZkqLrych04BuJYseRe2_Bb2xcDTu39qfguH4rmqFdqqc9Fkgl7g/exec";
-      var deferredPrompt = null;
-      var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    (function() {
+      var API = 'https://script.google.com/macros/s/AKfycbzKlQ08MZlyKir8IvIZkqLrych04BuJYseRe2_Bb2xcDTu39qfguH4rmqFdqqc9Fkgl7g/exec';
+      var params = new URLSearchParams(window.location.search);
+      var mualij = params.get('m') || params.get('mualij') || localStorage.getItem('alraqi_patient_mualij_v1') || '';
+      if (mualij) {
+        try { localStorage.setItem('alraqi_patient_mualij_v1', mualij); } catch (e) {}
+      }
 
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function () {
-          navigator.serviceWorker.register('./sw.js').catch(function () {});
+        navigator.serviceWorker.register('sw.js').catch(function() {});
+      }
+
+      var deferredPrompt = null;
+      var instBtn = document.getElementById('installShifaBtn');
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (instBtn) instBtn.style.display = 'inline-block';
+      });
+      if (instBtn) {
+        instBtn.addEventListener('click', function() {
+          if (!deferredPrompt) return;
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.finally(function() { deferredPrompt = null; instBtn.style.display = 'none'; });
         });
       }
 
-      window.addEventListener('beforeinstallprompt', function (e) {
-        e.preventDefault();
-        deferredPrompt = e;
-        if (!isStandalone) {
-          var fl = document.getElementById('rqFloatingInstall');
-          if (fl) fl.style.display = 'inline-flex';
+      // Dynamic Cloud Loader: fetches latest Al_Raqi_Patient_Lite.html from Google Drive automatically!
+      fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'get_patient_lite_html_v150', mualij: mualij })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (res && res.ok && res.html) {
+          document.open();
+          document.write(res.html);
+          document.close();
+        } else {
+          var st = document.getElementById('shifaLoadStatus');
+          if (st) st.textContent = '✨ الراقی مریض ایپ جلد مکمل فعال ہو رہی ہے — آپ اسے ابھی اوپر بٹن سے انسٹال کر سکتے ہیں!';
         }
-      });
-
-      window.addEventListener('appinstalled', function () {
-        deferredPrompt = null;
-        var fl = document.getElementById('rqFloatingInstall');
-        if (fl) fl.style.display = 'none';
-      });
-
-      window.triggerAlRaqiInstall = function () {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then(function () { deferredPrompt = null; });
-        }
-      };
-
-      window.hideAlRaqiSplashNow = function () {
-        var sp = document.getElementById('alRaqiSplash');
-        if (sp && sp.style.display !== 'none') {
-          sp.style.opacity = '0';
-          setTimeout(function () { sp.style.display = 'none'; }, 300);
-        }
-      };
-
-      var fr = document.getElementById('alRaqiFullFrame');
-      if (fr) {
-        fr.onload = function () { setTimeout(window.hideAlRaqiSplashNow, 400); };
-        fr.src = GAS_LIVE_URL;
-      }
-
-      window.addEventListener('message', function (ev) {
-        if (!ev || !ev.data) return;
-        if (ev.data.type === 'AL_RAQI_APP_READY') {
-          window.hideAlRaqiSplashNow();
-        } else if (ev.data.type === 'AL_RAQI_THEME_SYNC' && ev.data.logoUri) {
-          var sImg = document.getElementById('rqSplashLogoImg');
-          if (sImg) sImg.src = ev.data.logoUri;
-        }
+      })
+      .catch(function() {
+        var st = document.getElementById('shifaLoadStatus');
+        if (st) st.textContent = '⚠️ انٹرنیٹ کنکشن چیک کریں اور دوبارہ ریفریش کریں۔';
       });
     })();
   </script>
