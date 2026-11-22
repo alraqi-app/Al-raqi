@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ur">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="application-name" content="الراقی">
+  <meta name="apple-mobile-web-app-title" content="الراقی">
+  <meta name="theme-color" content="#0b1936">
+  <meta name="description" content="الراقی (Al-Raqi Pro): روحانی تشخیص، استخارہ، رقیہ شرعیہ، مستند قرآنی وظائف اور تعبیر الرؤیا کا جامع نظام۔ Practitioner Ruqyah Shariah, Dream Interpretation &amp; Islamic Guidance." />
+  <meta name="keywords" content="الراقی, رقیہ شرعیہ, تعبیر الرؤیا, استخارہ, وظائف, الرقية الشرعية, Al-Raqi, Ruqyah Shariah, Dream Interpretation, Spiritual Practitioner" />
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="الراقی | Al-Raqi Pro — Ruqyah Shariah &amp; Practitioner System">
+  <meta property="og:description" content="روحانی تشخیص، خواب کی تعبیر دیکھیں، پروفیشنل ورد و تسبیح کاؤنٹر اور ہجری و ۲۴ ساعاتِ کواکب کا جامع نظام۔">
+  <meta property="og:image" content="https://alraqi-app.github.io/Al-raqi/icon-512.png?v=6">
+  <title>الراقی | Al-Raqi — روحانی تشخیص، استخارہ و قرآنی علاج</title>
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=5">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=5">
+  <link id="dynManifest" rel="manifest" href="./manifest.json?v=5">
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.googleusercontent.com">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Al-Raqi Pro (الراقی)",
+    "alternateName": ["الراقی", "الراقي", "Al-Raqi Practitioner"],
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web, Android, iOS, Windows, macOS",
+    "inLanguage": ["ur", "ar", "en-GB", "en-US"],
+    "description": "Comprehensive Ruqyah Shariah, Quranic Wazaif, Istikhara and Dream Interpretation system for practitioners."
+  }
+  </script>
+  <style>
+    *{box-sizing:border-box}
+    body,html{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#0b1936;font-family:'Noto Nastaliq Urdu','Segoe UI',Tahoma,sans-serif}
+    #alRaqiSplash{position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at 50% 14%,#1e3a8a 0%,#0b1936 72%);color:#fef08a;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;padding:18px 14px 28px;transition:opacity 0.35s ease}
+    .rq-box{max-width:700px;width:100%;background:rgba(11,25,54,0.92);border:2px solid #d4af37;border-radius:24px;padding:20px 16px;box-shadow:0 20px 55px rgba(0,0,0,0.65);text-align:center}
+    .rq-logo{width:126px;height:126px;border-radius:26px;object-fit:contain;display:block;margin:0 auto 8px;box-shadow:0 12px 30px rgba(0,0,0,0.55);border:2px solid rgba(212,175,55,0.55)}
+    .rq-head-row{display:flex;align-items:center;justify-content:center;gap:12px;margin:2px 0 4px}
+    .rq-wing{flex:1;max-width:90px;height:2px;background:linear-gradient(90deg,transparent,#d4af37)}
+    .rq-wing.l{background:linear-gradient(270deg,transparent,#d4af37)}
+    .rq-ar-title{font-family:'Amiri','Noto Nastaliq Urdu',serif;font-size:clamp(2.2rem,5vw,3rem);font-weight:700;margin:0;background:linear-gradient(180deg,#fff8db 0%,#eac870 48%,#b88628 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.25}
+    .rq-tagline{display:inline-block;background:rgba(212,175,55,0.14);border:1.5px solid #d4af37;color:#fef08a;padding:4px 18px;border-radius:999px;font-size:0.94rem;font-weight:700;margin-bottom:8px}
+    .rq-desc{color:#e2e8f0;font-size:0.88rem;margin:0 0 12px;line-height:1.7}
+    .rq-actions{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    .rq-btn-install{background:linear-gradient(135deg,#facc15,#d4af37,#b88628);color:#0b1936;border:none;padding:9px 20px;border-radius:999px;font-weight:800;font-size:0.92rem;cursor:pointer;font-family:inherit;box-shadow:0 6px 20px rgba(212,175,55,0.4);display:inline-flex;align-items:center;gap:8px}
+    .rq-btn-open{background:rgba(255,255,255,0.12);color:#fff;border:1.5px solid rgba(212,175,55,0.7);padding:8px 18px;border-radius:999px;font-weight:700;font-size:0.88rem;cursor:pointer;font-family:inherit}
+    .rq-bar{background:rgba(255,255,255,0.07);border:1px solid rgba(212,175,55,0.4);border-radius:12px;padding:7px 14px;margin-bottom:14px;color:#e2e8f0;font-size:0.85rem;display:flex;align-items:center;justify-content:center;gap:10px}
+    .rq-spin{width:16px;height:16px;border:3px solid rgba(254,240,138,0.28);border-top-color:#fef08a;border-radius:50%;animation:rqRot 0.75s linear infinite}
+    @keyframes rqRot{to{transform:rotate(360deg)}}
+    .rq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:9px}
+    .rq-feat{background:#ffffff;border:1.5px solid #d4af37;border-radius:14px;padding:10px 13px;box-shadow:0 6px 14px rgba(0,0,0,0.2)}
+    .rq-feat strong{display:block;font-size:0.94rem;color:#0b1936;margin-bottom:2px}
+    .rq-feat small{display:block;font-size:0.8rem;color:#1e3a8a;line-height:1.65;font-weight:700}
+    #alRaqiFullFrame{position:fixed;top:-34px;left:0;width:100vw;height:calc(100vh + 34px);border:0;z-index:10;background:#0b1936}
+    #rqFloatingInstall{position:fixed;bottom:14px;left:14px;z-index:9998;background:linear-gradient(135deg,#facc15,#d4af37);color:#0b1936;border:2px solid #0b1936;padding:8px 16px;border-radius:999px;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:inherit;box-shadow:0 8px 24px rgba(0,0,0,0.45);display:none;align-items:center;gap:6px}
+    #rqIosTip{display:none;background:rgba(254,240,138,0.14);border:1px solid #d4af37;color:#fef08a;border-radius:12px;padding:8px 12px;font-size:0.82rem;margin-bottom:12px;line-height:1.7}
+  </style>
+</head>
+<body>
+  <div id="alRaqiSplash">
+    <div class="rq-box">
+      <img id="rqSplashLogoImg" class="rq-logo" src="./icon-512.png?v=5" alt="Al-Raqi">
+      <div class="rq-head-row">
+        <span class="rq-wing"></span>
+        <span style="color:#d4af37;font-size:1.1rem">❖</span>
+        <h1 class="rq-ar-title" id="rqTitleEl">الراقی</h1>
+        <span style="color:#d4af37;font-size:1.1rem">❖</span>
+        <span class="rq-wing l"></span>
+      </div>
+      <div class="rq-tagline" id="rqTagEl">روحانی تشخیص، استخارہ و قرآنی علاج کا جامع نظام</div>
+      <p class="rq-desc" id="rqDescEl">علم الاعداد، استخارہ، مستند قرآنی وظائف، رقیہ شرعیہ اور تعبیر الرؤیا کا تیز رفتار اور محفوظ نظام</p>
+
+      <div class="rq-actions">
+        <button type="button" id="rqInstallBtn" class="rq-btn-install" onclick="window.triggerAlRaqiInstall()">📲 ایپ انسٹال کریں (Install App)</button>
+        <button type="button" id="rqOpenBtn" class="rq-btn-open" onclick="window.hideAlRaqiSplashNow()">🚀 ایپ کھولیں</button>
+      </div>
+
+      <div id="rqIosTip"></div>
+
+      <div class="rq-bar">
+        <span class="rq-spin" id="rqSpinEl"></span>
+        <span id="rqLoadStatus">الراقی لائیو سسٹم گوگل کلاؤڈ سے لوڈ ہو رہا ہے...</span>
+      </div>
+
+      <div class="rq-grid" id="rqFeatGrid">
+        <div class="rq-feat"><strong>🔢 ۱. روحانی تشخیص، علم الاعداد و استخارہ</strong><small>نام و تاریخِ پیدائش سے ابجد، برج، مزاج اور مکمل روحانی تشخیص۔</small></div>
+        <div class="rq-feat"><strong>🌙 ۲. خواب کی تعبیر دیکھیں</strong><small>مستند کتبِ تعبیر سے خوابوں کا فوری تجزیہ، خلاصہ اور محفوظ ریکارڈ۔</small></div>
+        <div class="rq-feat"><strong>📿 ۳. پروفیشنل ورد و چلہ کاؤنٹر</strong><small>کروڑوں تک گنتی، فل اسکرین تسبیح، نائٹ موڈ اور محفوظ کلاؤڈ بیک اپ۔</small></div>
+        <div class="rq-feat"><strong>⏰ ۴. ہجری کیلنڈر اور ۲۴ ساعاتِ کواکب</strong><small>لائیو ساعات، موزوں نقوش و فوائد، قمر در عقرب اور بہترین وقت کی تلاش۔</small></div>
+      </div>
+    </div>
+  </div>
+
+  <button type="button" id="rqFloatingInstall" onclick="window.triggerAlRaqiInstall()">📲 ایپ انسٹال کریں</button>
+  <iframe id="alRaqiFullFrame" allow="clipboard-read; clipboard-write; fullscreen"></iframe>
+
+  <script>
+    (function () {
+      var GAS_LIVE_URL = "https://script.google.com/macros/s/AKfycbzKlQ08MZlyKir8IvIZkqLrych04BuJYseRe2_Bb2xcDTu39qfguH4rmqFdqqc9Fkgl7g/exec";
+      var BLUE_I18N = {
+        'ur': { dir:'rtl', title:'الراقی', tag:'روحانی تشخیص، استخارہ و قرآنی علاج کا جامع نظام', desc:'روحانی تشخیص، خواب کی تعبیر دیکھیں، پروفیشنل ورد کاؤنٹر اور ہجری و ۲۴ ساعات کا محفوظ نظام', install:'📲 ایپ انسٹال کریں (Install App)', open:'🚀 ایپ کھولیں', loading:'الراقی لائیو سسٹم لوڈ ہو رہا ہے...', ready:'الراقی تیار ہے!', manifest:'./manifest-ur.json?v=5' },
+        'ar': { dir:'rtl', title:'الراقي', tag:'نظام المعالج المتكامل للرقية الشرعية والعلاج', desc:'الرقية الشرعية الموثوقة، تعبير الرؤيا، الأذكار وإدارة المواعيد في مكان واحد', install:'📲 تثبيت التطبيق', open:'🚀 فتح التطبيق', loading:'جاري تحميل نظام الراقي...', ready:'نظام الراقي جاهز!', manifest:'./manifest-ar.json?v=5' },
+        'en-GB': { dir:'ltr', title:'Al-Raqi Pro', tag:'Practitioner Ruqyah & Spiritual Guidance Centre', desc:'Authentic Ruqyah Shariah, Quranic wazaif, dream interpretation and clinic scheduling in one secure centre', install:'📲 Install App', open:'🚀 Open App', loading:'Loading Al-Raqi live system...', ready:'Al-Raqi is ready!', manifest:'./manifest-en-gb.json?v=5' },
+        'en-US': { dir:'ltr', title:'Al-Raqi Pro', tag:'Practitioner Ruqyah & Spiritual Guidance Center', desc:'Authentic Ruqyah Shariah, Quranic wazaif, dream interpretation and clinic scheduling in one secure center', install:'📲 Install App', open:'🚀 Open App', loading:'Loading Al-Raqi live system...', ready:'Al-Raqi is ready!', manifest:'./manifest-en-us.json?v=5' }
+      };
+
+      var ARAB_CC = ['SA','AE','QA','KW','OM','BH','EG','JO','IQ','YE','SY','LB','PS','SD','LY','TN','DZ','MA','MR','SO','DJ','KM'];
+      var UK_CC = ['GB','UK','AU','NZ','IE','ZA','SG','MY','HK','MT','CY'];
+      var US_CC = ['US','CA','PH','PR'];
+      var UR_CC = ['PK','IN'];
+
+      function mapCountryToLang(cc) {
+        cc = String(cc || '').toUpperCase().trim();
+        if (UR_CC.indexOf(cc) !== -1) return 'ur';
+        if (ARAB_CC.indexOf(cc) !== -1) return 'ar';
+        if (UK_CC.indexOf(cc) !== -1) return 'en-GB';
+        if (US_CC.indexOf(cc) !== -1) return 'en-US';
+        return 'en-GB';
+      }
+
+      function detectFastLang() {
+        try {
+          var q = new URLSearchParams(window.location.search).get('lang');
+          if (q && ['ur','ar','en-GB','en-US'].indexOf(q) !== -1) return q;
+          var saved = localStorage.getItem('ALRAQI_LANG_V1');
+          if (saved && ['ur','ar','en-GB','en-US'].indexOf(saved) !== -1) return saved;
+        } catch (e) {}
+        try {
+          var tz = (Intl.DateTimeFormat().resolvedOptions().timeZone || '').toLowerCase();
+          if (tz.indexOf('karachi') !== -1 || tz.indexOf('kolkata') !== -1) return 'ur';
+          if (tz.indexOf('riyadh') !== -1 || tz.indexOf('dubai') !== -1 || tz.indexOf('qatar') !== -1 || tz.indexOf('kuwait') !== -1 || tz.indexOf('cairo') !== -1 || tz.indexOf('amman') !== -1 || tz.indexOf('baghdad') !== -1 || tz.indexOf('muscat') !== -1 || tz.indexOf('bahrain') !== -1) return 'ar';
+          if (tz.indexOf('london') !== -1 || tz.indexOf('sydney') !== -1 || tz.indexOf('melbourne') !== -1 || tz.indexOf('auckland') !== -1 || tz.indexOf('dublin') !== -1) return 'en-GB';
+          if (tz.indexOf('america/') !== -1 || tz.indexOf('new_york') !== -1 || tz.indexOf('chicago') !== -1 || tz.indexOf('los_angeles') !== -1 || tz.indexOf('toronto') !== -1) return 'en-US';
+        } catch (e) {}
+        var nav = (navigator.language || 'ur').toLowerCase();
+        if (nav.indexOf('ar') === 0) return 'ar';
+        if (nav.indexOf('ur') === 0) return 'ur';
+        if (nav === 'en-us' || nav === 'en-ca') return 'en-US';
+        if (nav.indexOf('en') === 0) return 'en-GB';
+        return 'ur';
+      }
+
+      function detectCountryGeoAsync(cb) {
+        try {
+          if (localStorage.getItem('ALRAQI_LANG_MANUAL_V1') === '1') return;
+        } catch (e) {}
+        var done = false;
+        var timer = setTimeout(function() { done = true; }, 2200);
+        fetch('https://ipapi.co/country/', { cache: 'no-store' })
+          .then(function(r) { return r.ok ? r.text() : ''; })
+          .then(function(cc) {
+            if (done) return;
+            clearTimeout(timer);
+            cc = String(cc || '').trim();
+            if (cc.length === 2) {
+              var lang = mapCountryToLang(cc);
+              try { localStorage.setItem('ALRAQI_LANG_V1', lang); } catch (e) {}
+              cb(lang);
+            }
+          }).catch(function() {});
+      }
+
+      var activeLang = detectFastLang();
+      function applyBlueSplashLang(lang) {
+        activeLang = BLUE_I18N[lang] ? lang : 'ur';
+        var t = BLUE_I18N[activeLang];
+        document.documentElement.lang = activeLang;
+        document.documentElement.dir = t.dir;
+        document.title = t.title + ' — ' + t.tag;
+        var elT = document.getElementById('rqTitleEl'); if (elT) elT.textContent = t.title;
+        var elG = document.getElementById('rqTagEl'); if (elG) elG.textContent = t.tag;
+        var elD = document.getElementById('rqDescEl'); if (elD) elD.textContent = t.desc;
+        var elI = document.getElementById('rqInstallBtn'); if (elI) elI.textContent = t.install;
+        var elO = document.getElementById('rqOpenBtn'); if (elO) elO.textContent = t.open;
+        var elL = document.getElementById('rqLoadStatus'); if (elL) elL.textContent = t.loading;
+        var mf = document.getElementById('dynManifest'); if (mf) mf.setAttribute('href', t.manifest);
+      }
+      applyBlueSplashLang(activeLang);
+      detectCountryGeoAsync(applyBlueSplashLang);
+
+      var deferredPrompt = null;
+      var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+      if (isStandalone) {
+        var b1 = document.getElementById('rqInstallBtn');
+        if (b1) b1.style.display = 'none';
+      }
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('./sw.js?v=5').then(function(reg) {
+            try { reg.update(); } catch (e) {}
+          }).catch(function () {});
+        });
+      }
+
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (!isStandalone) {
+          var fl = document.getElementById('rqFloatingInstall');
+          if (fl) fl.style.display = 'inline-flex';
+        }
+      });
+
+      window.addEventListener('appinstalled', function () {
+        deferredPrompt = null;
+        var b1 = document.getElementById('rqInstallBtn');
+        var fl = document.getElementById('rqFloatingInstall');
+        if (b1) b1.style.display = 'none';
+        if (fl) fl.style.display = 'none';
+      });
+
+      window.triggerAlRaqiInstall = function () {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function () { deferredPrompt = null; });
+          return;
+        }
+        var tip = document.getElementById('rqIosTip');
+        if (tip) {
+          var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+          tip.innerHTML = isIOS
+            ? "آئی فون/سفاری میں انسٹال کرنے کے لیے نیچے <b>Share (⬆️)</b> بٹن دبائیں اور <b>Add to Home Screen</b> منتخب کریں۔"
+            : "اگر انسٹال پاپ اپ خود نہ کھلے تو کروم کے ایڈریس بار یا اوپر تین نقطوں <b>(⋮)</b> مینیو میں جا کر <b>Install App / Add to Home Screen</b> پر کلک کریں۔";
+          tip.style.display = 'block';
+        }
+      };
+
+      window.hideAlRaqiSplashNow = function () {
+        var sp = document.getElementById('alRaqiSplash');
+        if (sp && sp.style.display !== 'none') {
+          sp.style.opacity = '0';
+          setTimeout(function () { sp.style.display = 'none'; }, 320);
+        }
+      };
+
+      var fr = document.getElementById('alRaqiFullFrame');
+      if (fr) {
+        fr.onload = function () {
+          var st = document.getElementById('rqLoadStatus');
+          if (st) st.textContent = (BLUE_I18N[activeLang] || BLUE_I18N.ur).ready;
+          setTimeout(window.hideAlRaqiSplashNow, 1600);
+        };
+        fr.src = GAS_LIVE_URL;
+      }
+
+      window.addEventListener('message', function (ev) {
+        if (!ev || !ev.data) return;
+        if (ev.data.type === 'AL_RAQI_APP_READY') {
+          window.hideAlRaqiSplashNow();
+        } else if (ev.data.type === 'AL_RAQI_THEME_SYNC' && ev.data.logoUri) {
+          var sImg = document.getElementById('rqSplashLogoImg');
+          if (sImg) sImg.src = ev.data.logoUri;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
