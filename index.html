@@ -702,6 +702,95 @@ html, body {
   -webkit-overflow-scrolling: touch !important;
 }
 
+
+.ar-el-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.ar-el-fire { background: #ffedd5; border: 1px solid #fdba74; }
+.ar-el-wind { background: #e0f2fe; border: 1px solid #7dd3fc; }
+.ar-el-water { background: #dbeafe; border: 1px solid #60a5fa; }
+.ar-el-earth { background: #dcfce7; border: 1px solid #86efac; }
+
+
+/* Batch 6: Header Home Pill + Ultra-Slim Exclusive Accordion Lists */
+#alRaqiV2Root .ar-hdr-home-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 12px;
+  min-height: 27px;
+  border-radius: 999px;
+  background: rgba(254, 240, 138, 0.16);
+  border: 1px solid rgba(212, 175, 55, 0.78);
+  color: #fef08a;
+  font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', Tahoma, sans-serif;
+  font-size: 0.80rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+#alRaqiV2Root .ar-hdr-home-pill:active {
+  background: #d4af37;
+  color: #0b1936;
+}
+#alRaqiV2Root .ar-cat-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 12px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1.5px solid #cbd5e1;
+  border-right: 4px solid #1e3a8a;
+  color: #0b1936;
+  font-weight: 800;
+  font-size: 0.96rem;
+  cursor: pointer;
+  margin-bottom: 5px;
+}
+#alRaqiV2Root .ar-cat-hdr.open {
+  background: linear-gradient(135deg, #0b1936 0%, #1e3a8a 100%);
+  color: #fef08a;
+  border-color: #d4af37;
+}
+#alRaqiV2Root .ar-slim-row {
+  background: #ffffff;
+  border: 1px solid #dbe4f0;
+  border-right: 3px solid #065f46;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+#alRaqiV2Root .ar-slim-row.open {
+  border: 1.8px solid #d4af37;
+  background: #fffdf5;
+  padding: 10px 12px;
+  box-shadow: 0 6px 18px rgba(11, 25, 54, 0.12);
+}
+#alRaqiV2Root .ar-slim-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.90rem;
+  font-weight: 700;
+  color: #0b1936;
+  line-height: 1.55;
+}
+#alRaqiV2Root .ar-slim-row.open .ar-slim-title {
+  font-size: 1.04rem;
+  color: #1e3a8a;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed #d4af37;
+  margin-bottom: 8px;
+}
+
 /* Batch 3 Fixes: Corner Sign-Out + 100% One-Screen Home Fit + Modal Equal Grid Buttons */
 #alRaqiV2Root #scr_home .ar-hero-header {
   position: relative !important;
@@ -853,9 +942,9 @@ html, body {
 
   <!-- ================= صفحہ ۳: سادہ تشخیص فارم ================= -->
   <section id="scr_form" class="screen">
-    <div class="ar-hero-header">
+    <div class="ar-hero-header" style="position:relative;"><div class="ar-hdr-corner-actions"><button type="button" class="ar-hdr-home-pill" onclick="openScreen('home')">ہوم</button></div>
       <img src="" data-ar-logo="1" alt="الراقی لوگو">
-      <h1 class="ar-arabic-text">الراقی روحانی تشخیص و استخارہ</h1>
+      <h1 class="ar-arabic-text" style="cursor:pointer;" onclick="openScreen('home')">الراقی روحانی تشخیص و استخارہ</h1>
     </div>
     <div class="wrap">
       <div class="card">
@@ -953,9 +1042,9 @@ html, body {
 
   <!-- ================= صفحہ ۴: تشخیصی سوالات اور علامات ================= -->
   <section id="scr_symptoms" class="screen">
-    <div class="ar-hero-header">
+    <div class="ar-hero-header" style="position:relative;"><div class="ar-hdr-corner-actions"><button type="button" class="ar-hdr-home-pill" onclick="openScreen('home')">ہوم</button></div>
       <img src="" data-ar-logo="1" alt="الراقی لوگو">
-      <h1 class="ar-arabic-text">الراقی روحانی تشخیص و استخارہ</h1>
+      <h1 class="ar-arabic-text" style="cursor:pointer;" onclick="openScreen('home')">الراقی روحانی تشخیص و استخارہ</h1>
     </div>
     <div class="wrap">
       <!-- پورشن ۱: تشخیصی سوالات -->
@@ -1021,9 +1110,9 @@ html, body {
 
   <!-- ================= صفحہ ۵: مکتبۂ الراقی (۵ فولڈرز) ================= -->
   <section id="scr_folders" class="screen">
-    <div class="ar-hero-header">
+    <div class="ar-hero-header" style="position:relative;"><div class="ar-hdr-corner-actions"><button type="button" class="ar-hdr-home-pill" onclick="openScreen('home')">ہوم</button></div>
       <img src="" data-ar-logo="1" alt="الراقی لوگو">
-      <h1 class="ar-arabic-text">الراقی روحانی تشخیص و استخارہ</h1>
+      <h1 class="ar-arabic-text" style="cursor:pointer;" onclick="openScreen('home')">الراقی روحانی تشخیص و استخارہ</h1>
     </div>
     <div class="wrap">
       <div class="folder-5-grid">
@@ -1090,13 +1179,7 @@ html, body {
 
       <!-- فولڈر ۳: اسماء الحسنیٰ (الگ مکمل فولڈر — پورے ۹۹ اسماء مع عددی و معنوی مزاج) -->
       <div id="fpane_asma" class="folder-pane card">
-        <div id="asmaMizajBar" class="ar-eq-grid-5" style="margin-bottom:9px;">
-          <button type="button" class="ar-unibtn active" data-mizaj="all" onclick="setAsmaMizajFilter('all')"><span>سب (۹۹)</span></button>
-          <button type="button" class="ar-unibtn" data-mizaj="آتشی" onclick="setAsmaMizajFilter('آتشی')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c.5 3.5-2 5.5-2 8.5a4 4 0 0 0 8 0c0-3-2.5-5.5-6-8.5z"/><path d="M12 22a6 6 0 0 1-6-6c0-2.5 1.5-4.5 3-6"/></svg><span>آتشی</span></button>
-          <button type="button" class="ar-unibtn" data-mizaj="بادی" onclick="setAsmaMizajFilter('بادی')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.1" stroke-linecap="round"><path d="M3 8h13a3 3 0 1 0-3-3"/><path d="M3 12h16a3 3 0 1 1-3 3"/><path d="M3 16h9"/></svg><span>بادی</span></button>
-          <button type="button" class="ar-unibtn" data-mizaj="آبی" onclick="setAsmaMizajFilter('آبی')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7l5.6 6.7a7.2 7.2 0 1 1-11.2 0L12 2.7z"/></svg><span>آبی</span></button>
-          <button type="button" class="ar-unibtn" data-mizaj="خاکی" onclick="setAsmaMizajFilter('خاکی')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg><span>خاکی</span></button>
-        </div>
+        <div id="asmaMizajBar" class="ar-eq-grid-5" style="margin-bottom:9px;"><button type="button" class="ar-unibtn active" data-mizaj="all" onclick="setAsmaMizajFilter('all')"><span>سب (۹۹)</span></button><button type="button" class="ar-unibtn" data-mizaj="آتشی" onclick="setAsmaMizajFilter('آتشی')"><span class="ar-el-ico ar-el-fire"><svg width="16" height="16" viewBox="0 0 24 24" fill="#ea580c"><path d="M12.5 2C12.5 2 18 6.4 18 12.2A6 6 0 1 1 6 12.2C6 9.1 7.6 6.8 9.2 5.3C9.2 5.3 8.8 8 10.6 9.1C10.6 9.1 10.2 5.2 12.5 2Z"/><path d="M12 19.5a2.8 2.8 0 0 1-2.8-2.8c0-1.5 1.3-2.6 2.8-4.2 1.5 1.6 2.8 2.7 2.8 4.2a2.8 2.8 0 0 1-2.8 2.8z" fill="#fde047"/></svg></span><span>آتشی</span></button><button type="button" class="ar-unibtn" data-mizaj="بادی" onclick="setAsmaMizajFilter('بادی')"><span class="ar-el-ico ar-el-wind"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.6" stroke-linecap="round"><path d="M2 8h13.5a2.8 2.8 0 1 0-2.8-2.8"/><path d="M2 13h17a2.8 2.8 0 1 1-2.8 2.8"/><path d="M2 18h10"/></svg></span><span>بادی</span></button><button type="button" class="ar-unibtn" data-mizaj="آبی" onclick="setAsmaMizajFilter('آبی')"><span class="ar-el-ico ar-el-water"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2.2C12 2.2 5.2 10.2 5.2 14.8a6.8 6.8 0 0 0 13.6 0C18.8 10.2 12 2.2 12 2.2z" fill="#2563eb"/><path d="M9.4 15.2a2.8 2.8 0 0 0 2.6 2.6" fill="none" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/></svg></span><span>آبی</span></button><button type="button" class="ar-unibtn" data-mizaj="خاکی" onclick="setAsmaMizajFilter('خاکی')"><span class="ar-el-ico ar-el-earth"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M3 19l5.5-8 4 5 3-4 5.5 7H3z" fill="#b45309"/><path d="M13 4c3 0 5 2 5 5-3 0-5-2-5-5z" fill="#16a34a"/></svg></span><span>خاکی</span></button></div>
         <input type="text" id="asmaSearchInp" placeholder="اسمِ مبارک یا عدد تلاش کریں..." oninput="renderAsmaFolder()" style="margin-bottom:10px;">
         <div id="asmaFolderList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:8px;"></div>
       </div>
@@ -1141,6 +1224,15 @@ html, body {
                 </select>
               </div>
             </div>
+            <div style="margin-bottom:8px;">
+              <label style="font-weight:700; font-size:0.86rem;">نقش کی چال / عنصر (تمام اوفاق کے لیے):</label>
+              <select id="naqshChaalSel" onchange="renderClassicGridNaqshPreview()">
+                <option value="aatishi">آتشی چال (ناری — Fire)</option>
+                <option value="baadi">بادی چال (ہوائی — Air)</option>
+                <option value="aabi">آبی چال (مائی — Water)</option>
+                <option value="khaaki">خاکی چال (ترابی — Earth)</option>
+              </select>
+            </div>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; align-items:center;">
               <button type="button" class="ar-unibtn active" onclick="renderClassicGridNaqshPreview()">نقش دکھائیں</button>
               <select id="naqshPrintCountSel" style="height:40px; padding:0 8px;">
@@ -1184,9 +1276,9 @@ html, body {
 
   <!-- ================= صفحہ ۶: تعبیر الرؤیا (۱۰۰٪ اصل UI + مکمل ابن سیرینؒ و ڈکشنری) ================= -->
   <section id="scr_tabeer" class="screen">
-    <div class="ar-hero-header">
+    <div class="ar-hero-header" style="position:relative;"><div class="ar-hdr-corner-actions"><button type="button" class="ar-hdr-home-pill" onclick="openScreen('home')">ہوم</button></div>
       <img src="" data-ar-logo="1" alt="الراقی لوگو">
-      <h1 class="ar-arabic-text">الراقی روحانی تشخیص و استخارہ</h1>
+      <h1 class="ar-arabic-text" style="cursor:pointer;" onclick="openScreen('home')">الراقی روحانی تشخیص و استخارہ</h1>
     </div>
     <div class="wrap">
       <!-- ۱. پورا خواب لکھ کر الفاظ سے تعبیر نکالیں (اصل خانہ بحال) -->
@@ -1239,9 +1331,9 @@ html, body {
 
   <!-- ================= صفحہ ۷: الراقی رپورٹ کارڈ ================= -->
   <section id="scr_report" class="screen">
-    <div class="ar-hero-header">
+    <div class="ar-hero-header" style="position:relative;"><div class="ar-hdr-corner-actions"><button type="button" class="ar-hdr-home-pill" onclick="openScreen('home')">ہوم</button></div>
       <img src="" data-ar-logo="1" alt="الراقی لوگو">
-      <h1 class="ar-arabic-text">الراقی روحانی تشخیص و استخارہ</h1>
+      <h1 class="ar-arabic-text" style="cursor:pointer;" onclick="openScreen('home')">الراقی روحانی تشخیص و استخارہ</h1>
     </div>
     <div class="wrap">
       <div class="card">
@@ -1339,9 +1431,9 @@ html, body {
 
   <!-- ================= صفحہ ۸: الساعات ================= -->
   <section id="scr_saaat" class="screen">
-    <div class="ar-hero-header">
+    <div class="ar-hero-header" style="position:relative;"><div class="ar-hdr-corner-actions"><button type="button" class="ar-hdr-home-pill" onclick="openScreen('home')">ہوم</button></div>
       <img src="" data-ar-logo="1" alt="الراقی لوگو">
-      <h1 class="ar-arabic-text">الراقی روحانی تشخیص و استخارہ</h1>
+      <h1 class="ar-arabic-text" style="cursor:pointer;" onclick="openScreen('home')">الراقی روحانی تشخیص و استخارہ</h1>
     </div>
     <div class="wrap">
       <div class="card" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
@@ -1375,11 +1467,11 @@ html, body {
   <!-- ================= صفحہ ۹: خالص تسبیح ================= -->
   <section id="scr_tasbeeh" class="screen">
     <div class="ar-slim-header" style="padding:8px 14px;">
-      <h2>تسبیح</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; width:100%;"><h2>تسبیح</h2><button type="button" class="ar-hdr-home-pill" onclick="openScreen('home')">ہوم</button></div>
     </div>
     <div class="wrap">
       <div class="tasbeeh-hero">
-        <div class="ar-arabic-text" id="tActiveTitle" style="font-size:1.45rem; color:#fef08a; font-weight:700; min-height:34px;">اپنی پلے لسٹ سے وظیفہ منتخب کریں</div>
+        <div class="ar-arabic-text" id="tActiveTitle" style="font-size:1.45rem; color:#fef08a; font-weight:700; min-height:34px;">اپنی لسٹ سے وظیفہ منتخب کریں</div>
         <div style="font-size:0.84rem; color:#bae6fd; margin-bottom:4px;">ہدف: <b id="tTargetLbl" dir="ltr">100</b></div>
         <div class="tap-circle" onclick="tapTasbeeh(1)">
           <span class="tap-count" id="tCount">0</span>
@@ -1394,7 +1486,7 @@ html, body {
 
       <div class="card hide-in-muraqaba">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
-          <h3 style="margin:0; border:none; padding:0;">میری ذاتی وظائف لسٹ (پلے لسٹ)</h3>
+          <h3 style="margin:0; border:none; padding:0;">میری منتخب وظائف لسٹ</h3>
           <button type="button" class="ar-unibtn active" style="width:auto; padding:0 12px; min-height:36px;" onclick="openScreen('folders'); openFolder4('wazaif');">+ مکتبۂ الراقی سے شامل کریں</button>
         </div>
         <div id="tasbeehPlaylistBox" style="display:flex; flex-direction:column; gap:7px; margin-bottom:12px;"></div>
@@ -1420,9 +1512,9 @@ html, body {
 
   <!-- ================= متحدہ سیٹنگز ================= -->
   <section id="scr_settings" class="screen">
-    <div class="ar-hero-header">
+    <div class="ar-hero-header" style="position:relative;"><div class="ar-hdr-corner-actions"><button type="button" class="ar-hdr-home-pill" onclick="openScreen('home')">ہوم</button></div>
       <img src="" data-ar-logo="1" alt="الراقی لوگو">
-      <h1 class="ar-arabic-text">الراقی روحانی تشخیص و استخارہ</h1>
+      <h1 class="ar-arabic-text" style="cursor:pointer;" onclick="openScreen('home')">الراقی روحانی تشخیص و استخارہ</h1>
     </div>
     <div class="wrap">
       <div class="card">
@@ -1506,9 +1598,6 @@ html, body {
 
 <!-- Toast Box -->
 <div id="toastBox" style="display:none; position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#0b1936; color:#fef08a; border:1.5px solid #d4af37; padding:9px 18px; border-radius:999px; font-weight:700; font-size:0.88rem; z-index:99999; box-shadow:0 8px 24px rgba(0,0,0,0.3); max-width:90vw; text-align:center;"></div>
-
-<!-- Floating Right-Side Home Button (hidden on Home) -->
-<button type="button" id="floatingHomeBtn" onclick="openScreen('home')" style="display:none; position:fixed; bottom:16px; right:14px; left:auto; z-index:9000; background:linear-gradient(135deg,#0b1936,#1e3a8a); color:#fef08a; border:1.5px solid #d4af37; border-radius:999px; padding:7px 14px; font-weight:700; font-size:0.86rem; box-shadow:0 4px 14px rgba(11,25,54,0.35); cursor:pointer; align-items:center; gap:5px;">ہوم</button>
 
 <!-- Unified Native Sign-In / Sign-Up / Pending Approval Modal -->
 <div id="clientLoginGateModal" style="display:none; position:fixed; inset:0; background:rgba(11,25,54,0.72); z-index:95000; align-items:center; justify-content:center; padding:14px;">
@@ -2610,7 +2699,7 @@ html, body {
     acc.innerHTML =
       '<div class="ar-arabic-text" style="font-size:1.38rem; color:#0f172a; line-height:2.1; text-align:center; margin-bottom:10px;">' + txt + '</div>' +
       '<div class="ar-eq-grid-2">' +
-        '<button type="button" class="ar-unibtn active" onclick="addItemToTasbeehPlaylist(\'' + nm.replace(/'/g, '') + '\', 41)">تسبیح پلے لسٹ میں شامل کریں</button>' +
+        '<button type="button" class="ar-unibtn active" onclick="addItemToTasbeehPlaylist(\'' + nm.replace(/'/g, '') + '\', 41)">تسبیح میں شامل کریں</button>' +
         '<button type="button" class="ar-unibtn" onclick="attachWazifaToReport(\'' + nm.replace(/'/g, '') + '\')">رپورٹ کارڈ میں لگائیں</button>' +
       '</div>';
     acc.style.display = 'block';
@@ -2657,7 +2746,7 @@ html, body {
             (it.ar ? '<div class="ar-arabic-text" style="font-size:1.25rem; color:#0f172a; white-space:pre-line; margin-bottom:8px;">' + it.ar + '</div>' : '') +
             (it.ur ? '<div style="font-size:0.92rem; color:#334155; white-space:pre-line; margin-bottom:10px;">' + it.ur + '</div>' : '') +
             '<div class="ar-eq-grid-2">' +
-              '<button type="button" class="ar-unibtn active" onclick="addItemToTasbeehPlaylist(\'' + it.title.replace(/'/g, '') + '\', 100)">تسبیح پلے لسٹ میں شامل کریں</button>' +
+              '<button type="button" class="ar-unibtn active" onclick="addItemToTasbeehPlaylist(\'' + it.title.replace(/'/g, '') + '\', 100)">تسبیح میں شامل کریں</button>' +
               '<button type="button" class="ar-unibtn" onclick="attachWazifaToReport(\'' + it.title.replace(/'/g, '') + '\')">رپورٹ کارڈ میں لگائیں</button>' +
             '</div>' +
           '</div>'
@@ -3036,7 +3125,7 @@ html, body {
     if (!box) return;
     var list = getTasbeehPlaylist();
     if (!list.length) {
-      box.innerHTML = '<div style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:10px; padding:12px; text-align:center; color:#475569; font-size:0.88rem;">آپ کی وظائف پلے لسٹ ابھی خالی ہے—اوپر «مکتبۂ الراقی سے شامل کریں» یا نیچے اپنا ذکر اور تعداد درج کر کے اپنی ذاتی لسٹ بنائیں۔</div>';
+      box.innerHTML = '<div style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:10px; padding:12px; text-align:center; color:#475569; font-size:0.88rem;">آپ کی منتخب وظائف لسٹ ابھی خالی ہے—اوپر «مکتبۂ الراقی سے شامل کریں» یا نیچے اپنا ذکر اور تعداد درج کر کے اپنی ذاتی لسٹ بنائیں۔</div>';
       return;
     }
     box.innerHTML = list.map(function(item, idx) {
@@ -3058,7 +3147,7 @@ html, body {
     _tActiveIdx = list.length - 1;
     window.selectTasbeehPlaylistItem(_tActiveIdx);
     window.openScreen('tasbeeh');
-    window.showToast('✅ آپ کی تسبیح پلے لسٹ میں شامل ہو گیا');
+    window.showToast('✅ آپ کی تسبیح لسٹ میں شامل ہو گیا');
   };
 
   window.addCustomTasbeehZikr = function() {
@@ -3428,6 +3517,508 @@ html, body {
   };
 
   
+
+  
+  // ===== Batch 5 Fixes =====
+  // Point #1: 16-Line Taj Company Mushaf Surah-wise Jump (exact starting page per Surah)
+  var TAJ_16LINE_PAGES = [2,3,45,69,95,115,136,160,169,187,199,212,225,231,237,242,255,266,277,284,294,302,311,319,329,335,345,354,364,371,377,381,384,393,399,404,410,417,422,431,439,445,451,457,460,464,468,472,476,479,482,485,488,490,493,496,499,504,507,510,513,515,516,518,520,522,524,526,529,531,533,535,537,539,541,543,545,547,548,550,551,552,553,555,556,557,558,558,559,561,561,562,563,563,564,564,565,565,566,567,567,568,568,568,569,569,570,570,570,571,571,571,572,572];
+
+  function populatePdfSurahSelector() {
+    var sel = $('pdfSurahJumpSel');
+    if (!sel || typeof QURAN_114_SURAHS === 'undefined') return;
+    if (sel.options.length < 10) {
+      sel.innerHTML = QURAN_114_SURAHS.map(function(s) {
+        var pg = TAJ_16LINE_PAGES[(Number(s.num) || 1) - 1] || 2;
+        return '<option value="' + s.num + '">' + s.num + '. ' + (s.urdu || s.name) + ' (صفحہ ' + pg + ')</option>';
+      }).join('');
+      var last = '';
+      try { last = localStorage.getItem('alraqi_last_pdf_surah_v2') || '1'; } catch (e) { last = '1'; }
+      sel.value = last;
+    }
+    window.openPdfSurahResume(sel.value || '1');
+  }
+
+  window.openPdfSurahResume = function(surahNum) {
+    var num = parseInt(surahNum, 10) || 1;
+    try { localStorage.setItem('alraqi_last_pdf_surah_v2', String(num)); } catch (e) {}
+    var pg = TAJ_16LINE_PAGES[num - 1] || 2;
+    var s = (typeof QURAN_114_SURAHS !== 'undefined') ? QURAN_114_SURAHS.find(function(x){ return Number(x.num) === num; }) : null;
+    var nm = s ? (s.urdu || s.name) : ('سورت ' + num);
+    var pdfUrl = 'https://drive.google.com/file/d/1t5g0IsUnlYFlp2rQmA8r_coJ5QHG5-Jm/view#page=' + pg;
+    var arText = '';
+    if (typeof FULL_SURAH_ARABIC_TEXT_DB !== 'undefined' && FULL_SURAH_ARABIC_TEXT_DB[String(num)]) arText = FULL_SURAH_ARABIC_TEXT_DB[String(num)];
+    else if (typeof SURAH_OPENING_TEXT_DB !== 'undefined' && SURAH_OPENING_TEXT_DB[String(num)]) arText = SURAH_OPENING_TEXT_DB[String(num)];
+    var area = $('pdfLongPressDemoArea');
+    if (area) {
+      area.innerHTML =
+        '<div class="db-item" style="border-right-color:#065f46; background:#fffdf5;">' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">' +
+            '<b class="ar-arabic-text" style="font-size:1.25rem; color:#0b1936;">' + num + '. ' + nm + '</b>' +
+            '<span class="ar-pat-badge ar-pat-badge-gold">۱۶ سطری مصحف — صفحہ ' + pg + '</span>' +
+          '</div>' +
+          '<div class="ar-eq-grid-2" style="margin-bottom:10px;">' +
+            '<button type="button" class="ar-unibtn active" onclick="window.open(\'' + pdfUrl + '\', \'_blank\')">پی ڈی ایف صفحہ ' + pg + ' کھولیں</button>' +
+            '<button type="button" class="ar-unibtn" onclick="addItemToTasbeehPlaylist(\'' + nm.replace(/'/g, '') + '\', 41)">تسبیح میں شامل کریں</button>' +
+          '</div>' +
+          (arText ? '<div class="ar-arabic-text" style="font-size:1.38rem; line-height:2.25; color:#0f172a; background:#ffffff; border:2px solid #d4af37; border-radius:10px; padding:12px; text-align:justify;">' + arText + '</div>' : '') +
+        '</div>';
+    }
+  };
+
+  var _origSwitchQSub = window.switchQuranSubMode;
+  window.switchQuranSubMode = function(mode) {
+    if (_origSwitchQSub) _origSwitchQSub(mode);
+    if (mode === 'pdf') populatePdfSurahSelector();
+  };
+
+  // Points #2 & #3: Fix Manzil 33 Ayahs & Hizb-ul-Bahr / Ahzab / Mujarrabat Arabic text (.arabic & .method keys!)
+  window.renderUnifiedWazaifList = function() {
+    var box = $('wazaifFolderList');
+    if (!box) return;
+    var q = (($('wazaifUnifiedSearch') || {}).value || '').trim();
+    var items = [];
+    if (typeof MANZIL_33_ITEMS !== 'undefined') {
+      items.push({
+        title: 'منزل شریف (۳۳ آیاتِ قرآنی)', meta: 'حفاظت، سحر، آسیب و نظرِ بد',
+        ar: MANZIL_33_ITEMS.map(function(m, i) {
+          if (typeof m === 'string') return (i+1) + '. ' + m;
+          return (m.title ? '【' + m.title + '】\n' : '') + (m.arabic || m.ar || m.text || '');
+        }).join('\n\n'),
+        ur: 'حفاظت، جادو، آسیب اور نظرِ بد کے لیے روزانہ صبح و شام اول و آخر ۱۱ بار درود شریف کے ساتھ تلاوت کریں۔'
+      });
+    }
+    if (typeof AHZAB_OPEN_LIST_ITEMS !== 'undefined') {
+      AHZAB_OPEN_LIST_ITEMS.forEach(function(h) {
+        items.push({
+          title: stripEmojis(h.title || h.name || ''),
+          meta: 'احزاب و اوراد',
+          ar: h.arabic || h.ar || '',
+          ur: h.method || h.text || h.desc || h.details || h.fawaid || ''
+        });
+      });
+    }
+    if (typeof MUJARRAB_OPEN_LIST_ITEMS !== 'undefined') {
+      MUJARRAB_OPEN_LIST_ITEMS.forEach(function(m) {
+        items.push({
+          title: stripEmojis(m.title || m.name || ''),
+          meta: 'مجرباتِ کتب',
+          ar: m.arabic || m.ar || '',
+          ur: m.method || m.text || m.desc || m.details || m.padhai || ''
+        });
+      });
+    }
+    if (typeof QURANIC_BOOK_TREATMENTS !== 'undefined') {
+      Object.keys(QURANIC_BOOK_TREATMENTS).forEach(function(k) {
+        var b = QURANIC_BOOK_TREATMENTS[k];
+        items.push({
+          title: stripEmojis(b.title || k),
+          meta: 'قرآنی عملیات',
+          ar: b.arabic || b.padhai || '',
+          ur: (b.tariqa || '') + (b.fawaid ? '\n' + b.fawaid : '')
+        });
+      });
+    }
+    var filt = items.filter(function(it) { return !q || (it.title + ' ' + it.meta + ' ' + it.ar + ' ' + it.ur).indexOf(q) !== -1; });
+    window._uniWazaifCache = filt;
+    box.innerHTML = filt.map(function(it, idx) {
+      var isOpen = (_openWazaifIdx === idx);
+      return '<div class="db-item" style="cursor:pointer; border-right-color:#065f46;" onclick="toggleInlineWazifa(' + idx + ')">' +
+        '<b style="color:#0b1936;">' + it.title + '</b>' +
+        '<div style="font-size:0.78rem; color:#065f46;">' + it.meta + '</div>' +
+        (isOpen ? (
+          '<div class="ar-inline-acc" onclick="event.stopPropagation()">' +
+            (it.ar ? '<div class="ar-arabic-text" style="font-size:1.28rem; line-height:2.2; color:#0f172a; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:9px; padding:10px; white-space:pre-line; margin-bottom:9px;">' + it.ar + '</div>' : '') +
+            (it.ur ? '<div style="font-size:0.92rem; color:#334155; white-space:pre-line; margin-bottom:10px;">' + it.ur + '</div>' : '') +
+            '<div class="ar-eq-grid-2">' +
+              '<button type="button" class="ar-unibtn active" onclick="addItemToTasbeehPlaylist(\'' + it.title.replace(/'/g, '') + '\', 100)">تسبیح میں شامل کریں</button>' +
+              '<button type="button" class="ar-unibtn" onclick="attachWazifaToReport(\'' + it.title.replace(/'/g, '') + '\')">رپورٹ کارڈ میں لگائیں</button>' +
+            '</div>' +
+          '</div>'
+        ) : '') +
+        '</div>';
+    }).join('') || '<div style="color:#64748b;">کوئی نتیجہ نہیں ملا۔</div>';
+  };
+
+  // Point #5: Vivid filled element icons in Asma cards + compact non-stretched '+ تسبیح' button
+  window.renderAsmaFolder = function() {
+    var box = $('asmaFolderList');
+    if (!box || typeof FULL_ASMA_LIST === 'undefined') return;
+    var q = (($('asmaSearchInp') || {}).value || '').trim();
+    var iconMap = {
+      'آتشی': '<span class="ar-el-ico ar-el-fire"><svg width="15" height="15" viewBox="0 0 24 24" fill="#ea580c"><path d="M12.5 2C12.5 2 18 6.4 18 12.2A6 6 0 1 1 6 12.2C6 9.1 7.6 6.8 9.2 5.3C9.2 5.3 8.8 8 10.6 9.1C10.6 9.1 10.2 5.2 12.5 2Z"/><path d="M12 19.5a2.8 2.8 0 0 1-2.8-2.8c0-1.5 1.3-2.6 2.8-4.2 1.5 1.6 2.8 2.7 2.8 4.2a2.8 2.8 0 0 1-2.8 2.8z" fill="#fde047"/></svg></span>',
+      'بادی': '<span class="ar-el-ico ar-el-wind"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.6" stroke-linecap="round"><path d="M2 8h13.5a2.8 2.8 0 1 0-2.8-2.8"/><path d="M2 13h17a2.8 2.8 0 1 1-2.8 2.8"/><path d="M2 18h10"/></svg></span>',
+      'آبی': '<span class="ar-el-ico ar-el-water"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 2.2C12 2.2 5.2 10.2 5.2 14.8a6.8 6.8 0 0 0 13.6 0C18.8 10.2 12 2.2 12 2.2z" fill="#2563eb"/><path d="M9.4 15.2a2.8 2.8 0 0 0 2.6 2.6" fill="none" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/></svg></span>',
+      'خاکی': '<span class="ar-el-ico ar-el-earth"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M3 19l5.5-8 4 5 3-4 5.5 7H3z" fill="#b45309"/><path d="M13 4c3 0 5 2 5 5-3 0-5-2-5-5z" fill="#16a34a"/></svg></span>'
+    };
+    var filt = FULL_ASMA_LIST.filter(function(a) {
+      var abj = a.abjad || a.num || 0;
+      var numMizaj = abj ? getMizajFromNumber(abj) : 'خاکی';
+      if (_asmaMizajFilter !== 'all' && numMizaj !== _asmaMizajFilter) return false;
+      var s = (a.ar || a.name || '') + ' ' + (a.urdu || a.meaning || a.ur || '') + ' ' + abj + ' ' + numMizaj;
+      return !q || s.indexOf(q) !== -1;
+    });
+    box.innerHTML = filt.map(function(a, i) {
+      var ar = a.ar || a.name || '';
+      var ur = a.urdu || a.meaning || a.ur || a.title || '';
+      var abj = a.abjad || a.num || 0;
+      var numMizaj = abj ? getMizajFromNumber(abj) : '—';
+      return '<div class="db-item" style="border-right-color:#1e3a8a;">' +
+        '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">' +
+          '<b class="ar-arabic-text" style="font-size:1.25rem; color:#0b1936;">' + (i+1) + '. ' + ar + '</b>' +
+          '<span style="font-size:0.82rem; background:#eff6ff; color:#1e3a8a; padding:2px 10px; border-radius:999px; font-weight:700;" dir="ltr">' + abj + '</span>' +
+        '</div>' +
+        (ur ? '<div style="font-size:0.84rem; color:#334155;">' + ur + '</div>' : '') +
+        '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:7px;">' +
+          '<span style="font-size:0.86rem; color:#0b1936; font-weight:700; display:inline-flex; align-items:center; gap:6px;">' + (iconMap[numMizaj] || '') + '<span>مزاج: ' + numMizaj + '</span></span>' +
+          '<button type="button" class="ar-unibtn" style="width:auto !important; flex-shrink:0; min-height:32px !important; padding:2px 14px !important; font-size:0.80rem !important;" onclick="addItemToTasbeehPlaylist(\'' + ar.replace(/'/g, '') + '\', ' + (abj || 100) + ')">+ تسبیح</button>' +
+        '</div></div>';
+    }).join('') || '<div style="color:#64748b;">کوئی اسم نہیں ملا۔</div>';
+  };
+
+  
+  // ===== Batch 6 Fixes =====
+  var _openWazCat = 'cat_manzil';
+  var _openWazKey = '';
+  var _cloudMahfoozatLoaded = false;
+  var _cloudMahfoozatItems = [];
+  var _cloudAzkarLoaded = false;
+  var _cloudAzkarItems = [];
+
+  function syncCloudLibraryOnce(cb) {
+    var tasks = [];
+    if (!_cloudMahfoozatLoaded && window.APPS_SCRIPT_URL) {
+      _cloudMahfoozatLoaded = true;
+      tasks.push(
+        fetch(window.APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'mahfoozat_list_v140' })
+        }).then(function(r){ return r.json(); }).then(function(res){
+          if (res && res.ok && Array.isArray(res.items)) _cloudMahfoozatItems = res.items;
+        }).catch(function(){})
+      );
+    }
+    if (!_cloudAzkarLoaded && window.APPS_SCRIPT_URL) {
+      _cloudAzkarLoaded = true;
+      tasks.push(
+        fetch(window.APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'get_arabic_azkar_vault_v41' })
+        }).then(function(r){ return r.json(); }).then(function(res){
+          if (res && res.ok && Array.isArray(res.items)) _cloudAzkarItems = res.items;
+        }).catch(function(){})
+      );
+    }
+    if (tasks.length && cb) Promise.all(tasks).then(cb);
+  }
+
+  // Points #3 & #4: ALL 52+ Book Wazaif in Slim Exclusive Category Accordion
+  function collectAllBookWazaifGrouped() {
+    var groups = [
+      { id: 'cat_manzil', label: '۱. منزل شریف، حفاظت و فیوض', items: [] },
+      { id: 'cat_ahzab',  label: '۲. احزاب و اورادِ مشائخ', items: [] },
+      { id: 'cat_muj',    label: '۳. مجرباتِ کتب و عملیات', items: [] },
+      { id: 'cat_quran',  label: '۴. قرآنی عملیات (شفا، رزق، شادی، بندش)', items: [] }
+    ];
+    if (typeof MANZIL_33_ITEMS !== 'undefined') {
+      groups[0].items.push({
+        k: 'm33_all',
+        title: 'منزل شریف مکمل (۳۳ آیاتِ قرآنی)',
+        ar: MANZIL_33_ITEMS.map(function(m, i) {
+          return (typeof m === 'string') ? ((i+1) + '. ' + m) : ((m.title ? '【' + m.title + '】\n' : '') + (m.arabic || m.ar || m.text || ''));
+        }).join('\n\n'),
+        ur: 'حفاظت، سحر، آسیب اور نظرِ بد کے لیے روزانہ صبح و شام اول و آخر ۱۱ بار درود شریف کے ساتھ پڑھیں۔'
+      });
+    }
+    if (typeof MANZIL_BOOK_DB !== 'undefined') {
+      Object.keys(MANZIL_BOOK_DB).forEach(function(k) {
+        if (k === 'manzil_full_33') return;
+        var b = MANZIL_BOOK_DB[k];
+        if (!b || !b.title) return;
+        groups[0].items.push({
+          k: 'mb_' + k,
+          title: stripEmojis(b.title),
+          ar: b.arabic || b.ar || '',
+          ur: stripEmojis((b.shortName ? b.shortName + '\n' : '') + (b.defaultCount ? 'تعداد: ' + b.defaultCount + ' | ' : '') + (b.defaultTiming || '') + (b.refDetail ? '\n' + b.refDetail.replace(/<[^>]+>/g, ' ') : ''))
+        });
+      });
+    }
+    if (typeof AHZAB_OPEN_LIST_ITEMS !== 'undefined') {
+      AHZAB_OPEN_LIST_ITEMS.forEach(function(h, i) {
+        groups[1].items.push({
+          k: 'ah_' + i,
+          title: stripEmojis(h.title || h.name || ''),
+          ar: h.arabic || h.ar || '',
+          ur: h.method || h.text || h.desc || h.details || h.fawaid || ''
+        });
+      });
+    }
+    if (typeof MUJARRAB_OPEN_LIST_ITEMS !== 'undefined') {
+      MUJARRAB_OPEN_LIST_ITEMS.forEach(function(m, i) {
+        groups[2].items.push({
+          k: 'mj_' + i,
+          title: stripEmojis(m.title || m.name || ''),
+          ar: m.arabic || m.ar || '',
+          ur: m.method || m.text || m.desc || m.details || m.padhai || ''
+        });
+      });
+    }
+    if (typeof EXTRA_MUJARRAB_TREATMENTS !== 'undefined') {
+      Object.keys(EXTRA_MUJARRAB_TREATMENTS).forEach(function(k) {
+        var b = EXTRA_MUJARRAB_TREATMENTS[k];
+        if (!b) return;
+        groups[2].items.push({
+          k: 'ex_' + k,
+          title: stripEmojis(b.title || k),
+          ar: b.arabic || b.padhai || '',
+          ur: (b.tariqa || '') + (b.fawaid ? '\n' + b.fawaid : '') + (b.count ? '\nتعداد: ' + b.count : '')
+        });
+      });
+    }
+    if (typeof QURANIC_BOOK_TREATMENTS !== 'undefined') {
+      Object.keys(QURANIC_BOOK_TREATMENTS).forEach(function(k) {
+        var b = QURANIC_BOOK_TREATMENTS[k];
+        if (!b) return;
+        groups[3].items.push({
+          k: 'qb_' + k,
+          title: stripEmojis(b.title || k),
+          ar: b.arabic || b.padhai || '',
+          ur: (b.tariqa || '') + (b.fawaid ? '\n' + b.fawaid : '')
+        });
+      });
+    }
+    if (typeof SIX_CATEGORY_QURANIC_WAZAIF !== 'undefined') {
+      var arr6 = Array.isArray(SIX_CATEGORY_QURANIC_WAZAIF) ? SIX_CATEGORY_QURANIC_WAZAIF : Object.keys(SIX_CATEGORY_QURANIC_WAZAIF).map(function(k){ return SIX_CATEGORY_QURANIC_WAZAIF[k]; });
+      arr6.forEach(function(c, i) {
+        if (!c || !c.title) return;
+        groups[3].items.push({
+          k: 's6_' + i,
+          title: stripEmojis(c.title),
+          ar: c.arabic || c.ayat || c.padhai || '',
+          ur: c.method || c.desc || c.fawaid || c.text || ''
+        });
+      });
+    }
+    if (_cloudAzkarItems.length) {
+      groups.push({
+        id: 'cat_cloud',
+        label: '۵. کلاؤڈ اذکار و اضافی وظائف',
+        items: _cloudAzkarItems.map(function(z, i) {
+          return { k: 'cz_' + i, title: stripEmojis(z.title || z.name || ('وظیفہ ' + (i+1))), ar: z.arabic || z.ar || '', ur: z.method || z.text || z.desc || '' };
+        })
+      });
+    }
+    return groups;
+  }
+
+  window.toggleWazCat = function(catId) {
+    _openWazCat = (_openWazCat === catId) ? '' : catId;
+    _openWazKey = '';
+    window.renderUnifiedWazaifList();
+  };
+  window.toggleWazItem = function(itemKey) {
+    _openWazKey = (_openWazKey === itemKey) ? '' : itemKey;
+    window.renderUnifiedWazaifList();
+  };
+
+  window.renderUnifiedWazaifList = function() {
+    var box = $('wazaifFolderList');
+    if (!box) return;
+    syncCloudLibraryOnce(function() { window.renderUnifiedWazaifList(); });
+    var q = (($('wazaifUnifiedSearch') || {}).value || '').trim();
+    var groups = collectAllBookWazaifGrouped();
+    var html = '';
+    groups.forEach(function(g) {
+      var list = g.items.filter(function(it) { return !q || (it.title + ' ' + it.ar + ' ' + it.ur).indexOf(q) !== -1; });
+      if (!list.length) return;
+      var catOpen = q ? true : (_openWazCat === g.id);
+      html += '<div class="ar-cat-hdr ' + (catOpen ? 'open' : '') + '" onclick="toggleWazCat(\'' + g.id + '\')">' +
+        '<span>' + g.label + '</span><span style="font-size:0.80rem; opacity:0.9;">(' + list.length + ')</span></div>';
+      if (catOpen) {
+        html += '<div style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px; padding-right:4px;">' +
+          list.map(function(it) {
+            var isOpen = (_openWazKey === it.k);
+            return '<div class="ar-slim-row ' + (isOpen ? 'open' : '') + '" onclick="toggleWazItem(\'' + it.k + '\')">' +
+              '<div class="ar-slim-title"><span>' + it.title + '</span><span style="font-size:0.78rem; color:#64748b;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
+              (isOpen ? (
+                '<div onclick="event.stopPropagation()">' +
+                  (it.ar ? '<div class="ar-arabic-text" style="font-size:1.34rem; line-height:2.25; color:#0f172a; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:9px; padding:11px; white-space:pre-line; margin-bottom:9px;">' + it.ar + '</div>' : '') +
+                  (it.ur ? '<div style="font-size:0.96rem; color:#1e293b; white-space:pre-line; line-height:1.9; margin-bottom:10px;">' + it.ur + '</div>' : '') +
+                  '<div class="ar-eq-grid-2">' +
+                    '<button type="button" class="ar-unibtn active" onclick="addItemToTasbeehPlaylist(\'' + it.title.replace(/'/g, '') + '\', 100)">تسبیح میں شامل کریں</button>' +
+                    '<button type="button" class="ar-unibtn" onclick="attachWazifaToReport(\'' + it.title.replace(/'/g, '') + '\')">رپورٹ کارڈ میں لگائیں</button>' +
+                  '</div>' +
+                '</div>'
+              ) : '') +
+            '</div>';
+          }).join('') + '</div>';
+      }
+    });
+    box.innerHTML = html || '<div style="color:#64748b; text-align:center; padding:12px;">کوئی وظیفہ نہیں ملا۔</div>';
+  };
+
+  // Point #2: Cloud Naqsh (mahfoozat_list_v140) + Smart Urdu Synonym Topic Filters + Slim Exclusive Accordion
+  var NAQSH_SYNONYMS = {
+    'حب':   ['حب','محبت','تسخیر','شادی','رشتہ','رشتے','پسند','الفت','ازدواجی'],
+    'جادو': ['جادو','سحر','آسیب','جنات','کراس','کاٹ','سفلی','ابطال'],
+    'بندش': ['بندش','رکاوٹ','انکار','حفاظت','حصار','مصیبت','حزب البحر','علی'],
+    'نظر':  ['نظر','حسد','بچوں','حفاظت','دفع'],
+    'رزق':  ['رزق','کاروبار','زبون','فروخت','مال','دکان','برکت','مربع'],
+    'شفاء': ['شفاء','شفا','بیماری','مرگی','اولاد','حمل','دم','علاج'],
+    'نفرت': ['نفرت','عداوت','دشمن','تفریق','جدائی','ظالم']
+  };
+  function matchNaqshTopic(hay, topic) {
+    if (topic === 'all') return true;
+    var syns = NAQSH_SYNONYMS[topic] || [topic];
+    return syns.some(function(w) { return hay.indexOf(w) !== -1; });
+  }
+
+  window.renderNaqshFolder = function() {
+    var box = $('naqshFolderList');
+    if (!box) return;
+    syncCloudLibraryOnce(function() { window.renderNaqshFolder(); });
+    var allItems = [];
+    if (typeof SPECIAL_VAULT_NAQSH_ITEMS !== 'undefined') {
+      Object.keys(SPECIAL_VAULT_NAQSH_ITEMS).forEach(function(k) {
+        var n = SPECIAL_VAULT_NAQSH_ITEMS[k];
+        allItems.push({
+          k: 'v_' + k,
+          title: stripEmojis(n.title || k).replace(/\([^)]*\)/g, '').trim(),
+          hay: (n.title || k) + ' ' + (n.practitionerNote || '') + ' ' + (n.tags || ''),
+          render: function() {
+            return (typeof n.renderHtml === 'function') ? n.renderHtml() :
+              '<div class="ar-arabic-text" style="padding:14px; background:#fff; border:2px solid #0f172a; display:inline-block;">' + stripEmojis(n.title || k) + '</div>';
+          }
+        });
+      });
+    }
+    _cloudMahfoozatItems.forEach(function(cm, i) {
+      var t = stripEmojis(cm.title || cm.name || ('کلاؤڈ نقش ' + (i+1)));
+      var cat = String(cm.category || cm.type || '').toLowerCase();
+      if (cat && cat.indexOf('book') !== -1 && cat.indexOf('naqsh') === -1) return;
+      allItems.push({
+        k: 'c_' + i,
+        title: t + ' (کلاؤڈ)',
+        hay: t + ' ' + (cm.note || cm.desc || '') + ' ' + (cm.tags || ''),
+        render: function() {
+          if (cm.imageUrl || cm.fileUrl || cm.url) {
+            var u = cm.imageUrl || cm.fileUrl || cm.url;
+            return '<div style="margin-bottom:6px;"><a href="' + u + '" target="_blank" class="ar-unibtn active" style="text-decoration:none;">کلاؤڈ نقش / فائل کھولیں</a></div>';
+          }
+          return '<div style="padding:10px; background:#fff; border:1.5px solid #0f172a;">' + (cm.note || t) + '</div>';
+        }
+      });
+    });
+
+    // Update topic counts on buttons
+    document.querySelectorAll('#naqshTopicBar .ar-unibtn').forEach(function(b) {
+      var tp = b.getAttribute('data-ntopic');
+      if (!tp) return;
+      var cnt = allItems.filter(function(it){ return matchNaqshTopic(it.hay, tp); }).length;
+      var base = b.getAttribute('data-base-lbl') || b.textContent.replace(/\s*\(\d+\)\s*$/, '').trim();
+      b.setAttribute('data-base-lbl', base);
+      b.textContent = base + ' (' + cnt + ')';
+    });
+
+    var q = (($('naqshTopicSearchInp') || {}).value || '').trim();
+    var filtered = allItems.filter(function(it) {
+      if (!matchNaqshTopic(it.hay, _naqshTopicFilter)) return false;
+      return !q || it.hay.indexOf(q) !== -1;
+    });
+
+    box.innerHTML = filtered.map(function(it) {
+      var isOpen = (_openNaqshKey === it.k);
+      return '<div class="ar-slim-row ' + (isOpen ? 'open' : '') + '" style="border-right-color:#b45309;" onclick="toggleInlineNaqsh(\'' + it.k + '\')">' +
+        '<div class="ar-slim-title"><span style="color:#78350f;">' + it.title + '</span><span style="font-size:0.78rem; color:#92400e;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
+        (isOpen ? (
+          '<div style="text-align:center;" onclick="event.stopPropagation()">' +
+            '<div id="naqshPrintTarget_' + it.k + '" style="margin:8px 0 10px;">' + it.render() + '</div>' +
+            '<div class="ar-eq-grid-2">' +
+              '<button type="button" class="ar-unibtn active" onclick="printSingleVaultNaqsh(\'naqshPrintTarget_' + it.k + '\', 4)">A4 پرنٹ (۴ نقوش)</button>' +
+              '<button type="button" class="ar-unibtn" onclick="printSingleVaultNaqsh(\'naqshPrintTarget_' + it.k + '\', 1)">A4 پرنٹ (۱ کونے میں)</button>' +
+            '</div>' +
+          '</div>'
+        ) : '') +
+      '</div>';
+    }).join('') || '<div style="color:#64748b; text-align:center; padding:12px;">اس موضوع میں ابھی کوئی نقش موجود نہیں—آپ اوفاقی نقوش سے تیار کر سکتے ہیں یا گوگل ڈرائیو میں شامل کر سکتے ہیں۔</div>';
+  };
+
+  // Point #5: 4 Classical Chaals (آتشی، بادی، آبی، خاکی) applied to ALL Awfaq types!
+  function rotateMatrix90(mat) {
+    var n = mat.length, out = [];
+    for (var r = 0; r < n; r++) {
+      out[r] = [];
+      for (var c = 0; c < n; c++) out[r][c] = mat[n - 1 - c][r];
+    }
+    return out;
+  }
+  function applyChaalTransform(mat, chaal) {
+    var m = mat.map(function(r){ return r.slice(); });
+    if (chaal === 'baadi')  return rotateMatrix90(m);
+    if (chaal === 'aabi')   return rotateMatrix90(rotateMatrix90(m));
+    if (chaal === 'khaaki') return rotateMatrix90(rotateMatrix90(rotateMatrix90(m)));
+    return m; // aatishi default
+  }
+
+  window.renderClassicGridNaqshPreview = function() {
+    var out = $('classicNaqshGridOut');
+    if (!out) return;
+    var raw = (($('naqshSoftInput') || {}).value || '786').trim();
+    var kind = ($('naqshTypeSel') || {}).value || 'musallas';
+    var chaal = ($('naqshChaalSel') || {}).value || 'aatishi';
+    var chaalLbl = { aatishi:'آتشی چال', baadi:'بادی چال', aabi:'آبی چال', khaaki:'خاکی چال' }[chaal] || 'آتشی چال';
+    var num = parseInt(raw, 10);
+    if (isNaN(num)) {
+      num = (typeof window.calculatePureAbjadTotal === 'function') ? (window.calculatePureAbjadTotal(raw) || 786) : 786;
+    }
+
+    if (kind === 'zulkitabat') {
+      var words = raw.split(/\s+/).filter(Boolean);
+      if (words.length < 4) words = ['بِسْمِ', 'اللّٰهِ', 'الرَّحْمٰنِ', 'الرَّحِیْمِ'];
+      var n = (words.length <= 4) ? 4 : 3;
+      var w4 = words.slice(0, n);
+      while (w4.length < n) w4.push(words[0]);
+      var baseMat = [];
+      for (var r = 0; r < n; r++) {
+        baseMat[r] = [];
+        for (var c = 0; c < n; c++) baseMat[r][c] = w4[(r + c) % n];
+      }
+      var finalMat = applyChaalTransform(baseMat, chaal);
+      var rows = finalMat.map(function(row) {
+        return '<tr>' + row.map(function(w) {
+          return '<td class="ar-arabic-text" style="border:1.8px solid #0f172a; padding:10px 8px; font-size:1.12rem; min-width:68px; text-align:center;">' + w + '</td>';
+        }).join('') + '</tr>';
+      }).join('');
+      out.innerHTML = '<div style="font-size:0.86rem; color:#1e3a8a; font-weight:700; margin-bottom:6px;">ذوالکتابت مربع — ' + chaalLbl + ' (کل ابجد: <span dir="ltr">' + num + '</span>)</div>' +
+        '<div id="activeGeneratedNaqshBox" style="display:inline-block; background:#fff; padding:6px;"><table style="border-collapse:collapse; margin:0 auto;">' + rows + '</table></div>';
+      return;
+    }
+
+    var dim = (kind === 'murabba') ? 4 : ((kind === 'mukhammas' || kind === 'khali_5') ? 5 : (kind === 'musaddas' ? 6 : 3));
+    var tarh = (dim === 3) ? 12 : (dim === 4 ? 30 : (dim === 5 ? 60 : 105));
+    var base = Math.max(1, Math.floor((num - tarh) / dim));
+    var kasar = Math.max(0, (num - tarh) % dim);
+    var grids = {
+      3: [[4,9,2],[3,5,7],[8,1,6]],
+      4: [[8,11,14,1],[13,2,7,12],[3,16,9,6],[10,5,4,15]],
+      5: [[17,24,1,8,15],[23,5,7,14,16],[4,6,13,20,22],[10,12,19,21,3],[11,18,25,2,9]],
+      6: [[6,32,3,34,35,1],[7,11,27,28,8,30],[19,14,16,15,23,24],[18,20,22,21,17,13],[25,29,10,9,26,12],[36,5,33,4,2,31]]
+    };
+    var g = applyChaalTransform(grids[dim] || grids[3], chaal);
+    var center = Math.floor(dim / 2);
+    var htmlRows = g.map(function(row, ri) {
+      return '<tr>' + row.map(function(idx, ci) {
+        if ((kind === 'khali_3' || kind === 'khali_5') && ri === center && ci === center) {
+          return '<td style="border:1.8px solid #0f172a; padding:8px; min-width:44px; font-weight:700; color:#92400e;">مقصد</td>';
+        }
+        var val = base + (idx - 1) + (kasar > 0 && idx > (dim * dim - kasar) ? 1 : 0);
+        return '<td dir="ltr" style="border:1.8px solid #0f172a; padding:8px 10px; min-width:44px; font-weight:700; font-size:0.96rem;">' + val + '</td>';
+      }).join('') + '</tr>';
+    }).join('');
+    out.innerHTML = '<div style="font-size:0.86rem; color:#1e3a8a; font-weight:700; margin-bottom:6px;">نقشِ ' + dim + '×' + dim + ' — ' + chaalLbl + ' | کل عدد: <span dir="ltr">' + num + '</span>' + (kasar ? ' (کسر: ' + kasar + ')' : '') + '</div>' +
+      '<div id="activeGeneratedNaqshBox" style="display:inline-block; background:#fff; padding:6px;"><table style="border-collapse:collapse; margin:0 auto;">' + htmlRows + '</table></div>';
+  };
 
   
   // ===== Batch 4 Fixes =====
