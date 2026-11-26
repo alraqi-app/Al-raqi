@@ -1403,6 +1403,7 @@ html, body {
             <div class="db-item" id="rBox_mufrad"><small style="color:#64748b;">مفرد عدد</small><br><b id="repMufrad" style="color:#065f46;">—</b></div>
             <div class="db-item" id="rBox_ism"><small style="color:#64748b;">اسمِ اعظم</small><br><b id="repIsm" class="ar-arabic-text" style="color:#1d4ed8;">—</b></div>
           </div>
+          <div class="db-item" id="rBox_dobCompat" style="display:none; margin-bottom:9px; border-right-color:#0f766e; background:#f8fafc;"><div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px; border-bottom:1px dashed #cbd5e1; padding-bottom:5px;"><small style="font-weight:800; color:#0b1936;">نام اور تاریخِ پیدائش کا مزاج و مطابقت</small><span id="repDobCompatBadge" class="ar-pat-badge ar-pat-badge-gold">—</span></div><div class="ar-eq-grid-2" style="margin-bottom:7px;"><div style="background:#fff; border:1px solid #dbe4f0; border-radius:8px; padding:6px 8px; text-align:center;"><small style="color:#64748b;">نام کا مزاج</small><div id="repNameMizajBadge" style="margin-top:3px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:5px;">—</div></div><div style="background:#fff; border:1px solid #dbe4f0; border-radius:8px; padding:6px 8px; text-align:center;"><small style="color:#64748b;">تاریخِ پیدائش کا عدد و مزاج</small><div id="repDobMizajBadge" style="margin-top:3px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:5px;">—</div></div></div><div id="repDobCompatSentence" style="font-size:0.88rem; color:#1e293b; background:#fff; border-radius:8px; padding:8px 10px; border-right:3px solid #065f46; line-height:1.85;">—</div></div>
           <div class="db-item" id="rBox_wazifa" style="margin-bottom:8px;">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:5px; flex-wrap:wrap;"><small style="font-weight:700; color:#1e3a8a;">منتخب وظیفہ</small><button type="button" id="btnPickWazifaFromFolder" class="ar-unibtn" style="width:auto !important; min-height:30px !important; padding:2px 10px !important; font-size:0.78rem !important;" onclick="openWazaifPickerForReport()">وظائف فولڈر سے منتخب کریں</button></div>
             <textarea id="repWazifaTxt" rows="2" placeholder="وظائف فولڈر سے منتخب کریں یا خود لکھیں..."></textarea>
@@ -4307,6 +4308,115 @@ html, body {
     }).join('');
     out.innerHTML = '<div style="font-size:0.86rem; color:#1e3a8a; font-weight:700; margin-bottom:6px;">ذوالکتابت مربع (مکمل آیت) — ' + chaalLbl + ' | کل ابجد: <span dir="ltr">' + num + '</span></div>' +
       '<div id="activeGeneratedNaqshBox" style="display:inline-block; background:#fff; padding:6px; max-width:100%; overflow-x:auto;"><table style="border-collapse:collapse; margin:0 auto;">' + rows + '</table></div>';
+  };
+
+  
+  // ===== Batch 8: DOB Numerology, Vivid Element Icons & Classical Name-DOB Compatibility =====
+  var _EL_ICONS_MAP = {
+    'آتشی': '<span class="ar-el-ico ar-el-fire"><svg width="14" height="14" viewBox="0 0 24 24" fill="#ea580c"><path d="M12.5 2C12.5 2 18 6.4 18 12.2A6 6 0 1 1 6 12.2C6 9.1 7.6 6.8 9.2 5.3C9.2 5.3 8.8 8 10.6 9.1C10.6 9.1 10.2 5.2 12.5 2Z"/><path d="M12 19.5a2.8 2.8 0 0 1-2.8-2.8c0-1.5 1.3-2.6 2.8-4.2 1.5 1.6 2.8 2.7 2.8 4.2a2.8 2.8 0 0 1-2.8 2.8z" fill="#fde047"/></svg></span>',
+    'بادی': '<span class="ar-el-ico ar-el-wind"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.6" stroke-linecap="round"><path d="M2 8h13.5a2.8 2.8 0 1 0-2.8-2.8"/><path d="M2 13h17a2.8 2.8 0 1 1-2.8 2.8"/><path d="M2 18h10"/></svg></span>',
+    'آبی': '<span class="ar-el-ico ar-el-water"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 2.2C12 2.2 5.2 10.2 5.2 14.8a6.8 6.8 0 0 0 13.6 0C18.8 10.2 12 2.2 12 2.2z" fill="#2563eb"/><path d="M9.4 15.2a2.8 2.8 0 0 0 2.6 2.6" fill="none" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/></svg></span>',
+    'خاکی': '<span class="ar-el-ico ar-el-earth"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M3 19l5.5-8 4 5 3-4 5.5 7H3z" fill="#b45309"/><path d="M13 4c3 0 5 2 5 5-3 0-5-2-5-5z" fill="#16a34a"/></svg></span>'
+  };
+
+  var _BURJ_TO_ELEMENT = {
+    'حمل':'آتشی','اسد':'آتشی','قوس':'آتشی',
+    'جوزا':'بادی','میزان':'بادی','دلو':'بادی',
+    'سرطان':'آبی','عقرب':'آبی','حوت':'آبی',
+    'ثور':'خاکی','سنبلہ':'خاکی','جدی':'خاکی'
+  };
+
+  function computeDobNumerologyV21(dobStr) {
+    if (!dobStr || dobStr === '—') return { valid: false };
+    var months = { jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12' };
+    var norm = String(dobStr).toLowerCase().replace(/\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\b/g, function(m) {
+      return months[m.slice(0,3)] || m;
+    });
+    var digits = norm.replace(/[^0-9]/g, '');
+    if (!digits) return { valid: false };
+    var sum = 0;
+    for (var i = 0; i < digits.length; i++) sum += parseInt(digits[i], 10);
+    var muf = (sum % 9) || 9;
+    var elMap = { 1:'آتشی', 2:'آبی', 3:'بادی', 4:'خاکی', 5:'آتشی', 6:'بادی', 7:'آبی', 8:'خاکی', 9:'آتشی' };
+    var stMap = { 1:'شمس', 2:'قمر', 3:'مشتری', 4:'زحل', 5:'عطارد', 6:'زہرہ', 7:'قمر', 8:'زحل', 9:'مریخ' };
+    return { valid: true, totalSum: sum, mufrad: muf, element: elMap[muf] || 'آتشی', star: stMap[muf] || 'شمس' };
+  }
+
+  function evaluateNameDobCompat(nameEl, dobEl) {
+    if (!nameEl || !dobEl) return { status: '—', color: '#64748b', text: '' };
+    if (nameEl === dobEl) {
+      return {
+        status: 'نہایت سعد اور ہم آہنگ (۱۰۰٪)',
+        color: '#065f46',
+        text: 'ماشاءاللہ! نام اور تاریخِ پیدائش دونوں کا عنصر ایک ہی (' + nameEl + ') ہے۔ شخصیت میں مضبوطی، روحانی توازن اور کاموں میں قدرتی برکت و یکسوئی رہتی ہے۔'
+      };
+    }
+    var pair = [nameEl, dobEl].sort().join('|');
+    if (pair === 'آتشی|بادی' || pair === 'آبی|خاکی') {
+      return {
+        status: 'بہترین اور دوست مزاج (سعد)',
+        color: '#065f46',
+        text: 'ان شاءاللہ نام (' + nameEl + ') اور تاریخِ پیدائش (' + dobEl + ') کے عناصر آپس میں گہرے دوست اور معاون ہیں۔ یہ ملاپ ترقی، ذہنی سکون اور رزق و عزت میں اضافے کی عمدہ علامت ہے۔'
+      };
+    }
+    if (pair === 'آتشی|خاکی' || pair === 'آبی|بادی') {
+      return {
+        status: 'معتدل اور متوازن مطابقت',
+        color: '#b45309',
+        text: 'نام (' + nameEl + ') اور تاریخِ پیدائش (' + dobEl + ') کی مطابقت معتدل ہے۔ باقاعدہ ذکر، صدقہ اور مزاجی اعتدال برقرار رکھنے سے معاملات ان شاءاللہ ہموار اور کامیاب رہتے ہیں۔'
+      };
+    }
+    return {
+      status: 'متضاد مزاج (توازن و صدقہ مفید)',
+      color: '#b91c1c',
+      text: 'نام (' + nameEl + ') اور تاریخِ پیدائش (' + dobEl + ') کے عناصر آپس میں متضاد ہیں۔ ایسے افراد کو بعض اوقات کاموں میں رکاوٹ، ذہنی الجھن یا مزاجی اتار چڑھاؤ محسوس ہو سکتا ہے؛ مناسب اسمِ اعظم کا ورد اور ہفتہ وار صدقہ توازن کے لیے نہایت مجرب ہے۔'
+    };
+  }
+
+  var _origLoadPatB8 = window.loadOfflinePatientToCard;
+  window.loadOfflinePatientToCard = function(idx) {
+    if (_origLoadPatB8) _origLoadPatB8(idx);
+    var c = window.getOfflineCases()[parseInt(idx, 10)];
+    if (!c) return;
+    var burjTxt = (($('repBurj') || {}).textContent || '').trim();
+    var nameEl = _BURJ_TO_ELEMENT[burjTxt] || getMizajFromNumber((c.mufrad || 1));
+    // Add vivid element icon right inside #repBurj too!
+    if ($('repBurj') && burjTxt && burjTxt !== '—') {
+      $('repBurj').innerHTML = '<span style="display:inline-flex; align-items:center; justify-content:center; gap:4px;">' + (_EL_ICONS_MAP[nameEl] || '') + '<span>' + burjTxt + '</span></span>';
+    }
+    var dobRes = computeDobNumerologyV21(c.dob);
+    var box = $('rBox_dobCompat');
+    if (box) {
+      if (dobRes.valid) {
+        var compat = evaluateNameDobCompat(nameEl, dobRes.element);
+        if ($('repNameMizajBadge')) $('repNameMizajBadge').innerHTML = (_EL_ICONS_MAP[nameEl] || '') + '<span>' + nameEl + '</span>';
+        if ($('repDobMizajBadge')) $('repDobMizajBadge').innerHTML = (_EL_ICONS_MAP[dobRes.element] || '') + '<span>عدد ' + dobRes.mufrad + ' — ' + dobRes.element + '</span>';
+        if ($('repDobCompatBadge')) {
+          $('repDobCompatBadge').textContent = compat.status;
+          $('repDobCompatBadge').style.color = compat.color;
+        }
+        if ($('repDobCompatSentence')) {
+          $('repDobCompatSentence').textContent = compat.text;
+          $('repDobCompatSentence').style.borderRightColor = compat.color;
+        }
+        box.style.display = (_repMode === 'pat' && !($('rChk_burj') && $('rChk_burj').checked)) ? 'none' : 'block';
+      } else {
+        box.style.display = 'none';
+      }
+    }
+  };
+
+  var _origSyncVisB8 = window.syncRepCardVis;
+  window.syncRepCardVis = function() {
+    if (_origSyncVisB8) _origSyncVisB8();
+    var box = $('rBox_dobCompat');
+    if (!box) return;
+    var hasDob = _currentReportRec && computeDobNumerologyV21(_currentReportRec.dob).valid;
+    if (!hasDob) { box.style.display = 'none'; return; }
+    var cbBurj = $('rChk_burj');
+    var on = cbBurj ? cbBurj.checked : false;
+    box.style.display = (_repMode === 'pat' && !on) ? 'none' : 'block';
+    box.style.opacity = (_repMode === 'doc' && !on) ? '0.45' : '1';
   };
 
   
