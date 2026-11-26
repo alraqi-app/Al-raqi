@@ -686,6 +686,75 @@ html, body {
 }
 
 
+
+/* Batch 3 Fixes: Corner Sign-Out + 100% One-Screen Home Fit + Modal Equal Grid Buttons */
+#alRaqiV2Root #scr_home .ar-hero-header {
+  position: relative !important;
+  margin: calc(env(safe-area-inset-top, 0px) + 8px) 10px 8px 10px !important;
+  padding: 10px 12px 9px !important;
+}
+#alRaqiV2Root #scr_home .ar-hero-header img {
+  width: 54px !important;
+  height: auto !important;
+  margin-bottom: 2px !important;
+}
+#alRaqiV2Root #scr_home .ar-hero-header h1 {
+  font-size: 1.24rem !important;
+  margin: 0 0 4px 0 !important;
+}
+#alRaqiV2Root .ar-hdr-corner-actions {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  display: flex;
+  gap: 5px;
+  z-index: 5;
+}
+#alRaqiV2Root .ar-hdr-corner-actions .ar-hdr-logout-pill {
+  margin: 0 !important;
+  padding: 2px 10px !important;
+  min-height: 26px !important;
+  font-size: 0.76rem !important;
+}
+#alRaqiV2Root #scr_home .home-grid {
+  gap: 8px !important;
+}
+#alRaqiV2Root #scr_home .home-tile {
+  min-height: 86px !important;
+  height: 86px !important;
+  padding: 7px 6px !important;
+  gap: 4px !important;
+}
+#alRaqiV2Root #scr_home .wrap {
+  padding-top: 2px !important;
+  padding-bottom: 8px !important;
+}
+/* Global modal button & grid support (works outside #alRaqiV2Root too!) */
+.ar-eq-grid-2 { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; width: 100%; }
+.ar-unibtn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 40px !important;
+  padding: 6px 10px !important;
+  border-radius: 11px !important;
+  font-weight: 700 !important;
+  font-size: 0.88rem !important;
+  cursor: pointer !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+  color: #0b1936 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 2px 5px rgba(11, 25, 54, 0.06), inset 0 1px 0 #ffffff !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+.ar-unibtn.active {
+  background: linear-gradient(135deg, #0b1936 0%, #1e3a8a 100%) !important;
+  color: #fef08a !important;
+  border-color: #d4af37 !important;
+  box-shadow: 0 4px 10px rgba(11, 25, 54, 0.22) !important;
+}
+
   </style>
 </head>
 <body>
@@ -697,13 +766,13 @@ html, body {
 
   <!-- ================= صفحہ ۲: معالج ہوم پیج (فلیگ شپ ڈیزائن) ================= -->
   <section id="scr_home" class="screen active">
-    <div class="ar-hero-header">
+    <div class="ar-hero-header"><div class="ar-hdr-corner-actions"><button type="button" class="ar-hdr-logout-pill" onclick="signOutAlRaqiV2()">سائن آؤٹ</button><button type="button" id="proInstallPwaTopBtn" class="ar-hdr-logout-pill" style="display:none; background:rgba(254,240,138,0.18); border-color:#d4af37; color:#fef08a;" onclick="triggerActiveMobileAddToHome()">انسٹال</button></div>
       <img src="" data-ar-logo="1" alt="الراقی لوگو">
       <h1 class="ar-arabic-text">الراقی روحانی تشخیص و استخارہ</h1>
       <div class="ar-hdr-code-pill">
         <span>معالج کوڈ:</span>
         <b id="homeMualijCode" dir="ltr">AFZAL-2026</b>
-      <div style="margin-top:6px;"><button type="button" class="ar-hdr-logout-pill" onclick="signOutAlRaqiV2()">سائن آؤٹ</button><button type="button" id="proInstallPwaTopBtn" class="ar-hdr-logout-pill" style="display:none; background:rgba(254,240,138,0.18); border-color:#d4af37; color:#fef08a;" onclick="triggerActiveMobileAddToHome()">ایپ انسٹال کریں</button></div></div>
+      <div style="margin-top:6px;"></div></div>
       <span id="homeAppLink" style="display:none;">https://alraqi-app.github.io/shifa/?code=AFZAL-2026</span>
     </div>
 
@@ -1424,12 +1493,16 @@ html, body {
       </div>
       <div style="margin-bottom:12px;">
         <label style="font-weight:700; font-size:0.86rem;">پاسورڈ:</label>
-        <input type="password" id="gate_loginPassword" placeholder="پاسورڈ درج کریں...">
+        <div style="display:flex; gap:6px; align-items:center;">
+          <input type="password" id="gate_loginPassword" placeholder="پاسورڈ درج کریں..." style="flex:1;">
+          <button type="button" class="ar-unibtn" style="width:auto !important; min-width:64px; padding:0 10px !important; font-size:0.82rem !important;" onclick="togglePassVisV21('gate_loginPassword', this)">دکھائیں</button>
+        </div>
       </div>
-      <div class="ar-eq-grid-2">
+      <div class="ar-eq-grid-2" style="margin-bottom:8px;">
         <button type="button" class="ar-unibtn active" onclick="submitNativeLogin()">سائن ان کریں</button>
         <button type="button" class="ar-unibtn" onclick="document.getElementById('clientLoginGateModal').style.display='none'">بند کریں</button>
       </div>
+      <button type="button" class="ar-unibtn" style="border-color:#d4af37 !important; color:#78350f !important; background:#fffbeb !important;" onclick="document.getElementById('clientLoginGateModal').style.display='none'; openAdminPinModal();">ایڈمن سائن ان (صرف مالک)</button>
     </div>
 
     <!-- Sign-Up Pane -->
@@ -1448,7 +1521,7 @@ html, body {
       </div>
       <div style="margin-bottom:12px;">
         <label style="font-weight:700; font-size:0.86rem;">مطلوبہ پاسورڈ:</label>
-        <input type="password" id="reg_password" placeholder="اپنا پاسورڈ منتخب کریں">
+        <div style="display:flex; gap:6px; align-items:center;"><input type="password" id="reg_password" placeholder="اپنا پاسورڈ منتخب کریں" style="flex:1;"><button type="button" class="ar-unibtn" style="width:auto !important; min-width:64px; padding:0 10px !important; font-size:0.82rem !important;" onclick="togglePassVisV21('reg_password', this)">دکھائیں</button></div>
       </div>
       <div class="ar-eq-grid-2">
         <button type="button" class="ar-unibtn active" onclick="submitNativeSignup()">درخواست جمع کروائیں</button>
@@ -1467,7 +1540,7 @@ html, body {
       <p>ایڈمن سیکیورٹی تصدیق (صرف مالک)</p>
     </div>
     <div id="adminPinErrorAlert" style="display:none; background:#fef2f2; color:#991b1b; border:1px solid #fca5a5; border-radius:9px; padding:7px 10px; font-size:0.84rem; margin-bottom:9px;"></div>
-    <input type="password" id="adminPinVerifyInput" placeholder="ایڈمن سیکیورٹی پِن درج کریں..." style="margin-bottom:12px;">
+    <div style="display:flex; gap:6px; align-items:center; margin-bottom:12px;"><input type="password" id="adminPinVerifyInput" placeholder="ایڈمن سیکیورٹی پِن درج کریں..." style="flex:1;"><button type="button" class="ar-unibtn" style="width:auto !important; min-width:64px; padding:0 10px !important; font-size:0.82rem !important;" onclick="togglePassVisV21('adminPinVerifyInput', this)">دکھائیں</button></div>
     <div class="ar-eq-grid-2">
       <button type="button" class="ar-unibtn active" onclick="verifyNativeAdminPin()">داخل ہوں</button>
       <button type="button" class="ar-unibtn" onclick="document.getElementById('adminPinVerifyModal').style.display='none'">بند کریں</button>
@@ -1571,30 +1644,118 @@ html, body {
     b.textContent = msg;
   }
 
-  window.submitNativeLogin = function() {
-    var u = ((document.getElementById('gate_loginUsername') || {}).value || '').trim();
-    var p = ((document.getElementById('gate_loginPassword') || {}).value || '').trim();
-    if (!u || !p) { showAuthAlert('براہِ کرم یوزر نام اور پاسورڈ دونوں درج کریں۔', true); return; }
-    showAuthAlert('تصدیق ہو رہی ہے...', false);
-    fetch(window.APPS_SCRIPT_URL, {
+  window.togglePassVisV21 = function(inpId, btn) {
+    var el = document.getElementById(inpId);
+    if (!el) return;
+    var show = (el.type === 'password');
+    el.type = show ? 'text' : 'password';
+    if (btn) btn.textContent = show ? 'چھپائیں' : 'دکھائیں';
+  };
+
+  function sha256HexV21(str) {
+    try {
+      if (!window.crypto || !window.crypto.subtle) return Promise.resolve('');
+      var buf = new TextEncoder().encode(String(str));
+      return window.crypto.subtle.digest('SHA-256', buf).then(function(h) {
+        return Array.from(new Uint8Array(h)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+      }).catch(function() { return ''; });
+    } catch (e) { return Promise.resolve(''); }
+  }
+
+  function postVerifyLoginV21(uVal, passVal) {
+    return fetch(window.APPS_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'verify_practitioner_login', username: u, password: p })
-    }).then(function(r) { return r.json(); }).then(function(res) {
-      if (res && String(res.status || '').toUpperCase() === 'PENDING') {
-        showAuthAlert('آپ کی درخواست زیرِ غور ہے—ایڈمن کی منظوری کے بعد آپ کا اکاؤنٹ فعال ہو جائے گا۔', false);
-        return;
-      }
-      if (res && (res.ok || res.success || res.approved)) {
-        window.completeLogin({ username: u, name: res.name || u, code: res.code || u, phone: res.phone || '', role: res.role || 'practitioner' });
-        if (typeof window.showToast === 'function') window.showToast('✅ خوش آمدید — سائن ان مکمل ہو گیا');
-      } else {
-        showAuthAlert((res && res.message) ? res.message : 'یوزر نام یا پاسورڈ درست نہیں۔', true);
-      }
-    }).catch(function() {
-      // Offline graceful fallback for existing cached practitioner
-      window.completeLogin({ username: u, name: 'روحانی معالج', code: u.toUpperCase() });
-      if (typeof window.showToast === 'function') window.showToast('✅ آف لائن سیشن فعال ہو گیا');
+      body: JSON.stringify({ action: 'verify_login', username: uVal, password: passVal })
+    }).then(function(r) { return r.json(); });
+  }
+
+  function tryLocalLicensedFallbackV21(uIn, uNorm, pIn, pHash) {
+    try {
+      var list = JSON.parse(localStorage.getItem(K_USERS) || '[]');
+      if (!Array.isArray(list)) return null;
+      return list.find(function(x) {
+        if (!x) return false;
+        var xu = String(x.username || x.gmail || x.email || x.code || '').toLowerCase();
+        var matchU = (xu === uIn.toLowerCase() || xu === uNorm.toLowerCase());
+        var xp = String(x.password || '');
+        var matchP = (xp === pIn || (pHash && xp === pHash));
+        return matchU && matchP;
+      }) || null;
+    } catch (e) { return null; }
+  }
+
+  window.submitNativeLogin = function() {
+    var uIn = ((document.getElementById('gate_loginUsername') || {}).value || '').trim();
+    var pIn = ((document.getElementById('gate_loginPassword') || {}).value || '').trim();
+    if (!uIn || !pIn) { showAuthAlert('براہِ کرم یوزر نام اور پاسورڈ دونوں درج کریں۔', true); return; }
+    var uNorm = uIn.indexOf('@') !== -1 ? uIn.split('@')[0].trim() : uIn;
+    showAuthAlert('کلاؤڈ سرور سے آپ کے اکاؤنٹ کی تصدیق ہو رہی ہے...', false);
+
+    sha256HexV21(pIn).then(function(pHash) {
+      // 1. Try cloud verify_login with full input first, then prefix, then SHA-256
+      return postVerifyLoginV21(uIn, pIn).then(function(res) {
+        if (res && res.ok && res.user) return res;
+        if (uNorm !== uIn) {
+          return postVerifyLoginV21(uNorm, pIn).then(function(r2) {
+            if (r2 && r2.ok && r2.user) return r2;
+            return (pHash ? postVerifyLoginV21(uNorm, pHash) : r2);
+          });
+        }
+        return (pHash ? postVerifyLoginV21(uIn, pHash) : res);
+      }).then(function(res) {
+        if (res && res.ok && res.user) {
+          var u = res.user;
+          window.completeLogin({
+            username: u.username || uIn,
+            name: u.fullName || u.name || uNorm,
+            code: u.code || u.mualijCode || u.username || uNorm,
+            phone: u.phone || '',
+            role: u.role || 'practitioner'
+          });
+          if (typeof window.showToast === 'function') window.showToast('✅ خوش آمدید ' + (u.fullName || u.name || uNorm));
+          return;
+        }
+        var code = String((res && res.code) || '').toUpperCase();
+        var st = String((res && res.status) || '').toUpperCase();
+        var msg = String((res && res.message) || '');
+        if (code === 'PENDING_APPROVAL' || st === 'PENDING' || msg.indexOf('منظوری') !== -1) {
+          showAuthAlert('آپ کی رجسٹریشن درخواست ایڈمن کے پاس زیرِ غور ہے۔ منظوری کے بعد آپ کا اکاؤنٹ فعال ہو جائے گا۔', false);
+          return;
+        }
+        if (code === 'REVOKED' || code === 'BLOCKED') {
+          showAuthAlert('آپ کا اکاؤنٹ معطل ہے—بحالی کے لیے ایڈمن سے رابطہ کریں۔', true);
+          return;
+        }
+        // 2. Fallback to local cached licensed users list (if backend does not expose verify_login or user is cached)
+        var localHit = tryLocalLicensedFallbackV21(uIn, uNorm, pIn, pHash);
+        if (localHit) {
+          window.completeLogin({
+            username: localHit.username || uIn,
+            name: localHit.fullName || localHit.name || uNorm,
+            code: localHit.code || localHit.mualijCode || localHit.username || uNorm,
+            phone: localHit.phone || '',
+            role: localHit.role || 'practitioner'
+          });
+          if (typeof window.showToast === 'function') window.showToast('✅ خوش آمدید ' + (localHit.fullName || localHit.name || uNorm));
+          return;
+        }
+        showAuthAlert('یوزر نام یا پاسورڈ درست نہیں ہے (یا نیا اکاؤنٹ بنائیں)۔', true);
+      }).catch(function() {
+        var localHit = tryLocalLicensedFallbackV21(uIn, uNorm, pIn, pHash);
+        if (localHit) {
+          window.completeLogin({
+            username: localHit.username || uIn,
+            name: localHit.fullName || localHit.name || uNorm,
+            code: localHit.code || localHit.mualijCode || localHit.username || uNorm,
+            phone: localHit.phone || '',
+            role: localHit.role || 'practitioner'
+          });
+          if (typeof window.showToast === 'function') window.showToast('✅ خوش آمدید');
+          return;
+        }
+        showAuthAlert('انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔', true);
+      });
     });
   };
 
@@ -1608,7 +1769,7 @@ html, body {
     fetch(window.APPS_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'register_practitioner_request', name: nm, phone: ph, city: ct, password: pw })
+      body: JSON.stringify({ action: 'register_user', name: nm, phone: ph, city: ct, password: pw })
     }).then(function(r) { return r.json(); }).then(function() {
       showAuthAlert('آپ کی رجسٹریشن درخواست موصول ہو گئی ہے—ایڈمن کی منظوری کے بعد آپ کو مطلع کر دیا جائے گا۔', false);
     }).catch(function() {
@@ -1628,10 +1789,30 @@ html, body {
   window.verifyNativeAdminPin = function() {
     var pin = ((document.getElementById('adminPinVerifyInput') || {}).value || '').trim();
     var err = document.getElementById('adminPinErrorAlert');
-    if (!pin) { if (err) { err.style.display = 'block'; err.textContent = 'براہِ کرم پِن درج کریں۔'; } return; }
-    try { localStorage.setItem(K_ADMIN, 'true'); } catch (e) {}
-    document.getElementById('adminPinVerifyModal').style.display = 'none';
-    if (typeof window.openScreen === 'function') window.openScreen('admin');
+    if (!pin) { if (err) { err.style.display = 'block'; err.textContent = 'براہِ کرم ایڈمن پِن درج کریں۔'; } return; }
+    if (err) { err.style.display = 'block'; err.style.background = '#f0fdf4'; err.style.color = '#065f46'; err.textContent = 'تصدیق ہو رہی ہے...'; }
+    sha256HexV21(pin).then(function(pinHash) {
+      return fetch(window.APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'get_admin_pin_hash_v140' })
+      }).then(function(r) { return r.json(); }).then(function(res) {
+        var cloudHash = (res && res.adminPinHash) ? String(res.adminPinHash).trim() : '';
+        if (cloudHash && pinHash && cloudHash !== pinHash && cloudHash !== pin) {
+          if (err) { err.style.display = 'block'; err.style.background = '#fef2f2'; err.style.color = '#991b1b'; err.textContent = 'ایڈمن پِن درست نہیں ہے۔'; }
+          return;
+        }
+        try { localStorage.setItem(K_ADMIN, 'true'); } catch (e) {}
+        if (err) err.style.display = 'none';
+        document.getElementById('adminPinVerifyModal').style.display = 'none';
+        window.completeLogin({ username: 'OWNER_ADMIN', name: 'روحانی معالج (ایڈمن)', code: 'AFZAL-2026', role: 'admin' });
+        if (typeof window.openScreen === 'function') window.openScreen('admin');
+      }).catch(function() {
+        try { localStorage.setItem(K_ADMIN, 'true'); } catch (e) {}
+        document.getElementById('adminPinVerifyModal').style.display = 'none';
+        if (typeof window.openScreen === 'function') window.openScreen('admin');
+      });
+    });
   };
 
   // ===== 2. Native Abjad-e-Qamari & Spiritual Calculation Engine =====
