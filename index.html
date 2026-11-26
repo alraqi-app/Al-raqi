@@ -1478,9 +1478,10 @@ html, body {
       <p>معالج سائن ان، نیا اکاؤنٹ اور لائسنس تصدیق</p>
     </div>
 
-    <div class="ar-eq-grid-2" style="margin-bottom:12px;">
-      <button type="button" id="gateTabBtn_login" class="ar-unibtn active" onclick="toggleRegistrationRequestPane(false)">سائن ان</button>
-      <button type="button" id="gateTabBtn_signup" class="ar-unibtn" onclick="toggleRegistrationRequestPane(true)">نیا اکاؤنٹ (سائن اپ)</button>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:12px;">
+      <button type="button" id="gateTabBtn_login" class="ar-unibtn active" onclick="switchAuthTabV21('login')">سائن ان</button>
+      <button type="button" id="gateTabBtn_signup" class="ar-unibtn" onclick="switchAuthTabV21('signup')">نیا اکاؤنٹ</button>
+      <button type="button" id="gateTabBtn_reset" class="ar-unibtn" onclick="switchAuthTabV21('reset')">پاسورڈ ری سیٹ</button>
     </div>
 
     <div id="loginStatusAlertBox" style="display:none; padding:9px 12px; border-radius:10px; margin-bottom:10px; font-size:0.86rem; font-weight:700;"></div>
@@ -1525,9 +1526,33 @@ html, body {
       </div>
       <div class="ar-eq-grid-2">
         <button type="button" class="ar-unibtn active" onclick="submitNativeSignup()">درخواست جمع کروائیں</button>
-        <button type="button" class="ar-unibtn" onclick="toggleRegistrationRequestPane(false)">واپس سائن ان</button>
+        <button type="button" class="ar-unibtn" onclick="switchAuthTabV21('login')">واپس سائن ان</button>
       </div>
     </div>
+    <!-- Password Reset Pane (OTP via Email -> Set New Password) -->
+    <div id="clientResetPasswordPane" style="display:none;">
+      <div style="margin-bottom:8px;">
+        <label style="font-weight:700; font-size:0.86rem;">رجسٹرڈ ای میل ایڈریس:</label>
+        <input type="email" id="rst_email" dir="ltr" placeholder="مثلاً: m.affansufyan@gmail.com">
+      </div>
+      <button type="button" class="ar-unibtn active" style="margin-bottom:10px;" onclick="requestPracPwdResetOtpV21()">ای میل پر OTP کوڈ بھیجیں</button>
+      <div style="margin-bottom:8px;">
+        <label style="font-weight:700; font-size:0.86rem;">OTP کوڈ (ای میل سے دیکھ کر لکھیں):</label>
+        <input type="text" id="rst_otp" dir="ltr" placeholder="6 ہندسوں کا OTP کوڈ...">
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-weight:700; font-size:0.86rem;">نیا پاسورڈ:</label>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <input type="password" id="rst_newPass" placeholder="نیا پاسورڈ درج کریں..." style="flex:1;">
+          <button type="button" class="ar-unibtn" style="width:auto !important; min-width:64px; padding:0 10px !important; font-size:0.82rem !important;" onclick="togglePassVisV21('rst_newPass', this)">دکھائیں</button>
+        </div>
+      </div>
+      <div class="ar-eq-grid-2">
+        <button type="button" class="ar-unibtn active" onclick="confirmPracPwdResetV21()">پاسورڈ تبدیل کریں</button>
+        <button type="button" class="ar-unibtn" onclick="switchAuthTabV21('login')">واپس سائن ان</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1623,15 +1648,89 @@ html, body {
     window.toggleRegistrationRequestPane(!!openInSignupMode);
   };
 
-  window.toggleRegistrationRequestPane = function(showReg) {
+  window.switchAuthTabV21 = function(tab) {
     var lp = document.getElementById('clientLoginFormPane');
     var rp = document.getElementById('clientRegisterRequestPane');
+    var xp = document.getElementById('clientResetPasswordPane');
     var bl = document.getElementById('gateTabBtn_login');
     var bs = document.getElementById('gateTabBtn_signup');
-    if (lp) lp.style.display = showReg ? 'none' : 'block';
-    if (rp) rp.style.display = showReg ? 'block' : 'none';
-    if (bl) bl.classList.toggle('active', !showReg);
-    if (bs) bs.classList.toggle('active', !!showReg);
+    var bx = document.getElementById('gateTabBtn_reset');
+    if (lp) lp.style.display = (tab === 'login') ? 'block' : 'none';
+    if (rp) rp.style.display = (tab === 'signup') ? 'block' : 'none';
+    if (xp) xp.style.display = (tab === 'reset') ? 'block' : 'none';
+    if (bl) bl.classList.toggle('active', tab === 'login');
+    if (bs) bs.classList.toggle('active', tab === 'signup');
+    if (bx) bx.classList.toggle('active', tab === 'reset');
+    if (tab === 'reset') {
+      var lu = ((document.getElementById('gate_loginUsername') || {}).value || '').trim();
+      var reEl = document.getElementById('rst_email');
+      if (reEl && !reEl.value && lu.indexOf('@') !== -1) reEl.value = lu;
+    }
+  };
+  window.toggleRegistrationRequestPane = function(showReg) {
+    window.switchAuthTabV21(showReg ? 'signup' : 'login');
+  };
+
+  window.requestPracPwdResetOtpV21 = function() {
+    var email = ((document.getElementById('rst_email') || {}).value || '').trim();
+    if (!email || email.indexOf('@') === -1) {
+      showAuthAlert('براہِ کرم اپنا رجسٹرڈ ای میل ایڈریس درج کریں۔', true);
+      return;
+    }
+    showAuthAlert('ای میل پر OTP کوڈ بھیجا جا رہا ہے...', false);
+    fetch(window.APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'practitioner_request_pwd_reset_v431',
+        email: email,
+        username: email.split('@')[0].trim()
+      })
+    }).then(function(r) { return r.json(); }).then(function(res) {
+      if (res && (res.ok || res.sent)) {
+        showAuthAlert('✅ OTP کوڈ آپ کے ای میل (' + email + ') پر بھیج دیا گیا ہے—انباکس یا اسپیم چیک کریں۔', false);
+      } else {
+        showAuthAlert((res && (res.error || res.message)) || 'OTP بھیجنے میں مسئلہ آیا—ای میل چیک کریں۔', true);
+      }
+    }).catch(function() {
+      showAuthAlert('انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔', true);
+    });
+  };
+
+  window.confirmPracPwdResetV21 = function() {
+    var email = ((document.getElementById('rst_email') || {}).value || '').trim();
+    var otp = ((document.getElementById('rst_otp') || {}).value || '').trim();
+    var np = ((document.getElementById('rst_newPass') || {}).value || '').trim();
+    if (!email || !otp || !np) {
+      showAuthAlert('براہِ کرم ای میل، OTP کوڈ اور نیا پاسورڈ تینوں درج کریں۔', true);
+      return;
+    }
+    showAuthAlert('نیا پاسورڈ محفوظ کیا جا رہا ہے...', false);
+    sha256HexV21(np).then(function(npHash) {
+      return fetch(window.APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'practitioner_confirm_pwd_reset_v431',
+          email: email,
+          username: email.split('@')[0].trim(),
+          otp: otp,
+          newPasswordHash: npHash || np,
+          newPasswordPlain: np
+        })
+      }).then(function(r) { return r.json(); }).then(function(res) {
+        if (res && res.ok) {
+          showAuthAlert('✅ پاسورڈ کامیابی سے تبدیل ہو گیا! اب نئے پاسورڈ سے سائن ان کریں۔', false);
+          if (document.getElementById('gate_loginUsername')) document.getElementById('gate_loginUsername').value = email;
+          if (document.getElementById('gate_loginPassword')) document.getElementById('gate_loginPassword').value = np;
+          setTimeout(function() { window.switchAuthTabV21('login'); }, 900);
+        } else {
+          showAuthAlert((res && (res.error || res.message)) || 'OTP کوڈ غلط یا زائد المیعاد ہے۔', true);
+        }
+      });
+    }).catch(function() {
+      showAuthAlert('انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔', true);
+    });
   };
 
   function showAuthAlert(msg, isErr) {
