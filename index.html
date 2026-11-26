@@ -1424,7 +1424,7 @@ html, body {
           <button type="button" class="ar-unibtn active" onclick="saveProfilePrefs(); showToast('✅ سیٹنگز محفوظ ہو گئیں')">محفوظ کریں</button>
           <button type="button" class="ar-unibtn" onclick="showToast('✅ اردو نستعلیق فونٹ فعال ہے')">نستعلیق فونٹ اپلائی</button>
           <button type="button" class="ar-unibtn" onclick="openLiveAuthGate()">سائن ان / سائن اپ اکاؤنٹ</button>
-          <button type="button" class="ar-unibtn" onclick="openLiveAdminPanel()">ایڈمن پینل (مالک)</button>
+          <button type="button" id="stealthAdminSettingsBtn" class="ar-unibtn" style="display:none;" onclick="openLiveAdminPanel()">ایڈمن پینل (مالک)</button>
         </div>
         <div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);">
           <button type="button" class="ar-unibtn" style="border-color:#fca5a5; color:#b91c1c;" onclick="triggerActiveMobileAddToHome()" style="margin-bottom:8px;">موبائل پر ایپ انسٹال کریں (Home Screen)</button><button type="button" class="ar-unibtn" style="border-color:#fca5a5; color:#b91c1c;" onclick="signOutAlRaqiV2()">سائن آؤٹ (لاگ آؤٹ کریں)</button>
@@ -1503,7 +1503,7 @@ html, body {
         <button type="button" class="ar-unibtn active" onclick="submitNativeLogin()">سائن ان کریں</button>
         <button type="button" class="ar-unibtn" onclick="document.getElementById('clientLoginGateModal').style.display='none'">بند کریں</button>
       </div>
-      <button type="button" class="ar-unibtn" style="border-color:#d4af37 !important; color:#78350f !important; background:#fffbeb !important;" onclick="document.getElementById('clientLoginGateModal').style.display='none'; openAdminPinModal();">ایڈمن سائن ان (صرف مالک)</button>
+      <div style="text-align:center; margin-top:4px;"><button type="button" onclick="switchAuthTabV21('reset')" style="background:none !important; border:none !important; box-shadow:none !important; color:#1e3a8a !important; font-weight:700; font-size:0.86rem; text-decoration:underline; cursor:pointer; min-height:28px !important; padding:2px 8px !important;">پاسورڈ بھول گئے؟ (پاسورڈ ری سیٹ کریں)</button></div>
     </div>
 
     <!-- Sign-Up Pane -->
@@ -1905,11 +1905,11 @@ html, body {
         if (err) err.style.display = 'none';
         document.getElementById('adminPinVerifyModal').style.display = 'none';
         window.completeLogin({ username: 'OWNER_ADMIN', name: 'روحانی معالج (ایڈمن)', code: 'AFZAL-2026', role: 'admin' });
-        if (typeof window.openScreen === 'function') window.openScreen('admin');
+        syncStealthAdminVisibility(); if (typeof window.openScreen === 'function') window.openScreen('admin');
       }).catch(function() {
         try { localStorage.setItem(K_ADMIN, 'true'); } catch (e) {}
         document.getElementById('adminPinVerifyModal').style.display = 'none';
-        if (typeof window.openScreen === 'function') window.openScreen('admin');
+        syncStealthAdminVisibility(); if (typeof window.openScreen === 'function') window.openScreen('admin');
       });
     });
   };
@@ -1986,6 +1986,32 @@ html, body {
       }
     }
   };
+
+  
+  // ===== 5. Stealth Owner Admin Trigger (5 rapid taps on Golden Logo anywhere) =====
+  var _logoTapCnt = 0, _logoTapTmr = null;
+  document.addEventListener('click', function(ev) {
+    var im = ev.target && ev.target.closest ? ev.target.closest('img[data-ar-logo="1"]') : null;
+    if (!im) return;
+    _logoTapCnt++;
+    clearTimeout(_logoTapTmr);
+    _logoTapTmr = setTimeout(function() { _logoTapCnt = 0; }, 2500);
+    if (_logoTapCnt >= 5) {
+      _logoTapCnt = 0;
+      var gate = document.getElementById('clientLoginGateModal');
+      if (gate) gate.style.display = 'none';
+      if (typeof window.openAdminPinModal === 'function') window.openAdminPinModal();
+    }
+  });
+  function syncStealthAdminVisibility() {
+    var b = document.getElementById('stealthAdminSettingsBtn');
+    if (b) {
+      var isAdm = false;
+      try { isAdm = (localStorage.getItem(K_ADMIN) === 'true'); } catch (e) {}
+      b.style.display = isAdm ? 'inline-flex' : 'none';
+    }
+  }
+  setTimeout(syncStealthAdminVisibility, 150);
 
   window.loadAlRaqiPack = function(packName, cb) {
     var flag = (packName === 'maktaba') ? '_ALRAQI_MAKTABA_LOADED' : '_ALRAQI_TABEER_LOADED';
