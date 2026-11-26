@@ -1290,7 +1290,7 @@ html, body {
             <img src="" data-ar-logo="1" alt="الراقی" style="width:62px; height:62px;">
             <h3 class="ar-arabic-text" style="margin:2px 0 4px; color:#fef08a; border:none; padding:0; font-size:1.36rem;">الراقی رپورٹ کارڈ</h3>
             <div style="font-size:0.9rem; color:#e2e8f0; display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap; margin-top:4px; padding-top:6px; border-top:1px solid rgba(254,240,138,0.22);">
-              <span>روحانی معالج: <b id="repMualijName" style="color:#fef08a;">روحانی معالج</b></span>
+              <span><span id="repMualijPrefix" style="display:none;">روحانی معالج: </span><b id="repMualijName" style="color:#fef08a;">روحانی معالج</b></span>
               <span id="repMualijCodeWrap" style="display:none; color:#bae6fd;">کوڈ: <b id="repMualijCode" dir="ltr">AFZAL-2026</b></span>
               <span id="repMualijPhoneWrap" style="display:none; color:#bae6fd;">رابطہ: <b id="repMualijPhone" dir="ltr"></b></span>
             </div>
@@ -1306,13 +1306,13 @@ html, body {
             </div>
             <div id="repMeta" style="font-size:0.84rem; color:#334155;">ولدیت: — | والدہ: — | تاریخِ پیدائش: — | شہر: —</div>
           </div>
-          <div class="rep-3col-strip" style="margin-bottom:9px;">
+          <div class="rep-3col-strip" id="repTop3Strip" style="margin-bottom:9px; display:grid; grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); gap:7px;">
             <div class="db-item" id="rBox_burj"><small style="color:#64748b;">برج</small><br><b id="repBurj" style="color:#1e3a8a;">—</b></div>
             <div class="db-item" id="rBox_mufrad"><small style="color:#64748b;">مفرد عدد</small><br><b id="repMufrad" style="color:#065f46;">—</b></div>
             <div class="db-item" id="rBox_ism"><small style="color:#64748b;">اسمِ اعظم</small><br><b id="repIsm" class="ar-arabic-text" style="color:#1d4ed8;">—</b></div>
           </div>
           <div class="db-item" id="rBox_wazifa" style="margin-bottom:8px;">
-            <small style="font-weight:700; color:#1e3a8a;">منتخب وظیفہ</small>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:5px; flex-wrap:wrap;"><small style="font-weight:700; color:#1e3a8a;">منتخب وظیفہ</small><button type="button" id="btnPickWazifaFromFolder" class="ar-unibtn" style="width:auto !important; min-height:30px !important; padding:2px 10px !important; font-size:0.78rem !important;" onclick="openWazaifPickerForReport()">وظائف فولڈر سے منتخب کریں</button></div>
             <textarea id="repWazifaTxt" rows="2" placeholder="وظائف فولڈر سے منتخب کریں یا خود لکھیں..."></textarea>
           </div>
           <div class="db-item" id="rBox_tabeer" style="margin-bottom:8px;">
@@ -1327,7 +1327,7 @@ html, body {
       </div>
 
       <!-- معالج کے ذاتی محفوظ متفرق خواب (پرائیویٹ) -->
-      <div class="card" style="margin-top:10px; border-top-color:#d97706;">
+      <div class="card" id="mualijPrivateDreamsCard" style="margin-top:10px; border-top-color:#d97706;">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
           <h3 style="margin:0; border:none; padding:0; color:#78350f;">متفرق خواب (صرف اس معالج کا ذاتی ریکارڈ)</h3>
           <button type="button" class="ar-unibtn" style="width:auto; padding:0 12px; min-height:34px;" onclick="togglePrivateDreamsDrawer()">دیکھیں / چھپائیں</button>
@@ -1456,17 +1456,43 @@ html, body {
     </div>
     <div class="wrap">
       <div class="card">
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
-          <button type="button" class="btn-sm" style="padding:8px;" onclick="showAdminPane('mualij')">معالج ایڈمن</button>
-          <button type="button" class="btn-green" style="padding:8px;" onclick="showAdminPane('sail')">سائل ایڈمن</button>
+        <div class="ar-eq-grid-2" style="margin-bottom:8px;">
+          <button type="button" id="admTabBtn_mualij" class="ar-unibtn active" onclick="showAdminPane('mualij')">معالج ایڈمن (بلیو)</button>
+          <button type="button" id="admTabBtn_sail" class="ar-unibtn" onclick="showAdminPane('sail')">سائل ایڈمن (گرین)</button>
         </div>
+        <button type="button" class="ar-unibtn" style="margin-bottom:10px;" onclick="loadLiveAdminCloudData()">لائیو کلاؤڈ ڈیٹا ریفریش کریں</button>
+        <div id="admCloudStatusBar" style="font-size:0.84rem; color:#065f46; font-weight:700; margin-bottom:8px;"></div>
+
+        <!-- معالج ایڈمن (بلیو) -->
         <div id="admPaneMualij">
-          <h3>معالج ایڈمن پینل</h3>
-          <p style="font-size:0.9rem; color:#475569;">معالجین کی منظوری، مدت (۳ ماہ تا مستقل)، نائب ایڈمن اختیارات اور فیس ریکارڈ (لائیو بیک اینڈ سے منسلک ہو گا)۔</p>
+          <div class="ar-sub-banner ar-sub-purple" style="margin-top:4px;">خلاصہ و اعداد و شمار (KPI)</div>
+          <div id="admBlueKpiGrid" class="ar-eq-grid-3" style="margin-bottom:10px;">
+            <div class="db-item" style="text-align:center;"><small>کل معالجین</small><br><b id="kpiTotalMualij">—</b></div>
+            <div class="db-item" style="text-align:center;"><small>کل کیسز</small><br><b id="kpiTotalCases">—</b></div>
+            <div class="db-item" style="text-align:center;"><small>انباکس پیغامات</small><br><b id="kpiInboxCount">—</b></div>
+          </div>
+
+          <div class="ar-sub-banner ar-sub-teal">رجسٹرڈ معالجین اور منظوری</div>
+          <div id="admBlueUsersList" style="display:flex; flex-direction:column; gap:7px; margin-bottom:10px;"></div>
+
+          <div class="ar-sub-banner ar-sub-red">ایڈمن انباکس (تازہ پیغامات)</div>
+          <div id="admBlueInboxList" style="display:flex; flex-direction:column; gap:7px; margin-bottom:10px;"></div>
+
+          <div class="ar-sub-banner ar-sub-purple">فیس لیجر و کلاؤڈ بیک اپ</div>
+          <div id="admBlueFeeList" style="display:flex; flex-direction:column; gap:7px; margin-bottom:10px;"></div>
+          <button type="button" class="ar-unibtn active" onclick="triggerAdminCloudBackup()">مکمل کلاؤڈ بیک اپ حاصل کریں</button>
         </div>
+
+        <!-- سائل ایڈمن (گرین) -->
         <div id="admPaneSail" style="display:none;">
-          <h3>سائل ایڈمن پینل</h3>
-          <p style="font-size:0.9rem; color:#475569;">تصدیق شدہ سائلین کی فہرست اور کوڈ کے بغیر آنے والے پیغامات (صرف ایڈمن تک محدود)۔</p>
+          <div class="ar-sub-banner ar-sub-teal" style="margin-top:4px;">گرین ایپ — منظور شدہ معالجین کی فہرست</div>
+          <div id="admGreenMualijList" style="display:flex; flex-direction:column; gap:7px; margin-bottom:10px;"></div>
+
+          <div class="ar-sub-banner ar-sub-purple">اپائنٹمنٹس اور سائلین کے کیسز</div>
+          <div id="admGreenApptsList" style="display:flex; flex-direction:column; gap:7px; margin-bottom:10px;"></div>
+
+          <div class="ar-sub-banner ar-sub-red">ادائیگی اکاؤنٹس (Payment Accounts)</div>
+          <div id="admGreenPayList" style="display:flex; flex-direction:column; gap:7px;"></div>
         </div>
       </div>
     </div>
@@ -1482,7 +1508,7 @@ html, body {
 <div id="toastBox" style="display:none; position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#0b1936; color:#fef08a; border:1.5px solid #d4af37; padding:9px 18px; border-radius:999px; font-weight:700; font-size:0.88rem; z-index:99999; box-shadow:0 8px 24px rgba(0,0,0,0.3); max-width:90vw; text-align:center;"></div>
 
 <!-- Floating Right-Side Home Button (hidden on Home) -->
-<button type="button" id="floatingHomeBtn" onclick="openScreen('home')" style="display:none; position:fixed; bottom:16px; left:14px; z-index:9000; background:linear-gradient(135deg,#0b1936,#1e3a8a); color:#fef08a; border:1.5px solid #d4af37; border-radius:999px; padding:7px 14px; font-weight:700; font-size:0.86rem; box-shadow:0 4px 14px rgba(11,25,54,0.35); cursor:pointer; align-items:center; gap:5px;">ہوم</button>
+<button type="button" id="floatingHomeBtn" onclick="openScreen('home')" style="display:none; position:fixed; bottom:16px; right:14px; left:auto; z-index:9000; background:linear-gradient(135deg,#0b1936,#1e3a8a); color:#fef08a; border:1.5px solid #d4af37; border-radius:999px; padding:7px 14px; font-weight:700; font-size:0.86rem; box-shadow:0 4px 14px rgba(11,25,54,0.35); cursor:pointer; align-items:center; gap:5px;">ہوم</button>
 
 <!-- Unified Native Sign-In / Sign-Up / Pending Approval Modal -->
 <div id="clientLoginGateModal" style="display:none; position:fixed; inset:0; background:rgba(11,25,54,0.72); z-index:95000; align-items:center; justify-content:center; padding:14px;">
@@ -3402,6 +3428,192 @@ html, body {
   };
 
   
+
+  
+  // ===== Batch 4 Fixes =====
+  // Point #1: No duplicate 'روحانی معالج: روحانی معالج'
+  var _origSavePrefs = window.saveProfilePrefs;
+  window.saveProfilePrefs = function() {
+    if (_origSavePrefs) _origSavePrefs();
+    var nm = (($('setMualijName') || {}).value || 'روحانی معالج').trim();
+    var prefEl = $('repMualijPrefix');
+    if (prefEl) prefEl.style.display = (nm && nm !== 'روحانی معالج') ? 'inline' : 'none';
+  };
+
+  // Point #2: Clean معالج ویو vs مریض کارڈ (Patient Card starts unchecked until practitioner ticks!)
+  var _patCardFirstSwitch = true;
+  window.setRepMode = function(m) {
+    _repMode = m;
+    if ($('btnRepModeDoc')) $('btnRepModeDoc').classList.toggle('active', m === 'doc');
+    if ($('btnRepModePat')) $('btnRepModePat').classList.toggle('active', m === 'pat');
+    if (m === 'pat' && _patCardFirstSwitch) {
+      _patCardFirstSwitch = false;
+      ['burj','mufrad','ism','wazifa','tabeer','opinion'].forEach(function(k) {
+        var cb = $('rChk_' + k);
+        if (cb) cb.checked = false;
+      });
+    }
+    var privCard = $('mualijPrivateDreamsCard');
+    if (privCard) privCard.style.display = (m === 'pat') ? 'none' : 'block';
+    var bd = $('backendDetailsDrawer');
+    if (bd && m === 'pat') bd.style.display = 'none';
+    var pickBtn = $('btnPickWazifaFromFolder');
+    if (pickBtn) pickBtn.style.display = (m === 'pat') ? 'none' : 'inline-flex';
+    window.syncRepCardVis();
+  };
+
+  window.syncRepCardVis = function() {
+    var topAny = false;
+    ['burj','mufrad','ism','wazifa','tabeer','opinion'].forEach(function(k) {
+      var cb = $('rChk_' + k), bx = $('rBox_' + k);
+      if (!bx) return;
+      var on = cb ? cb.checked : false;
+      if (_repMode === 'pat') {
+        bx.style.display = on ? 'block' : 'none';
+        bx.style.opacity = '1';
+      } else {
+        bx.style.display = 'block';
+        bx.style.opacity = on ? '1' : '0.42';
+      }
+      if ((k === 'burj' || k === 'mufrad' || k === 'ism') && (_repMode === 'doc' || on)) topAny = true;
+    });
+    var strip = $('repTop3Strip');
+    if (strip) strip.style.display = topAny ? 'grid' : 'none';
+  };
+
+  // Point #3: Guaranteed lazy-load on openFolder4 + direct Wazifa picker from Report Card
+  var _origOpenFolder4 = window.openFolder4;
+  window.openFolder4 = function(key) {
+    if (!window._ALRAQI_MAKTABA_LOADED && typeof window.loadAlRaqiPack === 'function') {
+      window.showToast('مکتبۂ الراقی لوڈ ہو رہا ہے...');
+      window.loadAlRaqiPack('maktaba', function() {
+        if (_origOpenFolder4) _origOpenFolder4(key);
+      });
+      return;
+    }
+    if (_origOpenFolder4) _origOpenFolder4(key);
+  };
+
+  var _returnToReportAfterWazifa = false;
+  window.openWazaifPickerForReport = function() {
+    _returnToReportAfterWazifa = true;
+    window.openScreen('folders');
+    setTimeout(function() { window.openFolder4('wazaif'); }, 80);
+  };
+  var _origAttachWazifa = window.attachWazifaToReport;
+  window.attachWazifaToReport = function(title) {
+    if (_origAttachWazifa) _origAttachWazifa(title);
+    var cb = $('rChk_wazifa');
+    if (cb) cb.checked = true;
+    if (_returnToReportAfterWazifa) {
+      _returnToReportAfterWazifa = false;
+      window.openScreen('report');
+      window.syncRepCardVis();
+    }
+  };
+
+  // Point #4: Live Cloud Admin Panel (معالج ایڈمن + سائل ایڈمن)
+  window.showAdminPane = function(which) {
+    if ($('admPaneMualij')) $('admPaneMualij').style.display = (which === 'mualij') ? 'block' : 'none';
+    if ($('admPaneSail')) $('admPaneSail').style.display = (which === 'sail') ? 'block' : 'none';
+    if ($('admTabBtn_mualij')) $('admTabBtn_mualij').classList.toggle('active', which === 'mualij');
+    if ($('admTabBtn_sail')) $('admTabBtn_sail').classList.toggle('active', which === 'sail');
+  };
+
+  function postAdminCloud(payload) {
+    return fetch(window.APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).then(function(r) { return r.json(); }).catch(function() { return null; });
+  }
+
+  window.loadLiveAdminCloudData = function() {
+    var st = $('admCloudStatusBar');
+    if (st) st.textContent = 'کلاؤڈ سرور سے لائیو ایڈمن ڈیٹا لوڈ ہو رہا ہے...';
+
+    Promise.all([
+      postAdminCloud({ action: 'get_public_kpi_v143' }),
+      postAdminCloud({ action: 'patient_list_approved_mualijeen_v154' }),
+      postAdminCloud({ action: 'get_admin_inbox_v41' }),
+      postAdminCloud({ action: 'admin_fee_ledger_list_v35' }),
+      postAdminCloud({ action: 'get_admin_payment_accounts_v36' }),
+      postAdminCloud({ action: 'mualij_list_appts_v154', mualijCode: 'ALL' })
+    ]).then(function(resArr) {
+      var kpi = resArr[0], mualijRes = resArr[1], inboxRes = resArr[2], feeRes = resArr[3], payRes = resArr[4], apptRes = resArr[5];
+
+      // 1. KPIs
+      var mList = (mualijRes && (mualijRes.mualijeen || mualijRes.list || mualijRes.items)) || [];
+      var inbList = (inboxRes && (inboxRes.messages || inboxRes.inbox || inboxRes.items)) || [];
+      if ($('kpiTotalMualij')) $('kpiTotalMualij').textContent = (kpi && (kpi.totalPractitioners || kpi.mualijeen)) || mList.length || '0';
+      if ($('kpiTotalCases')) $('kpiTotalCases').textContent = (kpi && (kpi.totalCases || kpi.cases)) || window.getOfflineCases().length || '0';
+      if ($('kpiInboxCount')) $('kpiInboxCount').textContent = inbList.length;
+
+      // 2. Blue Users List (combine cloud + local cached users)
+      var localUsers = [];
+      try { localUsers = JSON.parse(localStorage.getItem('al_mualij_licensed_users_v1') || '[]'); } catch (e) {}
+      var combined = mList.length ? mList : localUsers;
+      if ($('admBlueUsersList')) {
+        $('admBlueUsersList').innerHTML = combined.map(function(u) {
+          var nm = u.fullName || u.name || u.username || 'معالج';
+          var cd = u.code || u.mualijCode || u.username || '—';
+          var status = u.status || 'ACTIVE';
+          return '<div class="db-item"><b>' + nm + '</b> <small dir="ltr">(' + cd + ')</small> — <b style="color:#065f46;">' + status + '</b></div>';
+        }).join('') || '<div style="color:#64748b; font-size:0.86rem;">کوئی معالج ریکارڈ نہیں ملا۔</div>';
+      }
+
+      // 3. Blue Admin Inbox
+      if ($('admBlueInboxList')) {
+        $('admBlueInboxList').innerHTML = inbList.slice(0, 15).map(function(m) {
+          return '<div class="db-item" style="border-right-color:#dc2626;"><b>' + (m.sender || m.name || 'صارف') + '</b><div style="font-size:0.85rem; color:#334155;">' + (m.message || m.text || '') + '</div></div>';
+        }).join('') || '<div style="color:#64748b; font-size:0.86rem;">ایڈمن انباکس میں کوئی نیا پیغام نہیں۔</div>';
+      }
+
+      // 4. Blue Fee Ledger
+      var feeList = (feeRes && (feeRes.rows || feeRes.items || feeRes.ledger)) || [];
+      if ($('admBlueFeeList')) {
+        $('admBlueFeeList').innerHTML = feeList.slice(0, 15).map(function(f) {
+          return '<div class="db-item"><b>' + (f.mualijName || f.username || 'معالج') + '</b> — ' + (f.amount || f.fee || '—') + ' (' + (f.status || '') + ')</div>';
+        }).join('') || '<div style="color:#64748b; font-size:0.86rem;">کوئی فیس اندراج موجود نہیں۔</div>';
+      }
+
+      // 5. Green Admin: Approved Practitioners, Appts, Payment Accounts
+      if ($('admGreenMualijList')) {
+        $('admGreenMualijList').innerHTML = mList.map(function(u) {
+          return '<div class="db-item" style="border-right-color:#065f46;"><b>' + (u.fullName || u.name || u.username || 'معالج') + '</b> — ' + (u.city || '') + ' <small dir="ltr">(' + (u.code || u.mualijCode || '') + ')</small></div>';
+        }).join('') || '<div style="color:#64748b; font-size:0.86rem;">منظور شدہ معالجین کی فہرست خالی ہے۔</div>';
+      }
+      var apptList = (apptRes && (apptRes.appointments || apptRes.appts || apptRes.items)) || [];
+      if ($('admGreenApptsList')) {
+        $('admGreenApptsList').innerHTML = apptList.slice(0, 15).map(function(a) {
+          return '<div class="db-item"><b>' + (a.patientName || a.name || 'سائل') + '</b> — ' + (a.date || '') + ' ' + (a.slot || '') + ' (' + (a.status || '') + ')</div>';
+        }).join('') || '<div style="color:#64748b; font-size:0.86rem;">کوئی نئی اپائنٹمنٹ موجود نہیں۔</div>';
+      }
+      var payAccs = (payRes && (payRes.accounts || payRes.items)) || [];
+      if ($('admGreenPayList')) {
+        $('admGreenPayList').innerHTML = (Array.isArray(payAccs) ? payAccs : []).map(function(p) {
+          return '<div class="db-item"><b>' + (p.title || p.bank || 'اکاؤنٹ') + ':</b> <span dir="ltr">' + (p.number || p.account || '') + '</span></div>';
+        }).join('') || '<div style="color:#64748b; font-size:0.86rem;">ادائیگی اکاؤنٹس سیٹ نہیں ہیں۔</div>';
+      }
+
+      if (st) st.textContent = '✅ لائیو کلاؤڈ ڈیٹا تازہ ہو گیا (' + new Date().toLocaleTimeString() + ')';
+    });
+  };
+
+  window.triggerAdminCloudBackup = function() {
+    window.showToast('کلاؤڈ بیک اپ تیار ہو رہا ہے...');
+    postAdminCloud({ action: 'export_full_backup_v147' }).then(function(res) {
+      if (res && res.ok) window.showToast('✅ کلاؤڈ بیک اپ کامیابی سے تیار ہو گیا');
+      else window.showToast('بیک اپ کی درخواست کلاؤڈ پر بھیج دی گئی');
+    });
+  };
+
+  // Auto-load live cloud data when opening Admin screen
+  var _origOpenScrB4 = window.openScreen;
+  window.openScreen = function(name, skipPush) {
+    if (_origOpenScrB4) _origOpenScrB4(name, skipPush);
+    if (name === 'admin') { setTimeout(window.loadLiveAdminCloudData, 80); }
+  };
 
   function bootAlRaqiV2() {
     document.querySelectorAll('#alRaqiV2Root img[data-ar-logo="1"]').forEach(function(im) {
