@@ -1696,6 +1696,15 @@ html, body {
   };
 
   
+  function showAuthAlert(msg, isErr) {
+    var b = document.getElementById('loginStatusAlertBox');
+    if (!b) return;
+    b.style.display = 'block';
+    b.style.background = isErr ? '#fef2f2' : '#f0fdf4';
+    b.style.color = isErr ? '#991b1b' : '#065f46';
+    b.style.border = '1px solid ' + (isErr ? '#fca5a5' : '#86efac');
+    b.textContent = msg;
+  }
   function showResetAlert(msg, isErr) {
     var b = document.getElementById('resetStatusAlertBox');
     if (!b) return showAuthAlert(msg, isErr);
@@ -1913,7 +1922,7 @@ html, body {
           if (typeof window.showToast === 'function') window.showToast('✅ خوش آمدید ' + (localHit.fullName || localHit.name || uNorm));
           return;
         }
-        showAuthAlert('یوزر نام یا پاسورڈ درست نہیں ہے (یا نیا اکاؤنٹ بنائیں)۔', true);
+        showAuthAlert(((res && (res.error || res.message)) ? (res.error || res.message) : 'یوزر نام یا پاسورڈ درست نہیں ہے (یا نیچے «پاسورڈ بھول گئے؟» سے ری سیٹ کریں)۔'), true);
       }).catch(function() {
         var localHit = tryLocalLicensedFallbackV21(uIn, uNorm, pIn, pHash);
         if (localHit) {
@@ -3386,45 +3395,13 @@ html, body {
   window.openLiveAuthGate = function() {
     if (typeof window.openClientLoginGateModal === 'function') {
       window.openClientLoginGateModal(false, false);
-      setTimeout(enhanceUnifiedLegacyModals, 60);
+      
     } else {
       window.showToast('لاگ ان سسٹم تیار ہے');
     }
   };
 
-  function enhanceUnifiedLegacyModals() {
-    var modalIds = ['clientLoginGateModal', 'masterLicenseAdminModal', 'adminPinVerifyModal'];
-    modalIds.forEach(function(mid) {
-      var m = document.getElementById(mid);
-      if (!m) return;
-      var card = m.firstElementChild;
-      if (card && !card.querySelector('.ar-v2-modal-hero')) {
-        var sub = (mid === 'clientLoginGateModal')
-          ? 'معالج سائن ان، نیا اکاؤنٹ اور لائسنس تصدیق'
-          : (mid === 'adminPinVerifyModal' ? 'ایڈمن سیکیورٹی تصدیق (صرف مالک)' : 'الراقی متحدہ ایڈمن پینل');
-        var hero = document.createElement('div');
-        hero.className = 'ar-v2-modal-hero';
-        hero.innerHTML = '<img src="' + _ALRAQI_LOGO_SINGLE + '" alt="الراقی لوگو"><h2>الراقی روحانی تشخیص و استخارہ</h2><p>' + sub + '</p>';
-        card.insertBefore(hero, card.firstChild);
-      }
-      // Sync active class on Sign-In / Sign-Up tabs so only opened tab is Royal-Navy
-      var loginPane = document.getElementById('clientLoginFormPane');
-      var regPane = document.getElementById('clientRegisterRequestPane') || document.getElementById('rqAuthPane_signup');
-      var resetPane = document.getElementById('rqAuthPane_reset');
-      var bLogin = document.getElementById('gateTabBtn_login');
-      var bSign = document.getElementById('gateTabBtn_signup') || document.getElementById('rqAuthTabBtn_signup');
-      var bReset = document.getElementById('rqAuthTabBtn_reset');
-      if (bLogin) bLogin.classList.toggle('active', !!(loginPane && loginPane.style.display !== 'none'));
-      if (bSign) bSign.classList.toggle('active', !!(regPane && regPane.style.display !== 'none'));
-      if (bReset) bReset.classList.toggle('active', !!(resetPane && resetPane.style.display !== 'none'));
-    });
-  }
-
-  // Watch for dynamic opening of Sign-In / Sign-Up / Admin modals and auto-theme them seamlessly
-  try {
-    var _arModalObs = new MutationObserver(function() { enhanceUnifiedLegacyModals(); relocateLegacyVoiceBox(); });
-    _arModalObs.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
-  } catch (e) {}
+  
 
   function bootAlRaqiV2() {
     document.querySelectorAll('#alRaqiV2Root img[data-ar-logo="1"]').forEach(function(im) {
@@ -3439,7 +3416,7 @@ html, body {
     window.renderAllP4Portions();
     window.renderTasbeehPlaylist();
     window.renderOfflineSaat();
-    setTimeout(function(){ enhanceUnifiedLegacyModals(); relocateLegacyVoiceBox(); }, 140);
+    setTimeout(function(){  relocateLegacyVoiceBox(); }, 140);
   }
 
   if (document.readyState === 'loading') {
