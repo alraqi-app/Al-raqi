@@ -7291,7 +7291,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
   // ================= MODULE 12: REFRESH-STAY + ADMIN 3 PRACTITIONERS + SAVE ADMIN PIN + HOME HEADER SHARE ICON (v2.1.15) =================
   (function() {
-    var BUILD_VER = 'v2.1.19';
+    var BUILD_VER = 'v2.1.20';
     try {
       var prevVer = localStorage.getItem('alraqi_app_build_ver');
       if (prevVer !== BUILD_VER) {
@@ -7337,7 +7337,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       sp.id = 'arBuildVerBadge';
       sp.style.cssText = 'opacity:0.78; font-size:0.74rem; margin-right:6px;';
       sp.setAttribute('dir', 'ltr');
-      sp.textContent = '• v2.1.19';
+      sp.textContent = '• v2.1.20';
       pill.appendChild(sp);
     }
 
@@ -7510,9 +7510,9 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     }
   })();
 
-  // ================= MODULE 13: AUTHENTIC 604-PAGE MUSHAF READER (ZERO '16-LINE', NASTALEEQ URDU TITLES, OPEN ATTRIBUTION) (v2.1.19) =================
+  // ================= MODULE 13: REAL PRINTED 604-PAGE MUSHAF IMAGE READER (ZERO TEXT IN MUSHAF TAB!) (v2.1.20) =================
   (function() {
-    var BUILD_VER = 'v2.1.19';
+    var BUILD_VER = 'v2.1.20';
     try {
       var prevVer = localStorage.getItem('alraqi_app_build_ver');
       if (prevVer !== BUILD_VER) {
@@ -7524,7 +7524,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     } catch (e) {}
   })();
 
-  // Standard 604-page Mushaf starting page for all 114 Surahs
+  // Standard 604-page King Fahd Madani Mushaf starting page for all 114 Surahs
   var MUSHAF_604_SURAH_PAGES = [
     1,2,50,77,106,128,151,177,187,208,221,235,249,255,262,267,282,293,305,312,
     322,332,342,350,359,367,377,385,396,404,411,415,418,428,434,440,446,453,458,467,
@@ -7534,127 +7534,86 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     600,600,601,601,601,602,602,602,603,603,603,604,604,604
   ];
 
-  var _curMushafPageB19 = 1;
+  var _curMushafPageB20 = 1;
 
-  function fetchMushafPage604(pgNum, cb) {
-    var pg = Math.max(1, Math.min(604, parseInt(pgNum, 10) || 1));
-    var cacheKey = 'alraqi_mushaf604_pg_' + pg;
-    try {
-      var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
-      if (cached && Array.isArray(cached.ayahs) && cached.ayahs.length) { cb(cached); return; }
-    } catch (e) {}
-    fetch('https://api.alquran.cloud/v1/page/' + pg + '/quran-uthmani')
-      .then(function(r) { return r.json(); })
-      .then(function(res) {
-        if (res && res.data && Array.isArray(res.data.ayahs) && res.data.ayahs.length) {
-          var slim = {
-            page: pg,
-            juz: res.data.ayahs[0].juz || 1,
-            ayahs: res.data.ayahs.map(function(a) {
-              return {
-                sNum: (a.surah && a.surah.number) ? a.surah.number : 1,
-                sName: (a.surah && a.surah.name) ? a.surah.name : '',
-                n: a.numberInSurah,
-                t: a.text
-              };
-            })
-          };
-          try { localStorage.setItem(cacheKey, JSON.stringify(slim)); } catch (e) {}
-          cb(slim);
-        } else {
-          cb(null);
-        }
-      }).catch(function() { cb(null); });
+  function pad3Mushaf(n) {
+    var s = String(n);
+    while (s.length < 3) s = '0' + s;
+    return s;
   }
 
-  window.toggleMushafPageStarB19 = function(pg, sNum, aNum) {
-    var key = 'alraqi_mushaf604_star';
-    var tag = pg + ':' + sNum + ':' + aNum;
-    var cur = '';
-    try { cur = localStorage.getItem(key) || ''; } catch (e) {}
-    var next = (cur === tag) ? '' : tag;
-    try {
-      if (next) localStorage.setItem(key, next);
-      else localStorage.removeItem(key);
-    } catch (e) {}
-    document.querySelectorAll('#mushaf604FrameBody .ar-mushaf-ayah').forEach(function(el) {
-      el.classList.toggle('starred', next && el.getAttribute('data-tag') === next);
-    });
-    if (typeof window.showToast === 'function') {
-      window.showToast(next ? ('⭐ صفحہ ' + pg + ' — آیت ' + aNum + ' محفوظ کر لی گئی') : 'ستارہ ہٹا دیا گیا');
+  function findSurahForPage604(pg) {
+    var sIdx = 0;
+    for (var i = 0; i < MUSHAF_604_SURAH_PAGES.length; i++) {
+      if (MUSHAF_604_SURAH_PAGES[i] <= pg) sIdx = i;
+      else break;
     }
+    var num = sIdx + 1;
+    var sObj = (typeof QURAN_114_SURAHS !== 'undefined') ? QURAN_114_SURAHS.find(function(x){ return Number(x.num) === num; }) : null;
+    return sObj ? (sObj.num + '. ' + (sObj.urdu || sObj.name)) : ('سورت ' + num);
+  }
+
+  window.bookmarkMushafPageB20 = function(pg) {
+    try { localStorage.setItem('alraqi_mushaf604_bookmark_pg', String(pg)); } catch (e) {}
+    if (typeof window.showToast === 'function') window.showToast('⭐ مصحف کا صفحہ ' + pg + ' بطور نشانی محفوظ ہو گیا');
+  };
+
+  window.openBookmarkedMushafPageB20 = function() {
+    var bm = 0;
+    try { bm = parseInt(localStorage.getItem('alraqi_mushaf604_bookmark_pg') || '0', 10); } catch (e) {}
+    if (bm >= 1 && bm <= 604) window.loadMushafPage604(bm);
+    else if (typeof window.showToast === 'function') window.showToast('ابھی کوئی صفحہ محفوظ نہیں کیا گیا');
   };
 
   window.loadMushafPage604 = function(pgNum) {
     var pg = Math.max(1, Math.min(604, parseInt(pgNum, 10) || 1));
-    _curMushafPageB19 = pg;
+    _curMushafPageB20 = pg;
     try { localStorage.setItem('alraqi_last_mushaf_page_v19', String(pg)); } catch (e) {}
     var area = $('pdfLongPressDemoArea');
     if (!area) return;
 
+    var p3 = pad3Mushaf(pg);
+    var cdnUrl = 'https://cdn.jsdelivr.net/gh/GovarJabbar/Quran-PNG@master/' + p3 + '.png';
+    var rawUrl = 'https://raw.githubusercontent.com/GovarJabbar/Quran-PNG/master/' + p3 + '.png';
+    var surahTitle = findSurahForPage604(pg);
+
+    // Preload next & previous printed pages silently for instant flipping!
+    if (pg < 604) { var nImg = new Image(); nImg.src = 'https://cdn.jsdelivr.net/gh/GovarJabbar/Quran-PNG@master/' + pad3Mushaf(pg + 1) + '.png'; }
+    if (pg > 1) { var pImg = new Image(); pImg.src = 'https://cdn.jsdelivr.net/gh/GovarJabbar/Quran-PNG@master/' + pad3Mushaf(pg - 1) + '.png'; }
+
     area.innerHTML =
-      '<div style="background:#fdf8ec; border:2.5px solid #065f46; border-radius:14px; padding:10px; box-shadow:0 4px 16px rgba(6,95,70,0.12);">' +
-        '<div style="border:1.5px solid #d4af37; border-radius:10px; padding:10px 10px 12px; background:#fffdf7;">' +
-          '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; border-bottom:1.5px solid #d4af37; padding-bottom:6px; margin-bottom:10px;">' +
-            '<span id="mushaf604SurahLbl" style="font-size:1.05rem; font-weight:800; color:#0b1936;">مصحفِ پاک</span>' +
-            '<span id="mushaf604JuzLbl" style="font-size:0.86rem; font-weight:700; color:#065f46; background:#ecfdf5; border:1px solid #86efac; border-radius:999px; padding:1px 10px;">صفحہ ' + pg + ' / 604</span>' +
+      '<div style="background:#fdf8ec; border:2.5px solid #065f46; border-radius:14px; padding:8px; box-shadow:0 4px 16px rgba(6,95,70,0.12);">' +
+        '<div style="border:1.5px solid #d4af37; border-radius:10px; padding:8px; background:#fffdf7;">' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; border-bottom:1.5px solid #d4af37; padding-bottom:6px; margin-bottom:8px;">' +
+            '<span style="font-size:1.05rem; font-weight:800; color:#0b1936;">' + surahTitle + '</span>' +
+            '<span style="font-size:0.86rem; font-weight:700; color:#065f46; background:#ecfdf5; border:1px solid #86efac; border-radius:999px; padding:1px 10px;">صفحہ ' + pg + ' / 604</span>' +
           '</div>' +
-          '<div id="mushaf604FrameBody" class="ar-arabic-text" style="font-size:1.48rem; line-height:2.45; color:#0f172a; text-align:justify; min-height:280px; padding:4px 2px;">صفحہ ' + pg + ' لوڈ ہو رہا ہے...</div>' +
-          '<div style="display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center; margin-top:12px; padding-top:10px; border-top:1.5px dashed #d4af37;">' +
+          '<div style="position:relative; background:#ffffff; border-radius:8px; overflow:hidden; text-align:center; min-height:360px;">' +
+            '<div id="mushafImgLoadingLbl" style="padding:36px 10px; color:#065f46; font-weight:700;">مصحف کا صفحہ ' + pg + ' کھل رہا ہے...</div>' +
+            '<img id="mushafPrintedPageImg" src="' + cdnUrl + '" alt="مصحف صفحہ ' + pg + '" ' +
+              'style="width:100%; height:auto; display:none; border-radius:6px;" ' +
+              'onload="this.style.display=\'block\'; var l=document.getElementById(\'mushafImgLoadingLbl\'); if(l) l.style.display=\'none\';" ' +
+              'onerror="if(!this.dataset.fb){this.dataset.fb=1; this.src=\'' + rawUrl + '\';} else { var l=document.getElementById(\'mushafImgLoadingLbl\'); if(l) l.textContent=\'انٹرنیٹ کنکشن چیک کریں اور صفحہ دوبارہ کھولیں۔\'; }">' +
+          '</div>' +
+          '<div style="display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center; margin-top:10px; padding-top:8px; border-top:1.5px dashed #d4af37;">' +
             '<button type="button" class="ar-unibtn active" onclick="loadMushafPage604(' + Math.min(604, pg + 1) + ')"' + (pg >= 604 ? ' disabled' : '') + '>اگلا صفحہ ←</button>' +
             '<span style="font-size:0.88rem; font-weight:800; color:#0b1936; padding:0 4px;" dir="ltr">' + pg + ' / 604</span>' +
             '<button type="button" class="ar-unibtn" onclick="loadMushafPage604(' + Math.max(1, pg - 1) + ')"' + (pg <= 1 ? ' disabled' : '') + '>→ پچھلا صفحہ</button>' +
           '</div>' +
-          '<div style="text-align:center; font-size:0.74rem; color:#64748b; margin-top:8px;">ماخذِ قرآنی متن: AlQuran Cloud / Tanzil Project (بلا تبدیلی)</div>' +
+          '<div class="ar-eq-grid-2" style="margin-top:8px;">' +
+            '<button type="button" class="ar-unibtn" onclick="bookmarkMushafPageB20(' + pg + ')">⭐ اس صفحے پر نشانی لگائیں</button>' +
+            '<button type="button" class="ar-unibtn" onclick="openBookmarkedMushafPageB20()">📖 محفوظ صفحے پر جائیں</button>' +
+          '</div>' +
+          '<div style="text-align:center; font-size:0.74rem; color:#64748b; margin-top:8px;">ماخذِ مصحف: King Fahd Complex / Quran.com Open Mushaf</div>' +
         '</div>' +
       '</div>';
-
-    fetchMushafPage604(pg, function(data) {
-      var body = $('mushaf604FrameBody');
-      if (!body) return;
-      if (!data || !data.ayahs || !data.ayahs.length) {
-        body.innerHTML = '<div style="text-align:center; color:#64748b; font-size:0.96rem; padding:24px 8px;">صفحہ لوڈ کرنے کے لیے انٹرنیٹ کنکشن چیک کریں (ایک بار کھلنے کے بعد آف لائن محفوظ ہو جائے گا)۔</div>';
-        return;
-      }
-      var firstS = data.ayahs[0].sNum;
-      var sObj = (typeof QURAN_114_SURAHS !== 'undefined') ? QURAN_114_SURAHS.find(function(x){ return Number(x.num) === Number(firstS); }) : null;
-      var urduNm = sObj ? (sObj.num + '. ' + (sObj.urdu || sObj.name)) : (data.ayahs[0].sName || 'قرآنِ کریم');
-      if ($('mushaf604SurahLbl')) $('mushaf604SurahLbl').textContent = urduNm;
-      if ($('mushaf604JuzLbl')) $('mushaf604JuzLbl').textContent = 'پارہ ' + (data.juz || 1) + ' — صفحہ ' + pg;
-
-      var starTag = '';
-      try { starTag = localStorage.getItem('alraqi_mushaf604_star') || ''; } catch (e) {}
-
-      var outHtml = '';
-      var prevSurah = -1;
-      data.ayahs.forEach(function(a) {
-        if (a.sNum !== prevSurah && a.n === 1) {
-          var so = (typeof QURAN_114_SURAHS !== 'undefined') ? QURAN_114_SURAHS.find(function(x){ return Number(x.num) === Number(a.sNum); }) : null;
-          var sn = so ? (so.urdu || so.name) : a.sName;
-          outHtml += '<div style="text-align:center; margin:10px 0 8px; padding:5px 10px; background:linear-gradient(90deg,#ecfdf5 0%,#fef9c3 50%,#ecfdf5 100%); border:1.5px solid #d4af37; border-radius:9px; color:#0b1936; font-size:1.12rem; font-weight:800; font-family:\'Jameel Noori Nastaleeq\',\'Gulzar\',sans-serif !important;">' + sn + '</div>';
-          if (a.sNum !== 1 && a.sNum !== 9) {
-            outHtml += '<div style="text-align:center; color:#065f46; font-size:1.44rem; font-weight:700; margin-bottom:8px;">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِیْمِ</div>';
-          }
-        }
-        prevSurah = a.sNum;
-        var tag = pg + ':' + a.sNum + ':' + a.n;
-        var isStar = (starTag === tag);
-        var cleanText = a.t;
-        if (a.n === 1 && a.sNum !== 1 && a.sNum !== 9) {
-          cleanText = cleanText.replace(/^بِسْمِ\s+اللَّهِ\s+الرَّحْمَٰنِ\s+الرَّحِيمِ\s*/, '');
-        }
-        outHtml += '<span class="ar-mushaf-ayah' + (isStar ? ' starred' : '') + '" data-tag="' + tag + '" onclick="toggleMushafPageStarB19(' + pg + ',' + a.sNum + ',' + a.n + ')">' +
-          cleanText + '<span class="ar-ayah-end">﴿' + toArabicDigitsB13(a.n) + '﴾</span></span> ';
-      });
-      body.innerHTML = '<div style="direction:rtl;">' + outHtml + '</div>';
-    });
   };
 
   window.populatePdfSurahSelector = function() {
     var sel = $('pdfSurahJumpSel');
     if (!sel || typeof QURAN_114_SURAHS === 'undefined') return;
-    if (!sel.getAttribute('data-b19-ready')) {
-      sel.setAttribute('data-b19-ready', '1');
+    if (!sel.getAttribute('data-b20-ready')) {
+      sel.setAttribute('data-b20-ready', '1');
       sel.innerHTML = QURAN_114_SURAHS.map(function(s) {
         var pg = MUSHAF_604_SURAH_PAGES[(Number(s.num) || 1) - 1] || 1;
         return '<option value="' + s.num + '">' + s.num + '. ' + (s.urdu || s.name) + ' (صفحہ ' + pg + ')</option>';
@@ -7679,10 +7638,9 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     window.loadMushafPage604(pg);
   };
 
-  // Update Home header version badge to v2.1.19 & also make Surah list titles in Text Quran use crisp Nastaliq for Urdu readability
-  var _origSwitchQSubB19 = window.switchQuranSubMode;
+  var _origSwitchQSubB20 = window.switchQuranSubMode;
   window.switchQuranSubMode = function(mode) {
-    if (_origSwitchQSubB19) _origSwitchQSubB19(mode);
+    if (_origSwitchQSubB20) _origSwitchQSubB20(mode);
     if (mode === 'pdf') window.populatePdfSurahSelector();
   };
 
