@@ -839,8 +839,11 @@ html, body {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  min-height: 40px !important;
-  padding: 6px 10px !important;
+  min-height: 44px !important;
+  padding: 7px 10px !important;
+  line-height: 1.85 !important;
+  text-align: center !important;
+  overflow: visible !important;
   border-radius: 11px !important;
   font-weight: 700 !important;
   font-size: 0.88rem !important;
@@ -857,6 +860,61 @@ html, body {
   color: #fef08a !important;
   border-color: #d4af37 !important;
   box-shadow: 0 4px 10px rgba(11, 25, 54, 0.22) !important;
+}
+
+
+/* Batch 9: Compact Tabeer Alphabet Grid + Surah Card Padding + Gemstone Row */
+#alRaqiV2Root #tabeerAlphaStrip {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 5px !important;
+  margin-bottom: 10px !important;
+}
+#alRaqiV2Root .ar-alpha-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: 36px !important;
+  padding: 2px 4px !important;
+  border-radius: 9px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+  color: #0b1936 !important;
+  border: 1.3px solid #cbd5e1 !important;
+  font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', Tahoma, sans-serif !important;
+  font-size: 0.96rem !important;
+  font-weight: 800 !important;
+  line-height: 1.45 !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+}
+#alRaqiV2Root .ar-alpha-btn.active {
+  background: linear-gradient(135deg, #0b1936 0%, #1e3a8a 100%) !important;
+  color: #fef08a !important;
+  border-color: #d4af37 !important;
+  box-shadow: 0 3px 8px rgba(11, 25, 54, 0.22) !important;
+}
+#alRaqiV2Root #quranFolderList .db-item {
+  padding: 10px 12px 14px !important;
+  line-height: 1.85 !important;
+}
+#alRaqiV2Root .ar-tab-sec-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 11px;
+  border-radius: 9px;
+  background: linear-gradient(90deg, #eff6ff 0%, #dbeafe 100%);
+  border-right: 4px solid #1e3a8a;
+  color: #0b1936;
+  font-weight: 800;
+  font-size: 0.90rem;
+  margin: 8px 0 6px 0;
+}
+#alRaqiV2Root .ar-tab-sec-hdr.book {
+  background: linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%);
+  border-right-color: #b45309;
+  color: #78350f;
 }
 
   </style>
@@ -967,7 +1025,7 @@ html, body {
         <!-- آپشنل واٹس ایپ اجتماعی / خاندانی میسج پیسٹ باکس -->
         <div id="smartPasteDrawer" style="display:none; background:#eff6ff; border:1.5px solid #93c5fd; border-radius:12px; padding:12px; margin-bottom:12px;">
           <label style="font-weight:700; color:#1e3a8a; display:block; margin-bottom:5px;">واٹس ایپ میسج یہاں پیسٹ کریں (ایک یا زائد افراد):</label>
-          <textarea id="smartPasteInput" rows="4" placeholder="مثال: Name: Laila Fatima (13 April 1991)&#10;Mother Name: Raise Fatima"></textarea>
+          <textarea id="smartPasteInput" rows="4" placeholder="یہاں واٹس ایپ میسج پیسٹ کریں..."></textarea>
           <div class="ar-eq-grid-2" style="margin-top:8px;">
             <button type="button" class="ar-unibtn active" onclick="parseSmartWhatsappMsg()">افراد الگ کریں</button>
             <button type="button" class="ar-unibtn" onclick="toggleSmartPasteDrawer()">بند کریں</button>
@@ -1131,7 +1189,7 @@ html, body {
         </div>
 
         <div id="qSub_text">
-          <input type="text" id="quranSearchInp" placeholder="سورت کا نام یا نمبر تلاش کریں..." oninput="renderQuranFolder()" style="margin-bottom:10px;">
+          <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:11px; padding:9px 10px; margin-bottom:10px;"><div style="font-size:0.84rem; font-weight:800; color:#0b1936; margin-bottom:6px;">سورت اور آیت منتخب کریں (کاپی یا نقشِ ذوالکتابت کے لیے):</div><div class="ar-eq-grid-2" style="margin-bottom:7px;"><select id="qPickerSurahSel" onchange="onQuranPickerSurahChange(this.value)"><option value="">-- سورت منتخب کریں --</option></select><select id="qPickerAyahSel" onchange="onQuranPickerAyahChange(this.value)"><option value="all">پوری سورت</option></select></div><div id="qSelectedAyahBox" style="display:none; background:#fffdf5; border:2px solid #d4af37; border-radius:10px; padding:10px; margin-top:6px;"><div id="qSelectedAyahMeta" style="font-size:0.82rem; font-weight:700; color:#065f46; margin-bottom:5px;"></div><div id="qSelectedAyahText" class="ar-arabic-text" style="font-size:1.42rem; line-height:2.2; color:#0f172a; background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:10px; text-align:center; margin-bottom:8px;"></div><div class="ar-eq-grid-3"><button type="button" class="ar-unibtn active" onclick="copyPickedAyahOnly()">آیت کاپی کریں</button><button type="button" class="ar-unibtn" onclick="sendPickedAyahToZulkitabat()">نقشِ ذوالکتابت</button><button type="button" class="ar-unibtn" onclick="sendPickedAyahToTasbeeh()">تسبیح میں لائیں</button></div></div></div><input type="text" id="quranSearchInp" placeholder="سورت کا نام یا نمبر تلاش کریں..." oninput="renderQuranFolder()" style="margin-bottom:10px;">
           <div id="quranSurahReaderDrawer" style="display:none; background:#fffdf5; border:2px solid #d4af37; border-radius:12px; padding:12px; margin-bottom:10px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; border-bottom:1px dashed #cbd5e1; padding-bottom:6px; margin-bottom:8px;">
               <b id="qReaderTitle" class="ar-arabic-text" style="font-size:1.3rem; color:#1e3a8a;"></b>
@@ -1403,6 +1461,7 @@ html, body {
             <div class="db-item" id="rBox_mufrad"><small style="color:#64748b;">مفرد عدد</small><br><b id="repMufrad" style="color:#065f46;">—</b></div>
             <div class="db-item" id="rBox_ism"><small style="color:#64748b;">اسمِ اعظم</small><br><b id="repIsm" class="ar-arabic-text" style="color:#1d4ed8;">—</b></div>
           </div>
+          <div class="db-item" id="rBox_dobCompat" style="display:none; margin-bottom:9px; border-right-color:#0f766e; background:#f8fafc;"><div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px; border-bottom:1px dashed #cbd5e1; padding-bottom:5px;"><small style="font-weight:800; color:#0b1936;">نام اور تاریخِ پیدائش کا مزاج و مطابقت</small><span id="repDobCompatBadge" class="ar-pat-badge ar-pat-badge-gold">—</span></div><div class="ar-eq-grid-2" style="margin-bottom:7px;"><div style="background:#fff; border:1px solid #dbe4f0; border-radius:8px; padding:6px 8px; text-align:center;"><small style="color:#64748b;">نام کا مزاج</small><div id="repNameMizajBadge" style="margin-top:3px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:5px;">—</div></div><div style="background:#fff; border:1px solid #dbe4f0; border-radius:8px; padding:6px 8px; text-align:center;"><small style="color:#64748b;">تاریخِ پیدائش کا عدد و مزاج</small><div id="repDobMizajBadge" style="margin-top:3px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:5px;">—</div></div></div><div id="repDobCompatSentence" style="font-size:0.88rem; color:#1e293b; background:#fff; border-radius:8px; padding:8px 10px; border-right:3px solid #065f46; line-height:1.85;">—</div></div>
           <div class="db-item" id="rBox_wazifa" style="margin-bottom:8px;">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:5px; flex-wrap:wrap;"><small style="font-weight:700; color:#1e3a8a;">منتخب وظیفہ</small><button type="button" id="btnPickWazifaFromFolder" class="ar-unibtn" style="width:auto !important; min-height:30px !important; padding:2px 10px !important; font-size:0.78rem !important;" onclick="openWazaifPickerForReport()">وظائف فولڈر سے منتخب کریں</button></div>
             <textarea id="repWazifaTxt" rows="2" placeholder="وظائف فولڈر سے منتخب کریں یا خود لکھیں..."></textarea>
@@ -2111,6 +2170,33 @@ html, body {
       });
     });
   };
+
+  window.buildNaqshEAliCrossSvgHtml = function(showTop786) {
+      var top786Html = showTop786 ? '<div style="font-size:13pt; font-weight:bold; color:#0f172a; margin-bottom:2px; letter-spacing:2px;">۷۸۶</div>' : '';
+      return '<div style="display:inline-block; text-align:center; padding:8px 14px; color:#0f172a; font-family:\'Amiri\',serif; direction:rtl;">' +
+        top786Html +
+        '<div style="font-size:14.5pt; font-weight:bold; letter-spacing:5px; margin-bottom:2px;">ھ ھ ھ ھ ھ</div>' +
+        '<svg viewBox="0 0 180 112" style="width:165px; height:102px; display:block; margin:0 auto;">' +
+          '<!-- دو بڑے متقاطع خط (بڑا کراس) -->' +
+          '<line x1="16" y1="12" x2="164" y2="98" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" />' +
+          '<line x1="164" y1="12" x2="16" y2="98" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" />' +
+          '<!-- بائیں اوپر والے کونے کی لکیر کے عین درمیان میں دو متوازی خط (چھوٹا کراس) -->' +
+          '<line x1="25" y1="33" x2="43" y2="11" stroke="#0f172a" stroke-width="2.1" stroke-linecap="round" />' +
+          '<line x1="35" y1="39" x2="53" y2="17" stroke="#0f172a" stroke-width="2.1" stroke-linecap="round" />' +
+          '<!-- اوپر والے خانے کے ۲ نقطے -->' +
+          '<circle cx="85" cy="37" r="2.6" fill="#0f172a" />' +
+          '<circle cx="95" cy="37" r="2.6" fill="#0f172a" />' +
+          '<!-- بائیں اور دائیں خانے کے ۲-۲ نقطے -->' +
+          '<circle cx="58" cy="55" r="2.6" fill="#0f172a" />' +
+          '<circle cx="66" cy="55" r="2.6" fill="#0f172a" />' +
+          '<circle cx="114" cy="55" r="2.6" fill="#0f172a" />' +
+          '<circle cx="122" cy="55" r="2.6" fill="#0f172a" />' +
+          '<!-- نیچے والے خانے کا ۱ نقطہ -->' +
+          '<circle cx="90" cy="74" r="2.6" fill="#0f172a" />' +
+        '</svg>' +
+        '<div style="font-size:14.5pt; font-weight:bold; letter-spacing:2px; margin-top:3px;" dir="rtl">ء ء ء ء ء ء ء و ھ ص م</div>' +
+      '</div>';
+    };
 
   // ===== 2. Native Abjad-e-Qamari & Spiritual Calculation Engine =====
   var ABJAD_MAP = {
@@ -4021,6 +4107,377 @@ html, body {
   };
 
   
+  // ===== Batch 7 Fixes (Proactive Audit + All 9 Real Naqsh Slips + Full 114-Surah Ayah Picker & Zul-Kitabat) =====
+  window.renderNaqshFolder = function() {
+    var box = $('naqshFolderList');
+    if (!box) return;
+    syncCloudLibraryOnce(function() { window.renderNaqshFolder(); });
+    var allItems = [];
+    if (typeof SPECIAL_VAULT_NAQSH_ITEMS !== 'undefined') {
+      Object.keys(SPECIAL_VAULT_NAQSH_ITEMS).forEach(function(k) {
+        var n = SPECIAL_VAULT_NAQSH_ITEMS[k];
+        allItems.push({
+          k: 'v_' + k,
+          title: stripEmojis(n.title || k).replace(/\([^)]*\)/g, '').trim(),
+          note: stripEmojis(n.patientTariqa || n.practitionerNote || ''),
+          hay: (n.title || k) + ' ' + (n.practitionerNote || '') + ' ' + (n.patientTariqa || '') + ' ' + (n.tags || ''),
+          render: function() {
+            try {
+              if (typeof n.renderCleanSlip === 'function') return n.renderCleanSlip();
+              if (typeof n.renderHtml === 'function') return n.renderHtml();
+            } catch (e) {}
+            return '<div class="ar-arabic-text" style="padding:14px; background:#fff; border:2px solid #0f172a; display:inline-block;">' + stripEmojis(n.title || k) + '</div>';
+          }
+        });
+      });
+    }
+    _cloudMahfoozatItems.forEach(function(cm, i) {
+      var t = stripEmojis(cm.title || cm.name || ('کلاؤڈ نقش ' + (i+1)));
+      var cat = String(cm.category || cm.type || '').toLowerCase();
+      if (cat && cat.indexOf('book') !== -1 && cat.indexOf('naqsh') === -1) return;
+      allItems.push({
+        k: 'c_' + i,
+        title: t + ' (کلاؤڈ)',
+        note: stripEmojis(cm.note || cm.desc || ''),
+        hay: t + ' ' + (cm.note || cm.desc || '') + ' ' + (cm.tags || ''),
+        render: function() {
+          if (cm.imageUrl || cm.fileUrl || cm.url) {
+            var u = cm.imageUrl || cm.fileUrl || cm.url;
+            return '<div style="margin-bottom:6px;"><a href="' + u + '" target="_blank" class="ar-unibtn active" style="text-decoration:none;">کلاؤڈ نقش / فائل کھولیں</a></div>';
+          }
+          return '<div style="padding:10px; background:#fff; border:1.5px solid #0f172a;">' + (cm.note || t) + '</div>';
+        }
+      });
+    });
+
+    document.querySelectorAll('#naqshTopicBar .ar-unibtn').forEach(function(b) {
+      var tp = b.getAttribute('data-ntopic');
+      if (!tp) return;
+      var cnt = allItems.filter(function(it){ return matchNaqshTopic(it.hay, tp); }).length;
+      var base = b.getAttribute('data-base-lbl') || b.textContent.replace(/\s*\(\d+\)\s*$/, '').trim();
+      b.setAttribute('data-base-lbl', base);
+      b.textContent = base + ' (' + cnt + ')';
+    });
+
+    var q = (($('naqshTopicSearchInp') || {}).value || '').trim();
+    var filtered = allItems.filter(function(it) {
+      if (!matchNaqshTopic(it.hay, _naqshTopicFilter)) return false;
+      return !q || it.hay.indexOf(q) !== -1;
+    });
+
+    box.innerHTML = filtered.map(function(it) {
+      var isOpen = (_openNaqshKey === it.k);
+      return '<div class="ar-slim-row ' + (isOpen ? 'open' : '') + '" style="border-right-color:#b45309;" onclick="toggleInlineNaqsh(\'' + it.k + '\')">' +
+        '<div class="ar-slim-title"><span style="color:#78350f;">' + it.title + '</span><span style="font-size:0.78rem; color:#92400e;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
+        (isOpen ? (
+          '<div style="text-align:center;" onclick="event.stopPropagation()">' +
+            '<div id="naqshPrintTarget_' + it.k + '" style="margin:8px 0 8px; overflow-x:auto;">' + it.render() + '</div>' +
+            (it.note ? '<div style="font-size:0.84rem; color:#334155; text-align:right; background:#f8fafc; border-radius:8px; padding:7px 9px; margin-bottom:9px;">' + it.note + '</div>' : '') +
+            '<div class="ar-eq-grid-2">' +
+              '<button type="button" class="ar-unibtn active" onclick="printSingleVaultNaqsh(\'naqshPrintTarget_' + it.k + '\', 4)">A4 پرنٹ (۴ نقوش)</button>' +
+              '<button type="button" class="ar-unibtn" onclick="printSingleVaultNaqsh(\'naqshPrintTarget_' + it.k + '\', 1)">A4 پرنٹ (۱ کونے میں)</button>' +
+            '</div>' +
+          '</div>'
+        ) : '') +
+      '</div>';
+    }).join('') || '<div style="color:#64748b; text-align:center; padding:12px;">اس موضوع میں ابھی کوئی نقش موجود نہیں۔</div>';
+  };
+
+  // Full 114-Surah Ayah Loader + Picker (Offline + Live API cache for ALL 114 Surahs & 6,236 Ayahs!)
+  var _surahAyahsCache = {};
+  var _activePickedAyahText = '';
+  var _activePickedAyahRef = '';
+
+  function getSurahAyahsList(num, cb) {
+    var k = String(num);
+    if (_surahAyahsCache[k] && _surahAyahsCache[k].length) { cb(_surahAyahsCache[k]); return; }
+    try {
+      var cached = JSON.parse(localStorage.getItem('alraqi_surah_ayahs_' + k) || 'null');
+      if (Array.isArray(cached) && cached.length) { _surahAyahsCache[k] = cached; cb(cached); return; }
+    } catch (e) {}
+    if (typeof SURAH_AYAHS_OFFLINE_DB !== 'undefined' && Array.isArray(SURAH_AYAHS_OFFLINE_DB[k]) && SURAH_AYAHS_OFFLINE_DB[k].length) {
+      var arr = SURAH_AYAHS_OFFLINE_DB[k].map(function(a, idx) {
+        return typeof a === 'string' ? { n: idx + 1, t: a } : { n: a.num || a.n || (idx + 1), t: a.text || a.ar || a.arabic || '' };
+      }).filter(function(x){ return x.t; });
+      if (arr.length) { _surahAyahsCache[k] = arr; cb(arr); return; }
+    }
+    // Fetch complete authentic Surah from api.alquran.cloud and cache locally!
+    fetch('https://api.alquran.cloud/v1/surah/' + num + '/quran-uthmani')
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if (res && res.data && Array.isArray(res.data.ayahs)) {
+          var arr2 = res.data.ayahs.map(function(a){ return { n: a.numberInSurah, t: a.text }; });
+          _surahAyahsCache[k] = arr2;
+          try { localStorage.setItem('alraqi_surah_ayahs_' + k, JSON.stringify(arr2)); } catch (e) {}
+          cb(arr2);
+        } else {
+          cb([]);
+        }
+      }).catch(function(){ cb([]); });
+  }
+
+  function populateQuranSurahPicker() {
+    var sel = $('qPickerSurahSel');
+    if (!sel || sel.options.length > 5 || typeof QURAN_114_SURAHS === 'undefined') return;
+    sel.innerHTML = '<option value="">-- سورت منتخب کریں (۱ تا ۱۱۴) --</option>' +
+      QURAN_114_SURAHS.map(function(s){
+        return '<option value="' + s.num + '">' + s.num + '. ' + (s.urdu || s.name) + ' (' + (s.ayahs || '') + ' آیات)</option>';
+      }).join('');
+  }
+
+  window.onQuranPickerSurahChange = function(surahNum) {
+    var num = parseInt(surahNum, 10);
+    var aSel = $('qPickerAyahSel');
+    if (!num) {
+      if (aSel) aSel.innerHTML = '<option value="all">پوری سورت</option>';
+      if ($('qSelectedAyahBox')) $('qSelectedAyahBox').style.display = 'none';
+      return;
+    }
+    if (aSel) aSel.innerHTML = '<option value="all">آیات لوڈ ہو رہی ہیں...</option>';
+    getSurahAyahsList(num, function(ayahs) {
+      if (aSel) {
+        aSel.innerHTML = '<option value="all">-- پوری سورت (' + ayahs.length + ' آیات) --</option>' +
+          ayahs.map(function(a){ return '<option value="' + a.n + '">آیت ' + a.n + '</option>'; }).join('');
+      }
+      if (ayahs.length) {
+        window.pickSpecificAyah(num, 1);
+        window.toggleInlineSurah(num);
+      } else {
+        window.showToast('سورت لوڈ کرنے کے لیے انٹرنیٹ چیک کریں');
+      }
+    });
+  };
+
+  window.onQuranPickerAyahChange = function(val) {
+    var num = parseInt(($('qPickerSurahSel') || {}).value || '0', 10);
+    if (!num) return;
+    if (val === 'all') {
+      if ($('qSelectedAyahBox')) $('qSelectedAyahBox').style.display = 'none';
+      window.toggleInlineSurah(num);
+    } else {
+      window.pickSpecificAyah(num, parseInt(val, 10));
+    }
+  };
+
+  window.pickSpecificAyah = function(surahNum, ayahNum) {
+    getSurahAyahsList(surahNum, function(ayahs) {
+      var found = ayahs.find(function(a){ return Number(a.n) === Number(ayahNum); }) || ayahs[0];
+      if (!found) return;
+      var s = (typeof QURAN_114_SURAHS !== 'undefined') ? QURAN_114_SURAHS.find(function(x){ return Number(x.num) === Number(surahNum); }) : null;
+      var sName = s ? (s.urdu || s.name) : ('سورت ' + surahNum);
+      _activePickedAyahText = found.t;
+      _activePickedAyahRef = sName + ' — آیت ' + found.n;
+      var abj = (typeof window.calculatePureAbjadTotal === 'function') ? window.calculatePureAbjadTotal(found.t) : 0;
+      if ($('qPickerSurahSel')) $('qPickerSurahSel').value = String(surahNum);
+      if ($('qPickerAyahSel') && $('qPickerAyahSel').options.length > 1) $('qPickerAyahSel').value = String(found.n);
+      if ($('qSelectedAyahMeta')) $('qSelectedAyahMeta').textContent = _activePickedAyahRef + (abj ? (' | ابجد: ' + abj) : '');
+      if ($('qSelectedAyahText')) $('qSelectedAyahText').textContent = found.t;
+      if ($('qSelectedAyahBox')) {
+        $('qSelectedAyahBox').style.display = 'block';
+        $('qSelectedAyahBox').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+  };
+
+  window.copyPickedAyahOnly = function() {
+    if (!_activePickedAyahText) return;
+    window.copyTextVal(_activePickedAyahText);
+    window.showToast('✅ صرف منتخب آیت کاپی ہو گئی');
+  };
+
+  window.sendPickedAyahToZulkitabat = function() {
+    if (!_activePickedAyahText) return;
+    window.openFolder4('naqsh');
+    window.switchNaqshSubMode('soft');
+    if ($('naqshSoftInput')) $('naqshSoftInput').value = _activePickedAyahText;
+    if ($('naqshTypeSel')) $('naqshTypeSel').value = 'zulkitabat';
+    window.renderClassicGridNaqshPreview();
+    window.showToast('✅ منتخب آیت کا نقشِ ذوالکتابت تیار ہو گیا');
+  };
+
+  window.sendPickedAyahToTasbeeh = function() {
+    if (!_activePickedAyahText) return;
+    window.addItemToTasbeehPlaylist(_activePickedAyahText, 41);
+  };
+
+  var _origRenderQuran = window.renderQuranFolder;
+  window.renderQuranFolder = function() {
+    populateQuranSurahPicker();
+    if (_origRenderQuran) _origRenderQuran();
+  };
+
+  // Upgrade toggleInlineSurah to render FULL Surah ayah-by-ayah (tapping any Ayah picks ONLY that Ayah!)
+  window.toggleInlineSurah = function(num) {
+    var acc = $('qAcc_' + num);
+    if (!acc) return;
+    if (acc.style.display === 'block') { acc.style.display = 'none'; return; }
+    document.querySelectorAll('#quranFolderList .ar-inline-acc').forEach(function(el) { el.style.display = 'none'; });
+    acc.style.display = 'block';
+    acc.innerHTML = '<div style="text-align:center; color:#475569; padding:10px;">مکمل سورت لوڈ ہو رہی ہے...</div>';
+    getSurahAyahsList(num, function(ayahs) {
+      if (!ayahs.length) {
+        acc.innerHTML = '<div style="color:#b91c1c; text-align:center;">مکمل سورت لوڈ کرنے کے لیے انٹرنیٹ چیک کریں۔</div>';
+        return;
+      }
+      acc.innerHTML =
+        '<div style="font-size:0.80rem; color:#065f46; font-weight:700; margin-bottom:6px;">کسی بھی ایک آیت پر کلک کریں ← صرف وہی آیت کاپی یا نقشِ ذوالکتابت کے لیے منتخب ہو جائے گی:</div>' +
+        '<div style="max-height:360px; overflow-y:auto; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:9px; padding:10px; line-height:2.25; text-align:justify;">' +
+          ayahs.map(function(a) {
+            return '<span class="ar-arabic-text" style="font-size:1.32rem; color:#0f172a; cursor:pointer; padding:1px 3px; border-radius:5px;" onclick="pickSpecificAyah(' + num + ',' + a.n + ')">' +
+              a.t + ' <span style="color:#b45309; font-size:0.95rem;">﴿' + a.n + '﴾</span> </span>';
+          }).join('') +
+        '</div>';
+    });
+  };
+
+  // Balanced Full-Ayah Zul-Kitabat (splits ANY length Ayah cleanly into 4 complete segments so zero words are ever dropped!)
+  var _origClassicNaqsh = window.renderClassicGridNaqshPreview;
+  window.renderClassicGridNaqshPreview = function() {
+    var kind = ($('naqshTypeSel') || {}).value || 'musallas';
+    if (kind !== 'zulkitabat') {
+      if (_origClassicNaqsh) _origClassicNaqsh();
+      return;
+    }
+    var out = $('classicNaqshGridOut');
+    if (!out) return;
+    var raw = (($('naqshSoftInput') || {}).value || 'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِیْمِ').trim();
+    var chaal = ($('naqshChaalSel') || {}).value || 'aatishi';
+    var chaalLbl = { aatishi:'آتشی چال', baadi:'بادی چال', aabi:'آبی چال', khaaki:'خاکی چال' }[chaal] || 'آتشی چال';
+    var num = (typeof window.calculatePureAbjadTotal === 'function') ? (window.calculatePureAbjadTotal(raw) || 786) : 786;
+    var words = raw.split(/\s+/).filter(Boolean);
+    if (words.length < 4) words = ['بِسْمِ', 'اللّٰهِ', 'الرَّحْمٰنِ', 'الرَّحِیْمِ'];
+    // Split ALL words into 4 balanced segments (preserves 100% of long Ayahs!)
+    var segs = [[], [], [], []];
+    var per = Math.ceil(words.length / 4);
+    for (var i = 0; i < words.length; i++) {
+      segs[Math.min(3, Math.floor(i / per))].push(words[i]);
+    }
+    var w4 = segs.map(function(arr, idx) { return arr.length ? arr.join(' ') : words[idx % words.length]; });
+    var baseMat = [];
+    for (var r = 0; r < 4; r++) {
+      baseMat[r] = [];
+      for (var c = 0; c < 4; c++) baseMat[r][c] = w4[(r + c) % 4];
+    }
+    var finalMat = applyChaalTransform(baseMat, chaal);
+    var rows = finalMat.map(function(row) {
+      return '<tr>' + row.map(function(seg) {
+        return '<td class="ar-arabic-text" style="border:1.8px solid #0f172a; padding:8px 6px; font-size:1.04rem; min-width:64px; text-align:center;">' + seg + '</td>';
+      }).join('') + '</tr>';
+    }).join('');
+    out.innerHTML = '<div style="font-size:0.86rem; color:#1e3a8a; font-weight:700; margin-bottom:6px;">ذوالکتابت مربع (مکمل آیت) — ' + chaalLbl + ' | کل ابجد: <span dir="ltr">' + num + '</span></div>' +
+      '<div id="activeGeneratedNaqshBox" style="display:inline-block; background:#fff; padding:6px; max-width:100%; overflow-x:auto;"><table style="border-collapse:collapse; margin:0 auto;">' + rows + '</table></div>';
+  };
+
+  
+  // ===== Batch 8: DOB Numerology, Vivid Element Icons & Classical Name-DOB Compatibility =====
+  var _EL_ICONS_MAP = {
+    'آتشی': '<span class="ar-el-ico ar-el-fire"><svg width="14" height="14" viewBox="0 0 24 24" fill="#ea580c"><path d="M12.5 2C12.5 2 18 6.4 18 12.2A6 6 0 1 1 6 12.2C6 9.1 7.6 6.8 9.2 5.3C9.2 5.3 8.8 8 10.6 9.1C10.6 9.1 10.2 5.2 12.5 2Z"/><path d="M12 19.5a2.8 2.8 0 0 1-2.8-2.8c0-1.5 1.3-2.6 2.8-4.2 1.5 1.6 2.8 2.7 2.8 4.2a2.8 2.8 0 0 1-2.8 2.8z" fill="#fde047"/></svg></span>',
+    'بادی': '<span class="ar-el-ico ar-el-wind"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.6" stroke-linecap="round"><path d="M2 8h13.5a2.8 2.8 0 1 0-2.8-2.8"/><path d="M2 13h17a2.8 2.8 0 1 1-2.8 2.8"/><path d="M2 18h10"/></svg></span>',
+    'آبی': '<span class="ar-el-ico ar-el-water"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 2.2C12 2.2 5.2 10.2 5.2 14.8a6.8 6.8 0 0 0 13.6 0C18.8 10.2 12 2.2 12 2.2z" fill="#2563eb"/><path d="M9.4 15.2a2.8 2.8 0 0 0 2.6 2.6" fill="none" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/></svg></span>',
+    'خاکی': '<span class="ar-el-ico ar-el-earth"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M3 19l5.5-8 4 5 3-4 5.5 7H3z" fill="#b45309"/><path d="M13 4c3 0 5 2 5 5-3 0-5-2-5-5z" fill="#16a34a"/></svg></span>'
+  };
+
+  var _BURJ_TO_ELEMENT = {
+    'حمل':'آتشی','اسد':'آتشی','قوس':'آتشی',
+    'جوزا':'بادی','میزان':'بادی','دلو':'بادی',
+    'سرطان':'آبی','عقرب':'آبی','حوت':'آبی',
+    'ثور':'خاکی','سنبلہ':'خاکی','جدی':'خاکی'
+  };
+
+  function computeDobNumerologyV21(dobStr) {
+    if (!dobStr || dobStr === '—') return { valid: false };
+    var months = { jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12' };
+    var norm = String(dobStr).toLowerCase().replace(/\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\b/g, function(m) {
+      return months[m.slice(0,3)] || m;
+    });
+    var digits = norm.replace(/[^0-9]/g, '');
+    if (!digits) return { valid: false };
+    var sum = 0;
+    for (var i = 0; i < digits.length; i++) sum += parseInt(digits[i], 10);
+    var muf = (sum % 9) || 9;
+    var elMap = { 1:'آتشی', 2:'آبی', 3:'بادی', 4:'خاکی', 5:'آتشی', 6:'بادی', 7:'آبی', 8:'خاکی', 9:'آتشی' };
+    var stMap = { 1:'شمس', 2:'قمر', 3:'مشتری', 4:'زحل', 5:'عطارد', 6:'زہرہ', 7:'قمر', 8:'زحل', 9:'مریخ' };
+    return { valid: true, totalSum: sum, mufrad: muf, element: elMap[muf] || 'آتشی', star: stMap[muf] || 'شمس' };
+  }
+
+  function evaluateNameDobCompat(nameEl, dobEl) {
+    if (!nameEl || !dobEl) return { status: '—', color: '#64748b', text: '' };
+    if (nameEl === dobEl) {
+      return {
+        status: 'نہایت سعد اور ہم آہنگ (۱۰۰٪)',
+        color: '#065f46',
+        text: 'ماشاءاللہ! نام اور تاریخِ پیدائش دونوں کا عنصر ایک ہی (' + nameEl + ') ہے۔ شخصیت میں مضبوطی، روحانی توازن اور کاموں میں قدرتی برکت و یکسوئی رہتی ہے۔'
+      };
+    }
+    var pair = [nameEl, dobEl].sort().join('|');
+    if (pair === 'آتشی|بادی' || pair === 'آبی|خاکی') {
+      return {
+        status: 'بہترین اور دوست مزاج (سعد)',
+        color: '#065f46',
+        text: 'ان شاءاللہ نام (' + nameEl + ') اور تاریخِ پیدائش (' + dobEl + ') کے عناصر آپس میں گہرے دوست اور معاون ہیں۔ یہ ملاپ ترقی، ذہنی سکون اور رزق و عزت میں اضافے کی عمدہ علامت ہے۔'
+      };
+    }
+    if (pair === 'آتشی|خاکی' || pair === 'آبی|بادی') {
+      return {
+        status: 'معتدل اور متوازن مطابقت',
+        color: '#b45309',
+        text: 'نام (' + nameEl + ') اور تاریخِ پیدائش (' + dobEl + ') کی مطابقت معتدل ہے۔ باقاعدہ ذکر، صدقہ اور مزاجی اعتدال برقرار رکھنے سے معاملات ان شاءاللہ ہموار اور کامیاب رہتے ہیں۔'
+      };
+    }
+    return {
+      status: 'متضاد مزاج (توازن و صدقہ مفید)',
+      color: '#b91c1c',
+      text: 'نام (' + nameEl + ') اور تاریخِ پیدائش (' + dobEl + ') کے عناصر آپس میں متضاد ہیں۔ ایسے افراد کو بعض اوقات کاموں میں رکاوٹ، ذہنی الجھن یا مزاجی اتار چڑھاؤ محسوس ہو سکتا ہے؛ مناسب اسمِ اعظم کا ورد اور ہفتہ وار صدقہ توازن کے لیے نہایت مجرب ہے۔'
+    };
+  }
+
+  var _origLoadPatB8 = window.loadOfflinePatientToCard;
+  window.loadOfflinePatientToCard = function(idx) {
+    if (_origLoadPatB8) _origLoadPatB8(idx);
+    var c = window.getOfflineCases()[parseInt(idx, 10)];
+    if (!c) return;
+    var burjTxt = (($('repBurj') || {}).textContent || '').trim();
+    var nameEl = _BURJ_TO_ELEMENT[burjTxt] || getMizajFromNumber((c.mufrad || 1));
+    // Add vivid element icon right inside #repBurj too!
+    if ($('repBurj') && burjTxt && burjTxt !== '—') {
+      $('repBurj').innerHTML = '<span style="display:inline-flex; align-items:center; justify-content:center; gap:4px;">' + (_EL_ICONS_MAP[nameEl] || '') + '<span>' + burjTxt + '</span></span>';
+    }
+    var dobRes = computeDobNumerologyV21(c.dob);
+    var box = $('rBox_dobCompat');
+    if (box) {
+      if (dobRes.valid) {
+        var compat = evaluateNameDobCompat(nameEl, dobRes.element);
+        if ($('repNameMizajBadge')) $('repNameMizajBadge').innerHTML = (_EL_ICONS_MAP[nameEl] || '') + '<span>' + nameEl + '</span>';
+        if ($('repDobMizajBadge')) $('repDobMizajBadge').innerHTML = (_EL_ICONS_MAP[dobRes.element] || '') + '<span>عدد ' + dobRes.mufrad + ' — ' + dobRes.element + '</span>';
+        if ($('repDobCompatBadge')) {
+          $('repDobCompatBadge').textContent = compat.status;
+          $('repDobCompatBadge').style.color = compat.color;
+        }
+        if ($('repDobCompatSentence')) {
+          $('repDobCompatSentence').textContent = compat.text;
+          $('repDobCompatSentence').style.borderRightColor = compat.color;
+        }
+        box.style.display = (_repMode === 'pat' && !($('rChk_burj') && $('rChk_burj').checked)) ? 'none' : 'block';
+      } else {
+        box.style.display = 'none';
+      }
+    }
+  };
+
+  var _origSyncVisB8 = window.syncRepCardVis;
+  window.syncRepCardVis = function() {
+    if (_origSyncVisB8) _origSyncVisB8();
+    var box = $('rBox_dobCompat');
+    if (!box) return;
+    var hasDob = _currentReportRec && computeDobNumerologyV21(_currentReportRec.dob).valid;
+    if (!hasDob) { box.style.display = 'none'; return; }
+    var cbBurj = $('rChk_burj');
+    var on = cbBurj ? cbBurj.checked : false;
+    box.style.display = (_repMode === 'pat' && !on) ? 'none' : 'block';
+    box.style.opacity = (_repMode === 'doc' && !on) ? '0.45' : '1';
+  };
+
+  
   // ===== Batch 4 Fixes =====
   // Point #1: No duplicate 'روحانی معالج: روحانی معالج'
   var _origSavePrefs = window.saveProfilePrefs;
@@ -4205,6 +4662,587 @@ html, body {
     if (_origOpenScrB4) _origOpenScrB4(name, skipPush);
     if (name === 'admin') { setTimeout(window.loadLiveAdminCloudData, 80); }
   };
+
+
+
+  // ================= BATCH 9: PRIVACY CLEAR + GEMSTONES (پتھر) + DEEP TABEER ENGINE =================
+
+  // 1. Auto-clear smartPasteInput after batch save (zero lingering private names)
+  var _origSavePasteB9 = window.saveParsedBatchAndOpen;
+  if (typeof _origSavePasteB9 === 'function') {
+    window.saveParsedBatchAndOpen = function() {
+      var res = _origSavePasteB9.apply(this, arguments);
+      var ta = $('smartPasteInput');
+      if (ta) ta.value = '';
+      var prev = $('smartPastePreviewArea');
+      if (prev) prev.innerHTML = '';
+      var drw = $('v2SmartPasteDrawer');
+      if (drw) drw.style.display = 'none';
+      return res;
+    };
+  }
+
+  // 2. Gemstones (پتھر) from authentic v1.89 data on Report Card (Name/Burj + DOB)
+  var _BURJ_GEMS_V21 = {
+    'حمل': 'یاقوت (Ruby)',
+    'ثور': 'زمرد (Emerald)',
+    'جوزا': 'عقیق (Agate)',
+    'سرطان': 'سچا موتی (Pearl)',
+    'اسد': 'پکھراج (Yellow Sapphire)',
+    'سنبلہ': 'زمرد (Emerald)',
+    'میزان': 'ہیرا / سفید زرقون',
+    'عقرب': 'مرجان (Red Coral)',
+    'قوس': 'یاقوتِ زرد / پکھراج',
+    'جدی': 'نیلم / عقیقِ یمنی',
+    'دلو': 'لاجوردی / فیروزہ',
+    'حوت': 'فیروزہ (Turquoise)'
+  };
+  var _DOB_GEMS_V21 = {
+    1: 'یاقوتِ زرد یا عقیقِ زرد',
+    2: 'سچا موتی یا حجر القمر',
+    3: 'پکھراج یا فیروزہ',
+    4: 'یاقوتِ زرد یا عقیقِ زرد',
+    5: 'زمرد یا فیروزہ',
+    6: 'ہیرا، سفید زرقون یا دودھیا عقیق',
+    7: 'سچا موتی یا حجر القمر',
+    8: 'نیلم (موافقت چیک کر کے) یا عقیقِ یمنی',
+    9: 'مرجان یا عقیقِ سرخ'
+  };
+
+  var _origLoadPatB9 = window.loadOfflinePatientToCard;
+  window.loadOfflinePatientToCard = function(idx) {
+    if (_origLoadPatB9) _origLoadPatB9(idx);
+    var c = window.getOfflineCases()[parseInt(idx, 10)];
+    if (!c) return;
+    var burjRaw = (($('repBurj') || {}).textContent || '').trim();
+    var burjKey = Object.keys(_BURJ_GEMS_V21).find(function(k) { return burjRaw.indexOf(k) !== -1; }) || '';
+    var nameGem = _BURJ_GEMS_V21[burjKey] || 'عقیقِ یمنی';
+    var dobRes = (typeof computeDobNumerologyV21 === 'function') ? computeDobNumerologyV21(c.dob) : { valid: false };
+    var dobGem = dobRes.valid ? (_DOB_GEMS_V21[dobRes.mufrad] || '') : '';
+
+    var box = $('rBox_dobCompat');
+    if (box) {
+      var gemRow = $('repGemstonesRow');
+      if (!gemRow) {
+        gemRow = document.createElement('div');
+        gemRow.id = 'repGemstonesRow';
+        gemRow.style.cssText = 'margin-top:8px; padding:8px 10px; background:linear-gradient(90deg,#f0fdf4 0%,#ecfdf5 100%); border:1px solid #86efac; border-right:3.5px solid #065f46; border-radius:9px; font-size:0.86rem; color:#064e3b; line-height:1.8;';
+        box.appendChild(gemRow);
+      }
+      var html = '<div><b style="color:#065f46;">💎 موافق پتھر (برج / نام):</b> ' + nameGem + '</div>';
+      if (dobGem) {
+        html += '<div><b style="color:#1e3a8a;">💎 موافق پتھر (تاریخِ پیدائش):</b> ' + dobGem + '</div>';
+      }
+      gemRow.innerHTML = html;
+      if (!dobRes.valid) {
+        box.style.display = 'block';
+        if ($('repDobCompatBadge')) $('repDobCompatBadge').style.display = 'none';
+        if ($('repDobCompatText')) $('repDobCompatText').textContent = 'تاریخِ پیدائش درج ہونے پر تاریخ کا مزاج اور مطابقت بھی یہاں ظاہر ہو جائے گی۔';
+      } else {
+        if ($('repDobCompatBadge')) $('repDobCompatBadge').style.display = 'inline-block';
+      }
+    }
+  };
+
+  // 3. Complete Tabeer-ur-Ruya Deep Fix (Compact Alphabet Grid + Strict Letter Filter + Soft Copy & Book + Detail + Summary)
+  var _activeTabeerLetter = '';
+  var _openTabeerRowId = '';
+
+  function normUrduTabeer(s) {
+    return String(s || '')
+      .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, '')
+      .replace(/[آأإءٱ]/g, 'ا')
+      .replace(/[ك]/g, 'ک')
+      .replace(/[يےئ]/g, 'ی')
+      .replace(/[ہھۃة]/g, 'ہ')
+      .trim();
+  }
+
+  function firstUrduLetter(s) {
+    var n = normUrduTabeer(s).replace(/^[^ا-ی]+/, '');
+    return n ? n.charAt(0) : '';
+  }
+
+  function getAllSoftCopyDreams() {
+    var list = [];
+    var seen = {};
+    function pushItem(title, body, src, letter) {
+      var t = String(title || '').trim();
+      var b = String(body || '').trim();
+      if (!t || !b) return;
+      var key = normUrduTabeer(t).slice(0, 45);
+      if (seen[key]) return;
+      seen[key] = true;
+      list.push({
+        title: t,
+        body: b,
+        src: src || 'تعبیر الرؤیا انسائیکلوپیڈیا (سافٹ کاپی)',
+        letter: normUrduTabeer(letter || firstUrduLetter(t)).charAt(0)
+      });
+    }
+    if (typeof COMPREHENSIVE_DREAM_DICTIONARY !== 'undefined' && Array.isArray(COMPREHENSIVE_DREAM_DICTIONARY)) {
+      COMPREHENSIVE_DREAM_DICTIONARY.forEach(function(d) {
+        pushItem(d.word || d.w || d.title, d.tabeer || d.t, d.source || d.s || 'تعبیر الرؤیا کلاں — ابن سیرینؒ', d.letter || d.l);
+      });
+    }
+    if (typeof DREAM_TABEER_DB !== 'undefined' && Array.isArray(DREAM_TABEER_DB)) {
+      DREAM_TABEER_DB.forEach(function(d) {
+        pushItem(d.title || d.word, d.tabeer, d.source || 'مستند خواب نامہ (سافٹ کاپی)', d.letter);
+      });
+    }
+    if (typeof MORE_BOOK_DREAMS !== 'undefined' && Array.isArray(MORE_BOOK_DREAMS)) {
+      MORE_BOOK_DREAMS.forEach(function(d) {
+        pushItem(d.title || d.word, d.tabeer, d.source || 'مستند کتابِ تعبیر الرؤیا', d.letter);
+      });
+    }
+    return list;
+  }
+
+  function getIbnSirinBookEntries() {
+    if (typeof IBN_SIRIN_INDEX === 'undefined' || !Array.isArray(IBN_SIRIN_INDEX)) return [];
+    return IBN_SIRIN_INDEX.map(function(item, idx) {
+      var pg = (typeof IBN_SIRIN_DIGITAL_PAGES !== 'undefined' && item.p) ? IBN_SIRIN_DIGITAL_PAGES[String(item.p)] : null;
+      return {
+        id: 'bk_' + idx,
+        title: String(item.t || '').trim(),
+        letter: normUrduTabeer(item.l || firstUrduLetter(item.t)).charAt(0),
+        page: item.p || '',
+        body: (pg && pg.text) ? pg.text : 'اس باب کا تفصیلی متن کتاب کے صفحہ ' + (item.p || '—') + ' پر موجود ہے۔',
+        src: 'کتاب تعبیر الرؤیا — امام محمد بن سیرینؒ (صفحہ ' + (item.p || '—') + ')'
+      };
+    });
+  }
+
+  function renderTabeerAccordionItems(softItems, bookItems, headingText, queryForOnline) {
+    var out = $('offlineTabeerResults'), stats = $('offlineTabeerStats');
+    if (!out) return;
+    var total = softItems.length + bookItems.length;
+    if (stats) {
+      stats.textContent = headingText + ' — کل نتائج: ' + total + ' (سافٹ کاپی: ' + softItems.length + ' | کتاب امام ابن سیرینؒ: ' + bookItems.length + ')';
+    }
+    var html = '';
+    if (softItems.length) {
+      html += '<div class="ar-tab-sec-hdr"><span>📖 سافٹ کاپی انسائیکلوپیڈیا</span><span>(' + softItems.length + ')</span></div>';
+      html += softItems.map(function(r, i) {
+        var rid = 'soft_' + i;
+        var isOpen = (_openTabeerRowId === rid);
+        return '<div class="ar-slim-row' + (isOpen ? ' open' : '') + '" style="margin-bottom:5px;" onclick="toggleTabeerItemRow(\'' + rid + '\')">' +
+          '<div class="ar-slim-title"><span>' + r.title + '</span><span style="font-size:0.78rem; color:#1e3a8a;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
+          (isOpen ? (
+            '<div style="font-size:0.90rem; color:#1e293b; line-height:1.9; margin-top:4px;">' + r.body + '</div>' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:8px;">' +
+              '<small style="color:#065f46; font-weight:700;">ماخذ: ' + r.src + '</small>' +
+              '<button type="button" class="ar-unibtn active" style="width:auto !important; min-height:34px !important; padding:2px 12px !important; font-size:0.80rem !important;" onclick="event.stopPropagation(); appendTabeerToBox3(\'' + r.title.replace(/'/g, '') + '\', \'' + r.body.replace(/'/g, '').replace(/\n/g, ' ').slice(0, 320) + '\')">تعبیر خانے میں شامل کریں</button>' +
+            '</div>'
+          ) : '') +
+        '</div>';
+      }).join('');
+    }
+    if (bookItems.length) {
+      html += '<div class="ar-tab-sec-hdr book"><span>📚 مستند کتاب امام ابن سیرینؒ (مکمل متن)</span><span>(' + bookItems.length + ')</span></div>';
+      html += bookItems.map(function(b, i) {
+        var rid = 'book_' + i;
+        var isOpen = (_openTabeerRowId === rid);
+        return '<div class="ar-slim-row' + (isOpen ? ' open' : '') + '" style="margin-bottom:5px; border-right-color:#b45309;" onclick="toggleTabeerItemRow(\'' + rid + '\')">' +
+          '<div class="ar-slim-title"><span>' + b.title + ' <small style="color:#b45309;">(صفحہ ' + b.page + ')</small></span><span style="font-size:0.78rem; color:#b45309;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
+          (isOpen ? (
+            '<div style="font-size:0.90rem; color:#1e293b; line-height:1.95; white-space:pre-line; margin-top:4px; max-height:360px; overflow-y:auto;">' + b.body + '</div>' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:8px;">' +
+              '<small style="color:#78350f; font-weight:700;">ماخذ: ' + b.src + '</small>' +
+              '<button type="button" class="ar-unibtn active" style="width:auto !important; min-height:34px !important; padding:2px 12px !important; font-size:0.80rem !important;" onclick="event.stopPropagation(); appendTabeerToBox3(\'' + b.title.replace(/'/g, '') + '\', \'' + b.body.replace(/'/g, '').replace(/\n/g, ' ').slice(0, 320) + '\')">تعبیر خانے میں شامل کریں</button>' +
+            '</div>'
+          ) : '') +
+        '</div>';
+      }).join('');
+    }
+    if (!total) {
+      html = '<div style="text-align:center; color:#64748b; padding:12px;">اس حرف یا لفظ پر آف لائن ریکارڈ میں کوئی باب نہیں ملا۔</div>';
+    }
+    if (queryForOnline) {
+      var qUrl = 'https://www.google.com/search?q=' + encodeURIComponent('تعبیر الرؤیا امام ابن سیرین خواب میں ' + queryForOnline);
+      html += '<div style="margin-top:10px; text-align:center;">' +
+        '<a href="' + qUrl + '" target="_blank" rel="noopener" class="ar-unibtn" style="text-decoration:none;">🌐 آن لائن مستند تعبیر تلاش کریں («' + queryForOnline + '»)</a>' +
+      '</div>';
+    }
+    out.innerHTML = html;
+  }
+
+  var _lastTabeerRenderArgs = null;
+  window.toggleTabeerItemRow = function(rid) {
+    _openTabeerRowId = (_openTabeerRowId === rid) ? '' : rid;
+    if (_lastTabeerRenderArgs) {
+      renderTabeerAccordionItems(_lastTabeerRenderArgs[0], _lastTabeerRenderArgs[1], _lastTabeerRenderArgs[2], _lastTabeerRenderArgs[3]);
+    }
+  };
+
+  window.appendTabeerToBox3 = function(title, body) {
+    var box3 = $('questionsPageTabeerInput');
+    if (!box3) return;
+    var add = title + ': ' + body;
+    box3.value = box3.value.trim() ? (box3.value.trim() + '\n\n' + add) : add;
+    window.showToast('✅ تعبیر نیچے خانے میں شامل کر دی گئی');
+  };
+
+  window.initOfflineTabeer = function() {
+    var letters = ['ا','ب','پ','ت','ٹ','ث','ج','چ','ح','خ','د','ڈ','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ک','گ','ل','م','ن','و','ہ','ی'];
+    var strip = $('tabeerAlphaStrip');
+    if (strip) {
+      strip.innerHTML = letters.map(function(ch) {
+        var act = (_activeTabeerLetter === ch) ? ' active' : '';
+        return '<button type="button" class="ar-alpha-btn' + act + '" onclick="filterTabeerLetter(\'' + ch + '\')">' + ch + '</button>';
+      }).join('');
+    }
+    window.loadAlRaqiPack('tabeer', function() {
+      var sel = $('dreamSymbolSelector');
+      var soft = getAllSoftCopyDreams();
+      if (sel && sel.options.length <= 2 && soft.length) {
+        sel.innerHTML = '<option value="">-- خواب کی علامت منتخب کریں (' + soft.length + ' ابواب) --</option>' +
+          soft.map(function(d) {
+            return '<option value="' + d.title.replace(/"/g, '&quot;') + '">' + d.title + '</option>';
+          }).join('');
+      }
+      if (!_activeTabeerLetter && !(($('offlineDreamSearch') || {}).value || '').trim()) {
+        var stats = $('offlineTabeerStats'), out = $('offlineTabeerResults');
+        if (stats) stats.textContent = 'تعبیر دیکھنے کے لیے اوپر خواب لکھیں، کوئی حرف (ا تا ی) دبائیں یا لفظ تلاش کریں۔';
+        if (out) out.innerHTML = '';
+      }
+    });
+  };
+
+  window.filterTabeerLetter = function(ch) {
+    _activeTabeerLetter = normUrduTabeer(ch).charAt(0);
+    _openTabeerRowId = '';
+    if ($('offlineDreamSearch')) $('offlineDreamSearch').value = '';
+    var strip = $('tabeerAlphaStrip');
+    if (strip) {
+      strip.querySelectorAll('.ar-alpha-btn').forEach(function(btn) {
+        btn.classList.toggle('active', normUrduTabeer(btn.textContent).charAt(0) === _activeTabeerLetter);
+      });
+    }
+    window.loadAlRaqiPack('tabeer', function() {
+      var soft = getAllSoftCopyDreams().filter(function(d) {
+        return d.letter === _activeTabeerLetter || firstUrduLetter(d.title) === _activeTabeerLetter;
+      });
+      var book = getIbnSirinBookEntries().filter(function(b) {
+        return b.letter === _activeTabeerLetter || firstUrduLetter(b.title) === _activeTabeerLetter;
+      });
+      _lastTabeerRenderArgs = [soft, book, 'حرف «' + ch + '» کے تمام خواب', ''];
+      renderTabeerAccordionItems(soft, book, 'حرف «' + ch + '» کے تمام خواب', '');
+    });
+  };
+
+  window.searchOfflineTabeer = function() {
+    var q = (($('offlineDreamSearch') || {}).value || '').trim();
+    if (!q) {
+      if (_activeTabeerLetter) { window.filterTabeerLetter(_activeTabeerLetter); return; }
+      if ($('offlineTabeerStats')) $('offlineTabeerStats').textContent = 'تعبیر دیکھنے کے لیے اوپر خواب لکھیں، کوئی حرف (ا تا ی) دبائیں یا لفظ تلاش کریں۔';
+      if ($('offlineTabeerResults')) $('offlineTabeerResults').innerHTML = '';
+      return;
+    }
+    _activeTabeerLetter = '';
+    _openTabeerRowId = '';
+    var strip = $('tabeerAlphaStrip');
+    if (strip) strip.querySelectorAll('.ar-alpha-btn').forEach(function(b){ b.classList.remove('active'); });
+
+    var nq = normUrduTabeer(q);
+    window.loadAlRaqiPack('tabeer', function() {
+      var softAll = getAllSoftCopyDreams();
+      var softTitle = [], softBody = [];
+      softAll.forEach(function(d) {
+        if (normUrduTabeer(d.title).indexOf(nq) !== -1) softTitle.push(d);
+        else if (nq.length >= 2 && normUrduTabeer(d.body).indexOf(nq) !== -1) softBody.push(d);
+      });
+      var soft = softTitle.concat(softBody).slice(0, 40);
+
+      var bookAll = getIbnSirinBookEntries();
+      var bookTitle = [], bookBody = [];
+      bookAll.forEach(function(b) {
+        if (normUrduTabeer(b.title).indexOf(nq) !== -1) bookTitle.push(b);
+        else if (nq.length >= 3 && normUrduTabeer(b.body).indexOf(nq) !== -1) bookBody.push(b);
+      });
+      var book = bookTitle.concat(bookBody).slice(0, 30);
+
+      _lastTabeerRenderArgs = [soft, book, 'تلاش «' + q + '»', q];
+      renderTabeerAccordionItems(soft, book, 'تلاش «' + q + '»', q);
+    });
+  };
+
+  window.onOfflineDreamDropdownPick = function(val) {
+    if (!val) return;
+    if ($('offlineDreamSearch')) $('offlineDreamSearch').value = val;
+    window.searchOfflineTabeer();
+  };
+
+  window.extractAndSearchFromRawDream = function() {
+    var raw = (($('patientRawDreamTextInput') || {}).value || '').trim();
+    if (!raw) { window.showToast('پہلے خواب درج کریں'); return; }
+    window.loadAlRaqiPack('tabeer', function() {
+      var extraStop = {'میں':1,'نے':1,'خواب':1,'دیکھا':1,'دیکھی':1,'دیکھے':1,'کہ':1,'تھا':1,'تھی':1,'تھے':1,'ہے':1,'ہیں':1,'ہوں':1,'کو':1,'کا':1,'کی':1,'کے':1,'سے':1,'پر':1,'اور':1,'یا':1,'ایک':1,'مجھے':1,'میرا':1,'میری':1,'میرے':1,'رہا':1,'رہی':1,'رہے':1,'گیا':1,'گئی':1,'گئے':1,'ہو':1,'کر':1,'بہت':1,'کوئی':1,'اس':1,'ان':1,'اپنے':1,'اپنی':1,'اپنا':1,'پھر':1,'بعد':1,'اندر':1,'باہر':1,'ساتھ':1,'والا':1,'والی':1};
+      var nRaw = normUrduTabeer(raw);
+      var tokens = nRaw.replace(/[^\u0600-\u06FF\s]/g, ' ').split(/\s+/).filter(function(w) {
+        return w.length >= 2 && !extraStop[w] && !(typeof DREAM_STOP_WORDS !== 'undefined' && DREAM_STOP_WORDS[w]);
+      });
+      var uniqueTokens = [];
+      tokens.forEach(function(t) { if (uniqueTokens.indexOf(t) === -1) uniqueTokens.push(t); });
+
+      var matched = [];
+      var seenTitle = {};
+      function addMatch(title, body, src) {
+        var k = normUrduTabeer(title).slice(0, 35);
+        if (seenTitle[k]) return;
+        seenTitle[k] = true;
+        matched.push({ title: title, body: body, src: src });
+      }
+
+      if (typeof SEMANTIC_DREAM_RULES !== 'undefined' && Array.isArray(SEMANTIC_DREAM_RULES)) {
+        SEMANTIC_DREAM_RULES.forEach(function(rule) {
+          if (rule.pattern && rule.pattern.test(raw)) {
+            addMatch(rule.word || 'خاص علامت', rule.tabeer || '', rule.source || 'تعبیر الرؤیا کلاں');
+          }
+        });
+      }
+
+      var softAll = getAllSoftCopyDreams();
+      uniqueTokens.forEach(function(tok) {
+        softAll.forEach(function(d) {
+          if (matched.length >= 10) return;
+          if (normUrduTabeer(d.title).indexOf(tok) !== -1) {
+            addMatch(d.title, d.body, d.src);
+          }
+        });
+      });
+
+      var bookAll = getIbnSirinBookEntries();
+      var bookMatched = [];
+      uniqueTokens.forEach(function(tok) {
+        bookAll.forEach(function(b) {
+          if (bookMatched.length >= 6) return;
+          if (normUrduTabeer(b.title).indexOf(tok) !== -1) {
+            bookMatched.push(b);
+            if (matched.length < 10) {
+              addMatch(b.title, b.body.slice(0, 320) + (b.body.length > 320 ? '...' : ''), b.src);
+            }
+          }
+        });
+      });
+
+      var posWords = ['خیر','بشارت','رزق','عزت','شفاء','کامیابی','خوشی','بلندی','برکت','شادی','نیکی','فتح','دولت','راحت','فرحت','مراد','ترقی','سکون','مبارک'];
+      var warnWords = ['رنج','غم','دشمن','بیماری','نقصان','فتنہ','خوف','مصیبت','تنبیہ','پریشانی','رکاوٹ','حسد','اندیشہ','تکلیف','مکر'];
+      var posScore = 0, warnScore = 0;
+      matched.forEach(function(m) {
+        var bt = m.body || '';
+        posWords.forEach(function(pw) { if (bt.indexOf(pw) !== -1) posScore++; });
+        warnWords.forEach(function(ww) { if (bt.indexOf(ww) !== -1) warnScore++; });
+      });
+
+      var verdict = '', advice = '';
+      if (!matched.length) {
+        verdict = 'مذکورہ خواب کی مخصوص علامت آف لائن ابواب میں براہِ راست نہیں ملی۔';
+        advice = 'نیچے آن لائن تلاش کے بٹن سے مستند حوالہ دیکھ لیں، یا خواب کا بنیادی لفظ (مثلاً پانی، سانپ، پہاڑ) الگ لکھ کر تلاش کریں۔';
+      } else if (posScore > warnScore + 1) {
+        verdict = 'خیر و بشارت کا خواب (مثبت اشارہ)';
+        advice = 'مجموعی طور پر اس خواب میں اللہ تعالیٰ کے فضل، آسانی، عزت یا کسی نیک مقصد میں کامیابی کی بشارت نمایاں ہے۔ اللہ کا شکر ادا کریں اور نیک اعمال جاری رکھیں۔';
+      } else if (warnScore > posScore + 1) {
+        verdict = 'تنبیہ اور احتیاط کا اشارہ';
+        advice = 'اس خواب میں بعض علامات فکرمندی، رکاوٹ یا احتیاط کی طرف اشارہ کرتی ہیں۔ گھبرانے کے بجائے استغفار، حسبِ توفیق صدقہ اور صبح و شام کے حفاظتی اذکار (معوذتین و آیت الکرسی) کا اہتمام کریں۔';
+      } else {
+        verdict = 'معتدل اور ملا جلا اشارہ (آزمائش کے بعد آسانی)';
+        advice = 'اس خواب میں امید اور احتیاط دونوں پہلو پائے جاتے ہیں۔ صبر، دعا، استغفار اور صدقہ کے ذریعے ان شاءاللہ معاملات خیر و برکت کی طرف پلٹ جائیں گے۔';
+      }
+
+      var sumBox = $('dreamSmartSummaryBox');
+      if (sumBox) {
+        sumBox.style.display = 'block';
+        var detailHtml = matched.length ? matched.map(function(m, idx) {
+          return '<div style="background:#ffffff; border:1px solid #cbd5e1; border-right:3px solid #1e3a8a; border-radius:8px; padding:7px 9px; margin-bottom:6px;">' +
+            '<div style="font-weight:800; color:#0b1936;">' + (idx + 1) + '. ' + m.title + '</div>' +
+            '<div style="color:#1e293b; font-size:0.86rem; line-height:1.85; margin-top:2px;">' + m.body + '</div>' +
+            '<small style="color:#065f46;">ماخذ: ' + m.src + '</small>' +
+          '</div>';
+        }).join('') : '<div style="color:#64748b; margin-bottom:6px;">کوئی براہِ راست علامت نہیں ملی۔</div>';
+
+        var onlineUrl = 'https://www.google.com/search?q=' + encodeURIComponent('تعبیر الرؤیا امام ابن سیرین ' + raw.slice(0, 90));
+        sumBox.innerHTML =
+          '<div style="font-weight:800; color:#1e3a8a; font-size:0.96rem; margin-bottom:6px;">۱. تفصیلی تعبیر (علامت وار):</div>' +
+          detailHtml +
+          '<div style="margin-top:8px; padding:9px 10px; background:#ffffff; border:1.5px solid #065f46; border-radius:9px;">' +
+            '<div style="font-weight:800; color:#065f46; font-size:0.95rem;">۲. مکمل خواب کا جامع خلاصہ: ' + verdict + '</div>' +
+            '<div style="color:#064e3b; font-size:0.88rem; line-height:1.9; margin-top:4px;">' + advice + '</div>' +
+          '</div>' +
+          '<div style="margin-top:8px;">' +
+            '<a href="' + onlineUrl + '" target="_blank" rel="noopener" class="ar-unibtn" style="text-decoration:none;">🌐 آن لائن مزید تعبیر تلاش کریں</a>' +
+          '</div>';
+      }
+
+      var box3 = $('questionsPageTabeerInput');
+      if (box3 && matched.length) {
+        var plainLines = matched.slice(0, 4).map(function(m, i) { return (i + 1) + '. ' + m.title + ': ' + m.body.slice(0, 180); });
+        box3.value = 'جامع خلاصہ (' + verdict + '):\n' + advice + '\n\nتفصیلی علامات:\n' + plainLines.join('\n');
+      }
+
+      _lastTabeerRenderArgs = [matched, bookMatched, 'خواب سے اخذ کردہ ابواب', uniqueTokens.slice(0, 3).join(' ')];
+      renderTabeerAccordionItems(matched, bookMatched, 'خواب سے اخذ کردہ ابواب', uniqueTokens.slice(0, 3).join(' '));
+    });
+  };
+
+
+
+
+  // ================= BATCH 10: DEDICATED LETTER SCREEN FOR TABEER + AUTO CACHE-BUSTER (v2.1.10) =================
+  (function() {
+    var BUILD_VER = 'v2.1.10';
+    try {
+      var prevVer = localStorage.getItem('alraqi_app_build_ver');
+      if (prevVer !== BUILD_VER) {
+        localStorage.setItem('alraqi_app_build_ver', BUILD_VER);
+        if ('caches' in window && caches.keys) {
+          caches.keys().then(function(keys) {
+            keys.forEach(function(k) { caches.delete(k); });
+          }).catch(function(){});
+        }
+        if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
+          navigator.serviceWorker.getRegistrations().then(function(regs) {
+            regs.forEach(function(r) { try { r.update(); } catch (e) {} });
+          }).catch(function(){});
+        }
+      }
+    } catch (e) {}
+  })();
+
+  function ensureTabeerLetterViewOverlay() {
+    var scr = $('scr_tabeer');
+    if (!scr) return null;
+    var wrap = scr.querySelector('.wrap');
+    if (!wrap) return null;
+    var panel = $('tabeerDedicatedLetterView');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'tabeerDedicatedLetterView';
+      panel.style.display = 'none';
+      panel.innerHTML =
+        '<div class="card" style="border-top:4px solid #1e3a8a; background:#ffffff;">' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; padding-bottom:10px; border-bottom:1.5px dashed #cbd5e1; margin-bottom:10px;">' +
+            '<div id="tabeerLetterViewTitle" style="font-size:1.12rem; font-weight:800; color:#0b1936;"></div>' +
+            '<button type="button" class="ar-unibtn active" style="width:auto !important; min-height:38px !important; padding:4px 14px !important; font-size:0.86rem !important;" onclick="closeTabeerLetterView()">← حروفِ تہجی پر واپس جائیں</button>' +
+          '</div>' +
+          '<div id="tabeerLetterViewStats" style="font-size:0.84rem; color:#065f46; font-weight:700; margin-bottom:8px;"></div>' +
+          '<div id="tabeerLetterViewBody"></div>' +
+          '<div style="margin-top:12px;">' +
+            '<button type="button" class="ar-unibtn" onclick="closeTabeerLetterView()">← حروفِ تہجی پر واپس جائیں</button>' +
+          '</div>' +
+        '</div>';
+      wrap.insertBefore(panel, wrap.firstChild);
+    }
+    return panel;
+  }
+
+  window.closeTabeerLetterView = function() {
+    var scr = $('scr_tabeer');
+    if (!scr) return;
+    var wrap = scr.querySelector('.wrap');
+    var panel = $('tabeerDedicatedLetterView');
+    if (panel) panel.style.display = 'none';
+    if (wrap) {
+      Array.prototype.forEach.call(wrap.children, function(ch) {
+        if (ch.id !== 'tabeerDedicatedLetterView') ch.style.display = '';
+      });
+    }
+    _activeTabeerLetter = '';
+    var strip = $('tabeerAlphaStrip');
+    if (strip) strip.querySelectorAll('.ar-alpha-btn').forEach(function(b){ b.classList.remove('active'); });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  var _lastLetterScreenData = null;
+  var _openLetterScreenRowId = '';
+
+  function renderDedicatedLetterList() {
+    if (!_lastLetterScreenData) return;
+    var ch = _lastLetterScreenData.ch;
+    var soft = _lastLetterScreenData.soft;
+    var book = _lastLetterScreenData.book;
+    var body = $('tabeerLetterViewBody');
+    var stats = $('tabeerLetterViewStats');
+    var titleEl = $('tabeerLetterViewTitle');
+    if (titleEl) titleEl.textContent = 'حرف «' + ch + '» کے تمام خواب';
+    var total = soft.length + book.length;
+    if (stats) stats.textContent = 'کل نتائج: ' + total + ' (سافٹ کاپی انسائیکلوپیڈیا: ' + soft.length + ' | مستند کتاب امام ابن سیرینؒ: ' + book.length + ')';
+    if (!body) return;
+
+    var html = '';
+    if (soft.length) {
+      html += '<div class="ar-tab-sec-hdr"><span>📖 سافٹ کاپی انسائیکلوپیڈیا</span><span>(' + soft.length + ')</span></div>';
+      html += soft.map(function(r, i) {
+        var rid = 'lsoft_' + i;
+        var isOpen = (_openLetterScreenRowId === rid);
+        return '<div class="ar-slim-row' + (isOpen ? ' open' : '') + '" style="margin-bottom:5px;" onclick="toggleLetterScreenRow(\'' + rid + '\')">' +
+          '<div class="ar-slim-title"><span>' + r.title + '</span><span style="font-size:0.78rem; color:#1e3a8a;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
+          (isOpen ? (
+            '<div style="font-size:0.92rem; color:#1e293b; line-height:1.95; margin-top:4px;">' + r.body + '</div>' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:8px;">' +
+              '<small style="color:#065f46; font-weight:700;">ماخذ: ' + r.src + '</small>' +
+              '<button type="button" class="ar-unibtn active" style="width:auto !important; min-height:34px !important; padding:2px 12px !important; font-size:0.80rem !important;" onclick="event.stopPropagation(); appendTabeerToBox3(\'' + r.title.replace(/'/g, '') + '\', \'' + r.body.replace(/'/g, '').replace(/\n/g, ' ').slice(0, 320) + '\'); closeTabeerLetterView();">تعبیر خانے میں شامل کریں</button>' +
+            '</div>'
+          ) : '') +
+        '</div>';
+      }).join('');
+    }
+    if (book.length) {
+      html += '<div class="ar-tab-sec-hdr book"><span>📚 مستند کتاب امام ابن سیرینؒ (مکمل متن)</span><span>(' + book.length + ')</span></div>';
+      html += book.map(function(b, i) {
+        var rid = 'lbook_' + i;
+        var isOpen = (_openLetterScreenRowId === rid);
+        return '<div class="ar-slim-row' + (isOpen ? ' open' : '') + '" style="margin-bottom:5px; border-right-color:#b45309;" onclick="toggleLetterScreenRow(\'' + rid + '\')">' +
+          '<div class="ar-slim-title"><span>' + b.title + ' <small style="color:#b45309;">(صفحہ ' + b.page + ')</small></span><span style="font-size:0.78rem; color:#b45309;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
+          (isOpen ? (
+            '<div style="font-size:0.92rem; color:#1e293b; line-height:1.95; white-space:pre-line; margin-top:4px; max-height:380px; overflow-y:auto;">' + b.body + '</div>' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:8px;">' +
+              '<small style="color:#78350f; font-weight:700;">ماخذ: ' + b.src + '</small>' +
+              '<button type="button" class="ar-unibtn active" style="width:auto !important; min-height:34px !important; padding:2px 12px !important; font-size:0.80rem !important;" onclick="event.stopPropagation(); appendTabeerToBox3(\'' + b.title.replace(/'/g, '') + '\', \'' + b.body.replace(/'/g, '').replace(/\n/g, ' ').slice(0, 320) + '\'); closeTabeerLetterView();">تعبیر خانے میں شامل کریں</button>' +
+            '</div>'
+          ) : '') +
+        '</div>';
+      }).join('');
+    }
+    if (!total) {
+      html = '<div style="text-align:center; color:#64748b; padding:14px;">اس حرف سے شروع ہونے والا کوئی باب موجود نہیں۔</div>';
+    }
+    body.innerHTML = html;
+  }
+
+  window.toggleLetterScreenRow = function(rid) {
+    _openLetterScreenRowId = (_openLetterScreenRowId === rid) ? '' : rid;
+    renderDedicatedLetterList();
+  };
+
+  window.filterTabeerLetter = function(ch) {
+    _activeTabeerLetter = normUrduTabeer(ch).charAt(0);
+    _openLetterScreenRowId = '';
+    if ($('offlineDreamSearch')) $('offlineDreamSearch').value = '';
+    var scr = $('scr_tabeer');
+    var wrap = scr ? scr.querySelector('.wrap') : null;
+    var panel = ensureTabeerLetterViewOverlay();
+    if (panel && wrap) {
+      Array.prototype.forEach.call(wrap.children, function(child) {
+        if (child.id !== 'tabeerDedicatedLetterView') child.style.display = 'none';
+      });
+      panel.style.display = 'block';
+      if ($('tabeerLetterViewTitle')) $('tabeerLetterViewTitle').textContent = 'حرف «' + ch + '» کے خواب لوڈ ہو رہے ہیں...';
+      if ($('tabeerLetterViewBody')) $('tabeerLetterViewBody').innerHTML = '<div style="text-align:center; padding:16px; color:#475569;">براہِ کرم انتظار فرمائیں...</div>';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.loadAlRaqiPack('tabeer', function() {
+      var soft = getAllSoftCopyDreams().filter(function(d) {
+        return d.letter === _activeTabeerLetter || firstUrduLetter(d.title) === _activeTabeerLetter;
+      });
+      var book = getIbnSirinBookEntries().filter(function(b) {
+        return b.letter === _activeTabeerLetter || firstUrduLetter(b.title) === _activeTabeerLetter;
+      });
+      _lastLetterScreenData = { ch: ch, soft: soft, book: book };
+      renderDedicatedLetterList();
+    });
+  };
+
 
   function bootAlRaqiV2() {
     document.querySelectorAll('#alRaqiV2Root img[data-ar-logo="1"]').forEach(function(im) {
