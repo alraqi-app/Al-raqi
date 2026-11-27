@@ -839,8 +839,11 @@ html, body {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  min-height: 40px !important;
-  padding: 6px 10px !important;
+  min-height: 44px !important;
+  padding: 7px 10px !important;
+  line-height: 1.85 !important;
+  text-align: center !important;
+  overflow: visible !important;
   border-radius: 11px !important;
   font-weight: 700 !important;
   font-size: 0.88rem !important;
@@ -857,6 +860,61 @@ html, body {
   color: #fef08a !important;
   border-color: #d4af37 !important;
   box-shadow: 0 4px 10px rgba(11, 25, 54, 0.22) !important;
+}
+
+
+/* Batch 9: Compact Tabeer Alphabet Grid + Surah Card Padding + Gemstone Row */
+#alRaqiV2Root #tabeerAlphaStrip {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 5px !important;
+  margin-bottom: 10px !important;
+}
+#alRaqiV2Root .ar-alpha-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: 36px !important;
+  padding: 2px 4px !important;
+  border-radius: 9px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+  color: #0b1936 !important;
+  border: 1.3px solid #cbd5e1 !important;
+  font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', Tahoma, sans-serif !important;
+  font-size: 0.96rem !important;
+  font-weight: 800 !important;
+  line-height: 1.45 !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+}
+#alRaqiV2Root .ar-alpha-btn.active {
+  background: linear-gradient(135deg, #0b1936 0%, #1e3a8a 100%) !important;
+  color: #fef08a !important;
+  border-color: #d4af37 !important;
+  box-shadow: 0 3px 8px rgba(11, 25, 54, 0.22) !important;
+}
+#alRaqiV2Root #quranFolderList .db-item {
+  padding: 10px 12px 14px !important;
+  line-height: 1.85 !important;
+}
+#alRaqiV2Root .ar-tab-sec-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 11px;
+  border-radius: 9px;
+  background: linear-gradient(90deg, #eff6ff 0%, #dbeafe 100%);
+  border-right: 4px solid #1e3a8a;
+  color: #0b1936;
+  font-weight: 800;
+  font-size: 0.90rem;
+  margin: 8px 0 6px 0;
+}
+#alRaqiV2Root .ar-tab-sec-hdr.book {
+  background: linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%);
+  border-right-color: #b45309;
+  color: #78350f;
 }
 
   </style>
@@ -967,7 +1025,7 @@ html, body {
         <!-- آپشنل واٹس ایپ اجتماعی / خاندانی میسج پیسٹ باکس -->
         <div id="smartPasteDrawer" style="display:none; background:#eff6ff; border:1.5px solid #93c5fd; border-radius:12px; padding:12px; margin-bottom:12px;">
           <label style="font-weight:700; color:#1e3a8a; display:block; margin-bottom:5px;">واٹس ایپ میسج یہاں پیسٹ کریں (ایک یا زائد افراد):</label>
-          <textarea id="smartPasteInput" rows="4" placeholder="مثال: Name: Laila Fatima (13 April 1991)&#10;Mother Name: Raise Fatima"></textarea>
+          <textarea id="smartPasteInput" rows="4" placeholder="یہاں واٹس ایپ میسج پیسٹ کریں..."></textarea>
           <div class="ar-eq-grid-2" style="margin-top:8px;">
             <button type="button" class="ar-unibtn active" onclick="parseSmartWhatsappMsg()">افراد الگ کریں</button>
             <button type="button" class="ar-unibtn" onclick="toggleSmartPasteDrawer()">بند کریں</button>
@@ -4604,6 +4662,429 @@ html, body {
     if (_origOpenScrB4) _origOpenScrB4(name, skipPush);
     if (name === 'admin') { setTimeout(window.loadLiveAdminCloudData, 80); }
   };
+
+
+
+  // ================= BATCH 9: PRIVACY CLEAR + GEMSTONES (پتھر) + DEEP TABEER ENGINE =================
+
+  // 1. Auto-clear smartPasteInput after batch save (zero lingering private names)
+  var _origSavePasteB9 = window.saveParsedBatchAndOpen;
+  if (typeof _origSavePasteB9 === 'function') {
+    window.saveParsedBatchAndOpen = function() {
+      var res = _origSavePasteB9.apply(this, arguments);
+      var ta = $('smartPasteInput');
+      if (ta) ta.value = '';
+      var prev = $('smartPastePreviewArea');
+      if (prev) prev.innerHTML = '';
+      var drw = $('v2SmartPasteDrawer');
+      if (drw) drw.style.display = 'none';
+      return res;
+    };
+  }
+
+  // 2. Gemstones (پتھر) from authentic v1.89 data on Report Card (Name/Burj + DOB)
+  var _BURJ_GEMS_V21 = {
+    'حمل': 'یاقوت (Ruby)',
+    'ثور': 'زمرد (Emerald)',
+    'جوزا': 'عقیق (Agate)',
+    'سرطان': 'سچا موتی (Pearl)',
+    'اسد': 'پکھراج (Yellow Sapphire)',
+    'سنبلہ': 'زمرد (Emerald)',
+    'میزان': 'ہیرا / سفید زرقون',
+    'عقرب': 'مرجان (Red Coral)',
+    'قوس': 'یاقوتِ زرد / پکھراج',
+    'جدی': 'نیلم / عقیقِ یمنی',
+    'دلو': 'لاجوردی / فیروزہ',
+    'حوت': 'فیروزہ (Turquoise)'
+  };
+  var _DOB_GEMS_V21 = {
+    1: 'یاقوتِ زرد یا عقیقِ زرد',
+    2: 'سچا موتی یا حجر القمر',
+    3: 'پکھراج یا فیروزہ',
+    4: 'یاقوتِ زرد یا عقیقِ زرد',
+    5: 'زمرد یا فیروزہ',
+    6: 'ہیرا، سفید زرقون یا دودھیا عقیق',
+    7: 'سچا موتی یا حجر القمر',
+    8: 'نیلم (موافقت چیک کر کے) یا عقیقِ یمنی',
+    9: 'مرجان یا عقیقِ سرخ'
+  };
+
+  var _origLoadPatB9 = window.loadOfflinePatientToCard;
+  window.loadOfflinePatientToCard = function(idx) {
+    if (_origLoadPatB9) _origLoadPatB9(idx);
+    var c = window.getOfflineCases()[parseInt(idx, 10)];
+    if (!c) return;
+    var burjRaw = (($('repBurj') || {}).textContent || '').trim();
+    var burjKey = Object.keys(_BURJ_GEMS_V21).find(function(k) { return burjRaw.indexOf(k) !== -1; }) || '';
+    var nameGem = _BURJ_GEMS_V21[burjKey] || 'عقیقِ یمنی';
+    var dobRes = (typeof computeDobNumerologyV21 === 'function') ? computeDobNumerologyV21(c.dob) : { valid: false };
+    var dobGem = dobRes.valid ? (_DOB_GEMS_V21[dobRes.mufrad] || '') : '';
+
+    var box = $('rBox_dobCompat');
+    if (box) {
+      var gemRow = $('repGemstonesRow');
+      if (!gemRow) {
+        gemRow = document.createElement('div');
+        gemRow.id = 'repGemstonesRow';
+        gemRow.style.cssText = 'margin-top:8px; padding:8px 10px; background:linear-gradient(90deg,#f0fdf4 0%,#ecfdf5 100%); border:1px solid #86efac; border-right:3.5px solid #065f46; border-radius:9px; font-size:0.86rem; color:#064e3b; line-height:1.8;';
+        box.appendChild(gemRow);
+      }
+      var html = '<div><b style="color:#065f46;">💎 موافق پتھر (برج / نام):</b> ' + nameGem + '</div>';
+      if (dobGem) {
+        html += '<div><b style="color:#1e3a8a;">💎 موافق پتھر (تاریخِ پیدائش):</b> ' + dobGem + '</div>';
+      }
+      gemRow.innerHTML = html;
+      if (!dobRes.valid) {
+        box.style.display = 'block';
+        if ($('repDobCompatBadge')) $('repDobCompatBadge').style.display = 'none';
+        if ($('repDobCompatText')) $('repDobCompatText').textContent = 'تاریخِ پیدائش درج ہونے پر تاریخ کا مزاج اور مطابقت بھی یہاں ظاہر ہو جائے گی۔';
+      } else {
+        if ($('repDobCompatBadge')) $('repDobCompatBadge').style.display = 'inline-block';
+      }
+    }
+  };
+
+  // 3. Complete Tabeer-ur-Ruya Deep Fix (Compact Alphabet Grid + Strict Letter Filter + Soft Copy & Book + Detail + Summary)
+  var _activeTabeerLetter = '';
+  var _openTabeerRowId = '';
+
+  function normUrduTabeer(s) {
+    return String(s || '')
+      .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, '')
+      .replace(/[آأإءٱ]/g, 'ا')
+      .replace(/[ك]/g, 'ک')
+      .replace(/[يےئ]/g, 'ی')
+      .replace(/[ہھۃة]/g, 'ہ')
+      .trim();
+  }
+
+  function firstUrduLetter(s) {
+    var n = normUrduTabeer(s).replace(/^[^ا-ی]+/, '');
+    return n ? n.charAt(0) : '';
+  }
+
+  function getAllSoftCopyDreams() {
+    var list = [];
+    var seen = {};
+    function pushItem(title, body, src, letter) {
+      var t = String(title || '').trim();
+      var b = String(body || '').trim();
+      if (!t || !b) return;
+      var key = normUrduTabeer(t).slice(0, 45);
+      if (seen[key]) return;
+      seen[key] = true;
+      list.push({
+        title: t,
+        body: b,
+        src: src || 'تعبیر الرؤیا انسائیکلوپیڈیا (سافٹ کاپی)',
+        letter: normUrduTabeer(letter || firstUrduLetter(t)).charAt(0)
+      });
+    }
+    if (typeof COMPREHENSIVE_DREAM_DICTIONARY !== 'undefined' && Array.isArray(COMPREHENSIVE_DREAM_DICTIONARY)) {
+      COMPREHENSIVE_DREAM_DICTIONARY.forEach(function(d) {
+        pushItem(d.word || d.w || d.title, d.tabeer || d.t, d.source || d.s || 'تعبیر الرؤیا کلاں — ابن سیرینؒ', d.letter || d.l);
+      });
+    }
+    if (typeof DREAM_TABEER_DB !== 'undefined' && Array.isArray(DREAM_TABEER_DB)) {
+      DREAM_TABEER_DB.forEach(function(d) {
+        pushItem(d.title || d.word, d.tabeer, d.source || 'مستند خواب نامہ (سافٹ کاپی)', d.letter);
+      });
+    }
+    if (typeof MORE_BOOK_DREAMS !== 'undefined' && Array.isArray(MORE_BOOK_DREAMS)) {
+      MORE_BOOK_DREAMS.forEach(function(d) {
+        pushItem(d.title || d.word, d.tabeer, d.source || 'مستند کتابِ تعبیر الرؤیا', d.letter);
+      });
+    }
+    return list;
+  }
+
+  function getIbnSirinBookEntries() {
+    if (typeof IBN_SIRIN_INDEX === 'undefined' || !Array.isArray(IBN_SIRIN_INDEX)) return [];
+    return IBN_SIRIN_INDEX.map(function(item, idx) {
+      var pg = (typeof IBN_SIRIN_DIGITAL_PAGES !== 'undefined' && item.p) ? IBN_SIRIN_DIGITAL_PAGES[String(item.p)] : null;
+      return {
+        id: 'bk_' + idx,
+        title: String(item.t || '').trim(),
+        letter: normUrduTabeer(item.l || firstUrduLetter(item.t)).charAt(0),
+        page: item.p || '',
+        body: (pg && pg.text) ? pg.text : 'اس باب کا تفصیلی متن کتاب کے صفحہ ' + (item.p || '—') + ' پر موجود ہے۔',
+        src: 'کتاب تعبیر الرؤیا — امام محمد بن سیرینؒ (صفحہ ' + (item.p || '—') + ')'
+      };
+    });
+  }
+
+  function renderTabeerAccordionItems(softItems, bookItems, headingText, queryForOnline) {
+    var out = $('offlineTabeerResults'), stats = $('offlineTabeerStats');
+    if (!out) return;
+    var total = softItems.length + bookItems.length;
+    if (stats) {
+      stats.textContent = headingText + ' — کل نتائج: ' + total + ' (سافٹ کاپی: ' + softItems.length + ' | کتاب امام ابن سیرینؒ: ' + bookItems.length + ')';
+    }
+    var html = '';
+    if (softItems.length) {
+      html += '<div class="ar-tab-sec-hdr"><span>📖 سافٹ کاپی انسائیکلوپیڈیا</span><span>(' + softItems.length + ')</span></div>';
+      html += softItems.map(function(r, i) {
+        var rid = 'soft_' + i;
+        var isOpen = (_openTabeerRowId === rid);
+        return '<div class="ar-slim-row' + (isOpen ? ' open' : '') + '" style="margin-bottom:5px;" onclick="toggleTabeerItemRow(\'' + rid + '\')">' +
+          '<div class="ar-slim-title"><span>' + r.title + '</span><span style="font-size:0.78rem; color:#1e3a8a;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
+          (isOpen ? (
+            '<div style="font-size:0.90rem; color:#1e293b; line-height:1.9; margin-top:4px;">' + r.body + '</div>' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:8px;">' +
+              '<small style="color:#065f46; font-weight:700;">ماخذ: ' + r.src + '</small>' +
+              '<button type="button" class="ar-unibtn active" style="width:auto !important; min-height:34px !important; padding:2px 12px !important; font-size:0.80rem !important;" onclick="event.stopPropagation(); appendTabeerToBox3(\'' + r.title.replace(/'/g, '') + '\', \'' + r.body.replace(/'/g, '').replace(/\n/g, ' ').slice(0, 320) + '\')">تعبیر خانے میں شامل کریں</button>' +
+            '</div>'
+          ) : '') +
+        '</div>';
+      }).join('');
+    }
+    if (bookItems.length) {
+      html += '<div class="ar-tab-sec-hdr book"><span>📚 مستند کتاب امام ابن سیرینؒ (مکمل متن)</span><span>(' + bookItems.length + ')</span></div>';
+      html += bookItems.map(function(b, i) {
+        var rid = 'book_' + i;
+        var isOpen = (_openTabeerRowId === rid);
+        return '<div class="ar-slim-row' + (isOpen ? ' open' : '') + '" style="margin-bottom:5px; border-right-color:#b45309;" onclick="toggleTabeerItemRow(\'' + rid + '\')">' +
+          '<div class="ar-slim-title"><span>' + b.title + ' <small style="color:#b45309;">(صفحہ ' + b.page + ')</small></span><span style="font-size:0.78rem; color:#b45309;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
+          (isOpen ? (
+            '<div style="font-size:0.90rem; color:#1e293b; line-height:1.95; white-space:pre-line; margin-top:4px; max-height:360px; overflow-y:auto;">' + b.body + '</div>' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:8px;">' +
+              '<small style="color:#78350f; font-weight:700;">ماخذ: ' + b.src + '</small>' +
+              '<button type="button" class="ar-unibtn active" style="width:auto !important; min-height:34px !important; padding:2px 12px !important; font-size:0.80rem !important;" onclick="event.stopPropagation(); appendTabeerToBox3(\'' + b.title.replace(/'/g, '') + '\', \'' + b.body.replace(/'/g, '').replace(/\n/g, ' ').slice(0, 320) + '\')">تعبیر خانے میں شامل کریں</button>' +
+            '</div>'
+          ) : '') +
+        '</div>';
+      }).join('');
+    }
+    if (!total) {
+      html = '<div style="text-align:center; color:#64748b; padding:12px;">اس حرف یا لفظ پر آف لائن ریکارڈ میں کوئی باب نہیں ملا۔</div>';
+    }
+    if (queryForOnline) {
+      var qUrl = 'https://www.google.com/search?q=' + encodeURIComponent('تعبیر الرؤیا امام ابن سیرین خواب میں ' + queryForOnline);
+      html += '<div style="margin-top:10px; text-align:center;">' +
+        '<a href="' + qUrl + '" target="_blank" rel="noopener" class="ar-unibtn" style="text-decoration:none;">🌐 آن لائن مستند تعبیر تلاش کریں («' + queryForOnline + '»)</a>' +
+      '</div>';
+    }
+    out.innerHTML = html;
+  }
+
+  var _lastTabeerRenderArgs = null;
+  window.toggleTabeerItemRow = function(rid) {
+    _openTabeerRowId = (_openTabeerRowId === rid) ? '' : rid;
+    if (_lastTabeerRenderArgs) {
+      renderTabeerAccordionItems(_lastTabeerRenderArgs[0], _lastTabeerRenderArgs[1], _lastTabeerRenderArgs[2], _lastTabeerRenderArgs[3]);
+    }
+  };
+
+  window.appendTabeerToBox3 = function(title, body) {
+    var box3 = $('questionsPageTabeerInput');
+    if (!box3) return;
+    var add = title + ': ' + body;
+    box3.value = box3.value.trim() ? (box3.value.trim() + '\n\n' + add) : add;
+    window.showToast('✅ تعبیر نیچے خانے میں شامل کر دی گئی');
+  };
+
+  window.initOfflineTabeer = function() {
+    var letters = ['ا','ب','پ','ت','ٹ','ث','ج','چ','ح','خ','د','ڈ','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ک','گ','ل','م','ن','و','ہ','ی'];
+    var strip = $('tabeerAlphaStrip');
+    if (strip) {
+      strip.innerHTML = letters.map(function(ch) {
+        var act = (_activeTabeerLetter === ch) ? ' active' : '';
+        return '<button type="button" class="ar-alpha-btn' + act + '" onclick="filterTabeerLetter(\'' + ch + '\')">' + ch + '</button>';
+      }).join('');
+    }
+    window.loadAlRaqiPack('tabeer', function() {
+      var sel = $('dreamSymbolSelector');
+      var soft = getAllSoftCopyDreams();
+      if (sel && sel.options.length <= 2 && soft.length) {
+        sel.innerHTML = '<option value="">-- خواب کی علامت منتخب کریں (' + soft.length + ' ابواب) --</option>' +
+          soft.map(function(d) {
+            return '<option value="' + d.title.replace(/"/g, '&quot;') + '">' + d.title + '</option>';
+          }).join('');
+      }
+      if (!_activeTabeerLetter && !(($('offlineDreamSearch') || {}).value || '').trim()) {
+        var stats = $('offlineTabeerStats'), out = $('offlineTabeerResults');
+        if (stats) stats.textContent = 'تعبیر دیکھنے کے لیے اوپر خواب لکھیں، کوئی حرف (ا تا ی) دبائیں یا لفظ تلاش کریں۔';
+        if (out) out.innerHTML = '';
+      }
+    });
+  };
+
+  window.filterTabeerLetter = function(ch) {
+    _activeTabeerLetter = normUrduTabeer(ch).charAt(0);
+    _openTabeerRowId = '';
+    if ($('offlineDreamSearch')) $('offlineDreamSearch').value = '';
+    var strip = $('tabeerAlphaStrip');
+    if (strip) {
+      strip.querySelectorAll('.ar-alpha-btn').forEach(function(btn) {
+        btn.classList.toggle('active', normUrduTabeer(btn.textContent).charAt(0) === _activeTabeerLetter);
+      });
+    }
+    window.loadAlRaqiPack('tabeer', function() {
+      var soft = getAllSoftCopyDreams().filter(function(d) {
+        return d.letter === _activeTabeerLetter || firstUrduLetter(d.title) === _activeTabeerLetter;
+      });
+      var book = getIbnSirinBookEntries().filter(function(b) {
+        return b.letter === _activeTabeerLetter || firstUrduLetter(b.title) === _activeTabeerLetter;
+      });
+      _lastTabeerRenderArgs = [soft, book, 'حرف «' + ch + '» کے تمام خواب', ''];
+      renderTabeerAccordionItems(soft, book, 'حرف «' + ch + '» کے تمام خواب', '');
+    });
+  };
+
+  window.searchOfflineTabeer = function() {
+    var q = (($('offlineDreamSearch') || {}).value || '').trim();
+    if (!q) {
+      if (_activeTabeerLetter) { window.filterTabeerLetter(_activeTabeerLetter); return; }
+      if ($('offlineTabeerStats')) $('offlineTabeerStats').textContent = 'تعبیر دیکھنے کے لیے اوپر خواب لکھیں، کوئی حرف (ا تا ی) دبائیں یا لفظ تلاش کریں۔';
+      if ($('offlineTabeerResults')) $('offlineTabeerResults').innerHTML = '';
+      return;
+    }
+    _activeTabeerLetter = '';
+    _openTabeerRowId = '';
+    var strip = $('tabeerAlphaStrip');
+    if (strip) strip.querySelectorAll('.ar-alpha-btn').forEach(function(b){ b.classList.remove('active'); });
+
+    var nq = normUrduTabeer(q);
+    window.loadAlRaqiPack('tabeer', function() {
+      var softAll = getAllSoftCopyDreams();
+      var softTitle = [], softBody = [];
+      softAll.forEach(function(d) {
+        if (normUrduTabeer(d.title).indexOf(nq) !== -1) softTitle.push(d);
+        else if (nq.length >= 2 && normUrduTabeer(d.body).indexOf(nq) !== -1) softBody.push(d);
+      });
+      var soft = softTitle.concat(softBody).slice(0, 40);
+
+      var bookAll = getIbnSirinBookEntries();
+      var bookTitle = [], bookBody = [];
+      bookAll.forEach(function(b) {
+        if (normUrduTabeer(b.title).indexOf(nq) !== -1) bookTitle.push(b);
+        else if (nq.length >= 3 && normUrduTabeer(b.body).indexOf(nq) !== -1) bookBody.push(b);
+      });
+      var book = bookTitle.concat(bookBody).slice(0, 30);
+
+      _lastTabeerRenderArgs = [soft, book, 'تلاش «' + q + '»', q];
+      renderTabeerAccordionItems(soft, book, 'تلاش «' + q + '»', q);
+    });
+  };
+
+  window.onOfflineDreamDropdownPick = function(val) {
+    if (!val) return;
+    if ($('offlineDreamSearch')) $('offlineDreamSearch').value = val;
+    window.searchOfflineTabeer();
+  };
+
+  window.extractAndSearchFromRawDream = function() {
+    var raw = (($('patientRawDreamTextInput') || {}).value || '').trim();
+    if (!raw) { window.showToast('پہلے خواب درج کریں'); return; }
+    window.loadAlRaqiPack('tabeer', function() {
+      var extraStop = {'میں':1,'نے':1,'خواب':1,'دیکھا':1,'دیکھی':1,'دیکھے':1,'کہ':1,'تھا':1,'تھی':1,'تھے':1,'ہے':1,'ہیں':1,'ہوں':1,'کو':1,'کا':1,'کی':1,'کے':1,'سے':1,'پر':1,'اور':1,'یا':1,'ایک':1,'مجھے':1,'میرا':1,'میری':1,'میرے':1,'رہا':1,'رہی':1,'رہے':1,'گیا':1,'گئی':1,'گئے':1,'ہو':1,'کر':1,'بہت':1,'کوئی':1,'اس':1,'ان':1,'اپنے':1,'اپنی':1,'اپنا':1,'پھر':1,'بعد':1,'اندر':1,'باہر':1,'ساتھ':1,'والا':1,'والی':1};
+      var nRaw = normUrduTabeer(raw);
+      var tokens = nRaw.replace(/[^\u0600-\u06FF\s]/g, ' ').split(/\s+/).filter(function(w) {
+        return w.length >= 2 && !extraStop[w] && !(typeof DREAM_STOP_WORDS !== 'undefined' && DREAM_STOP_WORDS[w]);
+      });
+      var uniqueTokens = [];
+      tokens.forEach(function(t) { if (uniqueTokens.indexOf(t) === -1) uniqueTokens.push(t); });
+
+      var matched = [];
+      var seenTitle = {};
+      function addMatch(title, body, src) {
+        var k = normUrduTabeer(title).slice(0, 35);
+        if (seenTitle[k]) return;
+        seenTitle[k] = true;
+        matched.push({ title: title, body: body, src: src });
+      }
+
+      if (typeof SEMANTIC_DREAM_RULES !== 'undefined' && Array.isArray(SEMANTIC_DREAM_RULES)) {
+        SEMANTIC_DREAM_RULES.forEach(function(rule) {
+          if (rule.pattern && rule.pattern.test(raw)) {
+            addMatch(rule.word || 'خاص علامت', rule.tabeer || '', rule.source || 'تعبیر الرؤیا کلاں');
+          }
+        });
+      }
+
+      var softAll = getAllSoftCopyDreams();
+      uniqueTokens.forEach(function(tok) {
+        softAll.forEach(function(d) {
+          if (matched.length >= 10) return;
+          if (normUrduTabeer(d.title).indexOf(tok) !== -1) {
+            addMatch(d.title, d.body, d.src);
+          }
+        });
+      });
+
+      var bookAll = getIbnSirinBookEntries();
+      var bookMatched = [];
+      uniqueTokens.forEach(function(tok) {
+        bookAll.forEach(function(b) {
+          if (bookMatched.length >= 6) return;
+          if (normUrduTabeer(b.title).indexOf(tok) !== -1) {
+            bookMatched.push(b);
+            if (matched.length < 10) {
+              addMatch(b.title, b.body.slice(0, 320) + (b.body.length > 320 ? '...' : ''), b.src);
+            }
+          }
+        });
+      });
+
+      var posWords = ['خیر','بشارت','رزق','عزت','شفاء','کامیابی','خوشی','بلندی','برکت','شادی','نیکی','فتح','دولت','راحت','فرحت','مراد','ترقی','سکون','مبارک'];
+      var warnWords = ['رنج','غم','دشمن','بیماری','نقصان','فتنہ','خوف','مصیبت','تنبیہ','پریشانی','رکاوٹ','حسد','اندیشہ','تکلیف','مکر'];
+      var posScore = 0, warnScore = 0;
+      matched.forEach(function(m) {
+        var bt = m.body || '';
+        posWords.forEach(function(pw) { if (bt.indexOf(pw) !== -1) posScore++; });
+        warnWords.forEach(function(ww) { if (bt.indexOf(ww) !== -1) warnScore++; });
+      });
+
+      var verdict = '', advice = '';
+      if (!matched.length) {
+        verdict = 'مذکورہ خواب کی مخصوص علامت آف لائن ابواب میں براہِ راست نہیں ملی۔';
+        advice = 'نیچے آن لائن تلاش کے بٹن سے مستند حوالہ دیکھ لیں، یا خواب کا بنیادی لفظ (مثلاً پانی، سانپ، پہاڑ) الگ لکھ کر تلاش کریں۔';
+      } else if (posScore > warnScore + 1) {
+        verdict = 'خیر و بشارت کا خواب (مثبت اشارہ)';
+        advice = 'مجموعی طور پر اس خواب میں اللہ تعالیٰ کے فضل، آسانی، عزت یا کسی نیک مقصد میں کامیابی کی بشارت نمایاں ہے۔ اللہ کا شکر ادا کریں اور نیک اعمال جاری رکھیں۔';
+      } else if (warnScore > posScore + 1) {
+        verdict = 'تنبیہ اور احتیاط کا اشارہ';
+        advice = 'اس خواب میں بعض علامات فکرمندی، رکاوٹ یا احتیاط کی طرف اشارہ کرتی ہیں۔ گھبرانے کے بجائے استغفار، حسبِ توفیق صدقہ اور صبح و شام کے حفاظتی اذکار (معوذتین و آیت الکرسی) کا اہتمام کریں۔';
+      } else {
+        verdict = 'معتدل اور ملا جلا اشارہ (آزمائش کے بعد آسانی)';
+        advice = 'اس خواب میں امید اور احتیاط دونوں پہلو پائے جاتے ہیں۔ صبر، دعا، استغفار اور صدقہ کے ذریعے ان شاءاللہ معاملات خیر و برکت کی طرف پلٹ جائیں گے۔';
+      }
+
+      var sumBox = $('dreamSmartSummaryBox');
+      if (sumBox) {
+        sumBox.style.display = 'block';
+        var detailHtml = matched.length ? matched.map(function(m, idx) {
+          return '<div style="background:#ffffff; border:1px solid #cbd5e1; border-right:3px solid #1e3a8a; border-radius:8px; padding:7px 9px; margin-bottom:6px;">' +
+            '<div style="font-weight:800; color:#0b1936;">' + (idx + 1) + '. ' + m.title + '</div>' +
+            '<div style="color:#1e293b; font-size:0.86rem; line-height:1.85; margin-top:2px;">' + m.body + '</div>' +
+            '<small style="color:#065f46;">ماخذ: ' + m.src + '</small>' +
+          '</div>';
+        }).join('') : '<div style="color:#64748b; margin-bottom:6px;">کوئی براہِ راست علامت نہیں ملی۔</div>';
+
+        var onlineUrl = 'https://www.google.com/search?q=' + encodeURIComponent('تعبیر الرؤیا امام ابن سیرین ' + raw.slice(0, 90));
+        sumBox.innerHTML =
+          '<div style="font-weight:800; color:#1e3a8a; font-size:0.96rem; margin-bottom:6px;">۱. تفصیلی تعبیر (علامت وار):</div>' +
+          detailHtml +
+          '<div style="margin-top:8px; padding:9px 10px; background:#ffffff; border:1.5px solid #065f46; border-radius:9px;">' +
+            '<div style="font-weight:800; color:#065f46; font-size:0.95rem;">۲. مکمل خواب کا جامع خلاصہ: ' + verdict + '</div>' +
+            '<div style="color:#064e3b; font-size:0.88rem; line-height:1.9; margin-top:4px;">' + advice + '</div>' +
+          '</div>' +
+          '<div style="margin-top:8px;">' +
+            '<a href="' + onlineUrl + '" target="_blank" rel="noopener" class="ar-unibtn" style="text-decoration:none;">🌐 آن لائن مزید تعبیر تلاش کریں</a>' +
+          '</div>';
+      }
+
+      var box3 = $('questionsPageTabeerInput');
+      if (box3 && matched.length) {
+        var plainLines = matched.slice(0, 4).map(function(m, i) { return (i + 1) + '. ' + m.title + ': ' + m.body.slice(0, 180); });
+        box3.value = 'جامع خلاصہ (' + verdict + '):\n' + advice + '\n\nتفصیلی علامات:\n' + plainLines.join('\n');
+      }
+
+      _lastTabeerRenderArgs = [matched, bookMatched, 'خواب سے اخذ کردہ ابواب', uniqueTokens.slice(0, 3).join(' ')];
+      renderTabeerAccordionItems(matched, bookMatched, 'خواب سے اخذ کردہ ابواب', uniqueTokens.slice(0, 3).join(' '));
+    });
+  };
+
 
   function bootAlRaqiV2() {
     document.querySelectorAll('#alRaqiV2Root img[data-ar-logo="1"]').forEach(function(im) {
