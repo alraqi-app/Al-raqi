@@ -15,7 +15,8 @@
   <title>الراقی روحانی تشخیص و استخارہ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link href="https://cdn.jsdelivr.net/npm/jameel-noori@1.1.2/jameel-noori.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Gulzar&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <style id="alRaqiV2BaseStyles">
 
 
@@ -915,6 +916,35 @@ html, body {
   background: linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%);
   border-right-color: #b45309;
   color: #78350f;
+}
+
+
+/* Batch 13: Authentic Jameel Noori Nastaleeq Typography + Mushaf Star Bookmarking */
+html, body, #alRaqiV2Root, #alRaqiV2Root button, #alRaqiV2Root input, #alRaqiV2Root select, #alRaqiV2Root textarea,
+.ar-unibtn, .ar-alpha-btn, .ar-slim-row, .ar-cat-hdr {
+  font-family: 'Jameel Noori Nastaleeq', 'Jameel Noori', 'jameel-noori', 'jameel-noori-nastaleeq', 'Gulzar', 'Noto Nastaliq Urdu', Tahoma, sans-serif !important;
+  font-variant-ligatures: normal !important;
+  font-feature-settings: normal !important;
+}
+#alRaqiV2Root .ar-arabic-text {
+  font-family: 'Amiri', 'Noto Naskh Arabic', 'Traditional Arabic', serif !important;
+}
+#alRaqiV2Root .ar-mushaf-ayah {
+  display: inline;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 1px 2px;
+  transition: background 0.15s ease;
+}
+#alRaqiV2Root .ar-mushaf-ayah.starred {
+  background: #fef08a;
+  box-shadow: 0 0 0 2px #d4af37;
+}
+#alRaqiV2Root .ar-ayah-end {
+  color: #b45309;
+  font-size: 0.92em;
+  font-weight: 700;
+  margin: 0 4px;
 }
 
   </style>
@@ -6324,6 +6354,100 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
     if (_cloudKutubListB11 === null) {
       fetchCloudKutubOnce(function() { window.renderKutubFolder(); });
+    }
+  };
+
+
+
+
+  // ================= BATCH 13: FULL SURAH MUSHAF VIEWER + STAR BOOKMARK + JAMEEL NOORI NASTALEEQ (v2.1.13) =================
+  (function() {
+    var BUILD_VER = 'v2.1.13';
+    try {
+      var prevVer = localStorage.getItem('alraqi_app_build_ver');
+      if (prevVer !== BUILD_VER) {
+        localStorage.setItem('alraqi_app_build_ver', BUILD_VER);
+        if ('caches' in window && caches.keys) {
+          caches.keys().then(function(keys) { keys.forEach(function(k) { caches.delete(k); }); }).catch(function(){});
+        }
+      }
+    } catch (e) {}
+  })();
+
+  function toArabicDigitsB13(n) {
+    var d = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+    return String(n).replace(/\d/g, function(x) { return d[parseInt(x, 10)] || x; });
+  }
+
+  window.openTajPdfWithPageNote = function(pg) {
+    var url = 'https://drive.google.com/file/d/1t5g0IsUnlYFlp2rQmA8r_coJ5QHG5-Jm/view#page=' + pg;
+    if (typeof window.showToast === 'function') {
+      window.showToast('📖 ۱۶ سطری مصحف کھل رہا ہے — مطلوبہ صفحہ نمبر: ' + pg);
+    }
+    window.open(url, '_blank');
+  };
+
+  window.toggleMushafStarAyah = function(surahNum, ayahNum) {
+    var key = 'alraqi_mushaf_star_' + surahNum;
+    var cur = '';
+    try { cur = localStorage.getItem(key) || ''; } catch (e) {}
+    var next = (String(cur) === String(ayahNum)) ? '' : String(ayahNum);
+    try {
+      if (next) localStorage.setItem(key, next);
+      else localStorage.removeItem(key);
+    } catch (e) {}
+    document.querySelectorAll('#mushafFullSurahBody .ar-mushaf-ayah').forEach(function(el) {
+      el.classList.toggle('starred', next && el.getAttribute('data-ayah') === next);
+    });
+    if (typeof window.showToast === 'function') {
+      window.showToast(next ? ('⭐ سورۃ ' + surahNum + ' کی آیت ' + next + ' محفوظ کر لی گئی') : 'ستارہ ہٹا دیا گیا');
+    }
+  };
+
+  window.openPdfSurahResume = function(surahNum) {
+    var num = parseInt(surahNum, 10) || 1;
+    try { localStorage.setItem('alraqi_last_pdf_surah_v2', String(num)); } catch (e) {}
+    var pg = (typeof TAJ_16LINE_PAGES !== 'undefined' && TAJ_16LINE_PAGES[num - 1]) ? TAJ_16LINE_PAGES[num - 1] : 2;
+    var s = (typeof QURAN_114_SURAHS !== 'undefined') ? QURAN_114_SURAHS.find(function(x){ return Number(x.num) === num; }) : null;
+    var nm = s ? (s.urdu || s.name) : ('سورت ' + num);
+    var area = $('pdfLongPressDemoArea');
+    if (!area) return;
+
+    area.innerHTML =
+      '<div class="db-item" style="border-right-color:#065f46; background:#fffdf5;">' +
+        '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">' +
+          '<b class="ar-arabic-text" style="font-size:1.30rem; color:#0b1936;">' + num + '. ' + nm + '</b>' +
+          '<span class="ar-pat-badge ar-pat-badge-gold">۱۶ سطری مصحف — صفحہ ' + pg + '</span>' +
+        '</div>' +
+        '<div class="ar-eq-grid-2" style="margin-bottom:8px;">' +
+          '<button type="button" class="ar-unibtn active" onclick="openTajPdfWithPageNote(' + pg + ')">پی ڈی ایف (صفحہ ' + pg + ') کھولیں</button>' +
+          '<button type="button" class="ar-unibtn" onclick="addItemToTasbeehPlaylist(\'' + nm.replace(/'/g, '') + '\', 41)">تسبیح میں شامل کریں</button>' +
+        '</div>' +
+        '<div style="font-size:0.78rem; color:#475569; margin-bottom:8px; line-height:1.7;">نوٹ: گوگل ڈرائیو پی ڈی ایف موبائل پر صفحہ ۱ سے کھلتا ہے (اس سورت کا صفحہ نمبر <b>' + pg + '</b> ہے)۔ مکمل سورت براہِ راست تلاوت کے لیے نیچے فوری طور پر کھول دی گئی ہے — کسی بھی آیت پر کلک کر کے ستارہ (⭐) لگا لیں:</div>' +
+        '<div id="mushafFullSurahBody" class="ar-arabic-text" style="font-size:1.42rem; line-height:2.45; color:#0f172a; background:#ffffff; border:2px solid #d4af37; border-radius:12px; padding:14px 12px; text-align:justify; max-height:68vh; overflow-y:auto;">مکمل سورت لوڈ ہو رہی ہے...</div>' +
+      '</div>';
+
+    var loader = (typeof getSurahAyahsFull === 'function') ? getSurahAyahsFull : null;
+    if (loader) {
+      loader(num, function(ayahs) {
+        var box = $('mushafFullSurahBody');
+        if (!box) return;
+        if (!ayahs || !ayahs.length) {
+          box.innerHTML = '<div style="text-align:center; color:#64748b; font-size:1rem;">مکمل سورت لوڈ کرنے کے لیے انٹرنیٹ کنکشن درکار ہے (ایک بار کھلنے کے بعد آف لائن محفوظ ہو جائے گی)۔</div>';
+          return;
+        }
+        var starAyah = '';
+        try { starAyah = localStorage.getItem('alraqi_mushaf_star_' + num) || ''; } catch (e) {}
+        var bismillah = (num !== 1 && num !== 9)
+          ? '<div style="text-align:center; color:#065f46; font-size:1.48rem; font-weight:700; margin-bottom:10px; border-bottom:1px dashed #d4af37; padding-bottom:6px;">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِیْمِ</div>'
+          : '';
+        var flow = ayahs.map(function(a) {
+          var isStar = (starAyah && String(a.n) === String(starAyah));
+          return '<span class="ar-mushaf-ayah' + (isStar ? ' starred' : '') + '" data-ayah="' + a.n + '" onclick="toggleMushafStarAyah(' + num + ',' + a.n + ')">' +
+            a.t + '<span class="ar-ayah-end">﴿' + toArabicDigitsB13(a.n) + '﴾</span></span> ';
+        }).join('');
+        box.innerHTML = bismillah + '<div style="direction:rtl;">' + flow + '</div>';
+      });
     }
   };
 
