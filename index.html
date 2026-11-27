@@ -5695,6 +5695,8 @@ html, body, #alRaqiV2Root,
             '<div style="font-size:0.88rem; color:#1e293b; margin-bottom:8px;">یہ مکمل انسائیکلوپیڈیا تعبیر الرؤیا کے صفحے سے حروفِ تہجی اور تلاش کے ذریعے منسلک ہے۔</div>' +
             '<button type="button" class="ar-unibtn active" onclick="openScreen(\'tabeer\')">تعبیر الرؤیا کھولیں</button>' +
           '</div>';
+        } else if (b.type === 'digital_book' && typeof window.renderDigitalBookInlineV23 === 'function') {
+          inner = window.renderDigitalBookInlineV23(b.key, 0, '');
         } else if (b.type === 'mujarrab') {
           var rows = [];
           if (typeof QURANIC_BOOK_TREATMENTS !== 'undefined') {
@@ -6462,18 +6464,33 @@ window.MASTER_THREE_BOOKS_DREAMS = [
         pdfUrl: 'https://drive.google.com/file/d/1AMapY-M1yTs1C8v1TOuLWk1WA-Yyf5UJ/preview'
       },
       {
-        key: 'bk_aamil', folder: 'amliyat',
-        title: 'عاملِ کامل',
+        key: 'bk_qawaid', folder: 'amliyat',
+        title: 'قواعدِ عملیات (بوقتِ ضرورت حوالہ — مکمل دستور)',
         author: 'کاش البرنی',
-        line: 'نقوش و اوفاق کے قوانین (پی ڈی ایف اپ لوڈ منتظر)',
-        available: false, type: 'pdf_pending'
+        line: 'واجباتِ عامل، حصار، بخورات، نحس و سعد تاریخیں، پرہیزِ جلالی و جمالی، ابجد و زکوٰۃ',
+        available: true, type: 'digital_book'
+      },
+      {
+        key: 'bk_aamil_v2', folder: 'amliyat',
+        title: 'عاملِ کامل (حصہ دوم — علم النقوش و علم الالواح)',
+        author: 'کاش البرنی',
+        line: 'مثلث تا معشر (۳×۳ تا ۱۰×۱۰) اوفاق، چالیں، کسر اور ترفیع تنزل (پی ڈی ایف)',
+        available: true, type: 'drive_pdf',
+        pdfUrl: 'https://drive.google.com/file/d/1h8q29asD17nknmckIsWQuSaKnfcLty6v/preview'
+      },
+      {
+        key: 'bk_aamil', folder: 'amliyat',
+        title: 'عاملِ کامل (بوقتِ ضرورت حوالہ — حصہ اول و دوم)',
+        author: 'کاش البرنی',
+        line: 'قواعدِ نقوش، مثلث تا معشر، شرفِ کواکب، زکوٰۃ و موکلات (ایپ کے اندر مطالعہ و تلاش)',
+        available: true, type: 'digital_book'
       },
       {
         key: 'bk_saaat', folder: 'amliyat',
-        title: 'الساعات',
+        title: 'الساعات (بوقتِ ضرورت حوالہ — حصہ اول و دوم)',
         author: 'کاش البرنی',
-        line: '۲۴ ساعاتِ کواکب کے قوانین (پی ڈی ایف اپ لوڈ منتظر)',
-        available: false, type: 'pdf_pending'
+        line: '۲۴ ساعاتِ لیل و نہار، احکامِ کواکب، صدقات، ممنوع اوقات و جدولِ شہر (ایپ کے اندر مطالعہ و تلاش)',
+        available: true, type: 'digital_book'
       },
       // --- وظائف و قرآن فولڈر ---
       {
@@ -7245,9 +7262,16 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     var now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     pushLocalChatMsg({ dir: 'out', sender: info.name || 'معالج', text: txt, time: now });
     if (inp) inp.value = '';
-    if (typeof window.alRaqiCloudPost === 'function') {
-      var act = (_activeInAppChatCh === 'admin') ? 'admin_support_msg_v41' : 'mualij_send_reply_v154';
-      window.alRaqiCloudPost({ action: act, sender: info.name || 'معالج', mualijCode: info.code || '', message: txt }).catch(function() {});
+    var postFn = window.alRaqiCloudPost || (typeof postAdminCloud === 'function' ? postAdminCloud : null);
+    if (postFn) {
+      var payload = (_activeInAppChatCh === 'admin')
+        ? { action: 'admin_support_msg_v41', userId: info.code || info.name || 'practitioner', userName: info.name || 'معالج', role: 'practitioner', message: txt, forceAdmin: true }
+        : { action: 'mualij_send_reply_v154', sender: info.name || 'معالج', mualijCode: info.code || '', message: txt };
+      postFn(payload).then(function(r) {
+        if (r && (r.ok || r.success || r.status === 'ok')) {
+          if (typeof window.showToast === 'function') window.showToast('✅ پیغام کلاؤڈ ایڈمن انباکس میں پہنچ گیا');
+        }
+      }).catch(function() {});
     }
   };
 
@@ -7289,9 +7313,20 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     });
   };
 
+
+  // Global Cloud POST bridge (fixes In-App Chat -> Admin Inbox, Admin 3 Practitioners, & Cloud Kutub!)
+  window.alRaqiCloudPost = function(payload) {
+    if (typeof postAdminCloud === 'function') return postAdminCloud(payload);
+    return fetch(window.APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).then(function(r) { return r.json(); }).catch(function() { return null; });
+  };
+
   // ================= MODULE 12: REFRESH-STAY + ADMIN 3 PRACTITIONERS + SAVE ADMIN PIN + HOME HEADER SHARE ICON (v2.1.15) =================
   (function() {
-    var BUILD_VER = 'v2.1.21';
+    var BUILD_VER = 'v2.1.23';
     try {
       var prevVer = localStorage.getItem('alraqi_app_build_ver');
       if (prevVer !== BUILD_VER) {
@@ -7337,7 +7372,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       sp.id = 'arBuildVerBadge';
       sp.style.cssText = 'opacity:0.78; font-size:0.74rem; margin-right:6px;';
       sp.setAttribute('dir', 'ltr');
-      sp.textContent = '• v2.1.21';
+      sp.textContent = '• v2.1.23';
       pill.appendChild(sp);
     }
 
@@ -7486,6 +7521,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     }
     if (name === 'home') ensureHomeHeaderSharePillB15();
     if (name === 'inapp_chat') window.loadInAppChatMessages();
+    if (name === 'admin') setTimeout(fixAdminHeaderAndInboxReplyB15, 60);
   };
 
   // Restore exact active screen on page reload / pull-to-refresh!
@@ -7509,6 +7545,31 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       setTimeout(restoreScreenAfterBoot, 160);
     }
   })();
+
+
+  // Admin Header Home Pill spacing fix + Admin Inbox Reply button
+  function fixAdminHeaderAndInboxReplyB15() {
+    var hdr = document.querySelector('#scr_admin .ar-hero-header');
+    if (hdr) {
+      hdr.style.paddingTop = '38px';
+      var corner = hdr.querySelector('.ar-hdr-corner-actions');
+      if (corner) corner.style.top = '10px';
+    }
+  }
+  window.replyToAdminInboxMsg = function(userId, senderName) {
+    var txt = prompt('جواب تحریر کریں (' + (senderName || userId || 'صارف') + '):');
+    if (!txt || !txt.trim()) return;
+    window.alRaqiCloudPost({
+      action: 'reply_admin_support_v41',
+      userId: userId || '',
+      sender: 'ایڈمن',
+      reply: txt.trim(),
+      message: txt.trim()
+    }).then(function() {
+      if (typeof window.showToast === 'function') window.showToast('✅ جواب ارسال کر دیا گیا');
+      if (typeof window.loadLiveAdminCloudData === 'function') window.loadLiveAdminCloudData();
+    });
+  };
 
   // ================= MODULE 13: SINGLE CLEAN TEXT QURAN WORKSPACE (COPY, ZUL-KITABAT, AWFAQI NAQSH, REPORT CARD, TASBEEH) (v2.1.21) =================
   (function() {
@@ -7630,6 +7691,1185 @@ window.MASTER_THREE_BOOKS_DREAMS = [
   };
 
   setTimeout(setupCleanSingleQuranTabB21, 260);
+
+  // ================= MODULE 14: TABEER LIVE URDU VOICE DICTATION + WHATSAPP AUDIO FILE PLAYER & TRANSCRIBE HELPER (v2.1.22) =================
+  (function() {
+    var BUILD_VER = 'v2.1.22';
+    try {
+      var prevVer = localStorage.getItem('alraqi_app_build_ver');
+      if (prevVer !== BUILD_VER) {
+        localStorage.setItem('alraqi_app_build_ver', BUILD_VER);
+        if ('caches' in window && caches.keys) {
+          caches.keys().then(function(keys) { keys.forEach(function(k) { caches.delete(k); }); }).catch(function(){});
+        }
+      }
+    } catch (e) {}
+  })();
+
+  var _dreamSpeechRec = null;
+  var _dreamSpeechActive = false;
+  var _lastUploadedDreamAudioUrl = '';
+
+  window.toggleVoiceDreamDictation = function() {
+    var btn = $('btnVoiceDreamRec');
+    var st = $('dreamAudioStatusBox');
+    var ta = $('patientRawDreamTextInput');
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (_dreamSpeechActive && _dreamSpeechRec) {
+      _dreamSpeechActive = false;
+      try { _dreamSpeechRec.stop(); } catch (e) {}
+      if (btn) { btn.textContent = 'بول کر خواب درج کریں'; btn.classList.remove('active'); }
+      if (st && !_lastUploadedDreamAudioUrl) st.style.display = 'none';
+      return;
+    }
+    if (!SR) {
+      if (typeof window.showToast === 'function') window.showToast('اس براؤزر میں اردو وائس ٹائپنگ دستیاب نہیں — کروم استعمال کریں');
+      return;
+    }
+    try {
+      _dreamSpeechRec = new SR();
+      _dreamSpeechRec.lang = 'ur-PK';
+      _dreamSpeechRec.interimResults = true;
+      _dreamSpeechRec.continuous = true;
+      var baseText = ta ? ta.value.trim() : '';
+
+      _dreamSpeechRec.onstart = function() {
+        _dreamSpeechActive = true;
+        if (btn) { btn.textContent = '⏹️ بولنا بند کریں (تعبیر نکالیں)'; btn.classList.add('active'); }
+        if (st) {
+          st.style.display = 'block';
+          if (!_lastUploadedDreamAudioUrl) {
+            st.innerHTML = '🎙️ <b>اردو وائس ٹائپنگ آن ہے...</b> اب اپنا خواب بولیں، الفاظ خودکار اوپر خانے میں لکھے جا رہے ہیں۔';
+          }
+        }
+      };
+
+      _dreamSpeechRec.onresult = function(ev) {
+        var finalChunk = '', interimChunk = '';
+        for (var i = 0; i < ev.results.length; i++) {
+          if (ev.results[i].isFinal) finalChunk += ev.results[i][0].transcript + ' ';
+          else interimChunk += ev.results[i][0].transcript + ' ';
+        }
+        var combined = (baseText ? (baseText + ' ') : '') + (finalChunk + interimChunk).trim();
+        if (ta) ta.value = combined;
+      };
+
+      _dreamSpeechRec.onerror = function() {
+        _dreamSpeechActive = false;
+        if (btn) { btn.textContent = 'بول کر خواب درج کریں'; btn.classList.remove('active'); }
+      };
+
+      _dreamSpeechRec.onend = function() {
+        _dreamSpeechActive = false;
+        if (btn) { btn.textContent = 'بول کر خواب درج کریں'; btn.classList.remove('active'); }
+        if (ta && ta.value.trim() && typeof window.extractAndSearchFromRawDream === 'function') {
+          window.extractAndSearchFromRawDream();
+        }
+      };
+
+      _dreamSpeechRec.start();
+    } catch (e) {
+      if (typeof window.showToast === 'function') window.showToast('مائیکروفون شروع نہیں ہو سکا — براہِ کرم اجازت چیک کریں');
+    }
+  };
+
+  window.onDreamAudioFilePicked = function(inputEl) {
+    if (!inputEl || !inputEl.files || !inputEl.files.length) return;
+    var file = inputEl.files[0];
+    var st = $('dreamAudioStatusBox');
+    if (_lastUploadedDreamAudioUrl) {
+      try { URL.revokeObjectURL(_lastUploadedDreamAudioUrl); } catch (e) {}
+    }
+    _lastUploadedDreamAudioUrl = URL.createObjectURL(file);
+    var safeName = String(file.name || 'وائس نوٹ').replace(/</g, '&lt;');
+
+    if (st) {
+      st.style.display = 'block';
+      st.innerHTML =
+        '<div style="font-weight:800; color:#1e3a8a; margin-bottom:6px;">🎧 وائس نوٹ منسلک ہو گیا: ' + safeName + '</div>' +
+        '<audio id="dreamUploadedAudioPlayer" controls src="' + _lastUploadedDreamAudioUrl + '" style="width:100%; height:40px; margin-bottom:8px;"></audio>' +
+        '<div style="font-size:0.82rem; color:#334155; line-height:1.75; margin-bottom:8px;">آڈیو چلا کر نیچے بٹن دبائیں تاکہ خواب خودکار اردو میں لکھا جائے، یا اوپر خانے میں خواب کے اہم الفاظ لکھ کر <b>تعبیر اور خلاصہ نکالیں</b> دبائیں:</div>' +
+        '<div class="ar-eq-grid-2">' +
+          '<button type="button" class="ar-unibtn active" onclick="playAndDictateDreamAudio()">🎙️ چلائیں اور اردو لکھیں</button>' +
+          '<button type="button" class="ar-unibtn" onclick="var ta=$(\'patientRawDreamTextInput\'); if(ta) ta.focus();">✍️ خود الفاظ لکھیں</button>' +
+        '</div>';
+    }
+    if (typeof window.showToast === 'function') {
+      window.showToast('✅ آڈیو فائل منسلک ہو گئی — چلا کر اردو میں درج کریں');
+    }
+  };
+
+  window.playAndDictateDreamAudio = function() {
+    var aud = $('dreamUploadedAudioPlayer');
+    if (aud) {
+      try { aud.currentTime = 0; aud.play(); } catch (e) {}
+    }
+    if (!_dreamSpeechActive) window.toggleVoiceDreamDictation();
+  };
+
+  // ================= MODULE 15: ZUL-KITABAT QURAN SYMBOL CLEANER + AWFAQ/ZUL-KITABAT CHAAL & MEEZAN VERIFIER =================
+  function stripQuranicSignsForNaqsh(str) {
+    return String(str || '')
+      .replace(/[\u06D6-\u06ED\u06DD\u06DE\u06E9\uFD3E\uFD3F﴿﴾۞۩۝]/g, '')
+      .replace(/[0-9٠-٩]+/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function appendNaqshVerificationPanel(outEl, mode, chaalLbl) {
+    if (!outEl) return;
+    var tbl = outEl.querySelector('#activeGeneratedNaqshBox table');
+    if (!tbl) return;
+    var rows = Array.prototype.map.call(tbl.querySelectorAll('tr'), function(tr) {
+      return Array.prototype.map.call(tr.querySelectorAll('td'), function(td) { return (td.textContent || '').trim(); });
+    });
+    if (!rows.length) return;
+    var n = rows.length;
+    var isNumeric = rows.every(function(r) { return r.every(function(c) { return /^\d+$/.test(c); }); });
+
+    var html = '';
+    if (isNumeric) {
+      var rowSums = rows.map(function(r) { return r.reduce(function(a, b) { return a + parseInt(b, 10); }, 0); });
+      var colSums = [];
+      for (var c = 0; c < n; c++) {
+        var cs = 0;
+        for (var r = 0; r < n; r++) cs += parseInt(rows[r][c] || '0', 10);
+        colSums.push(cs);
+      }
+      var d1 = 0, d2 = 0;
+      for (var i = 0; i < n; i++) {
+        d1 += parseInt(rows[i][i] || '0', 10);
+        d2 += parseInt(rows[i][n - 1 - i] || '0', 10);
+      }
+      var target = rowSums[0];
+      var allEq = rowSums.every(function(x){ return x === target; }) && colSums.every(function(x){ return x === target; }) && d1 === target && d2 === target;
+      html =
+        '<div style="font-weight:800; color:' + (allEq ? '#065f46' : '#b45309') + '; margin-bottom:4px;">' +
+          (allEq ? '✅ میزان اور چال کی تصدیق: ۱۰۰٪ درست (' + chaalLbl + ')' : '⚠️ میزان کی تفصیل (' + chaalLbl + ')') +
+        '</div>' +
+        '<div style="font-size:0.82rem; color:#334155; line-height:1.8;" dir="rtl">' +
+          '• افقی سطروں کا مجموعہ: <b dir="ltr">' + rowSums.join(' , ') + '</b><br>' +
+          '• عمودی کالموں کا مجموعہ: <b dir="ltr">' + colSums.join(' , ') + '</b><br>' +
+          '• دونوں وتروں (Diagonals) کا مجموعہ: <b dir="ltr">' + d1 + ' , ' + d2 + '</b>' +
+        '</div>';
+    } else {
+      // Zul-Kitabat Latin-Square verification: every row & every column must contain all unique segments once!
+      var rowOk = rows.every(function(r) {
+        var u = {}; r.forEach(function(x){ u[x] = 1; }); return Object.keys(u).length === r.length;
+      });
+      var colOk = true;
+      for (var cc = 0; cc < n; cc++) {
+        var uc = {};
+        for (var rr = 0; rr < n; rr++) uc[rows[rr][cc]] = 1;
+        if (Object.keys(uc).length !== n) colOk = false;
+      }
+      var okAll = rowOk && colOk;
+      html =
+        '<div style="font-weight:800; color:' + (okAll ? '#065f46' : '#b45309') + '; margin-bottom:4px;">' +
+          (okAll ? '✅ ذوالکتابت میزان و چال کی تصدیق: ۱۰۰٪ درست (' + chaalLbl + ')' : '⚠️ ذوالکتابت ترتیب چیک کریں') +
+        '</div>' +
+        '<div style="font-size:0.82rem; color:#334155; line-height:1.8;">' +
+          '• ہر افقی سطر میں مکمل آیت کے چاروں اجزاء بغیر تکرار موجود ہیں: <b>' + (rowOk ? 'جی ہاں ✅' : 'تکرار موجود') + '</b><br>' +
+          '• ہر عمودی کالم میں مکمل آیت کے چاروں اجزاء بغیر تکرار موجود ہیں: <b>' + (colOk ? 'جی ہاں ✅' : 'تکرار موجود') + '</b><br>' +
+          '• قرآنی علامات (۞ ۝ ۩ وغیرہ) نقش کے خانوں سے مکمل صاف کر دی گئی ہیں (یہ باکس A4 پرنٹ میں نہیں آئے گا)۔' +
+        '</div>';
+    }
+
+    var vBox = document.createElement('div');
+    vBox.id = 'naqshVerificationBoxB23';
+    vBox.style.cssText = 'margin-top:10px; padding:9px 11px; background:#f0fdf4; border:1.5px solid #86efac; border-right:4px solid #065f46; border-radius:10px; text-align:right;';
+    vBox.innerHTML = html;
+    outEl.appendChild(vBox);
+  }
+
+  // Clean input before sending from Quran picker to Zul-Kitabat
+  var _origSendZulB23 = window.sendPickedAyahToZulkitabat;
+  if (typeof _origSendZulB23 === 'function') {
+    window.sendPickedAyahToZulkitabat = function() {
+      var res = _origSendZulB23.apply(this, arguments);
+      var inp = $('naqshInputVal');
+      if (inp && inp.value) inp.value = stripQuranicSignsForNaqsh(inp.value);
+      return res;
+    };
+  }
+
+  // Clean Quranic signs inside buildSelectedNaqsh AND attach automatic Verification Panel
+  var _origBuildNaqshB23 = window.buildSelectedNaqsh;
+  if (typeof _origBuildNaqshB23 === 'function') {
+    window.buildSelectedNaqsh = function() {
+      var inp = $('naqshInputVal');
+      if (inp && inp.value && !/^\d+$/.test(inp.value.trim())) {
+        inp.value = stripQuranicSignsForNaqsh(inp.value);
+      }
+      var res = _origBuildNaqshB23.apply(this, arguments);
+      var out = $('naqshRenderedOutput');
+      var chaalSel = $('naqshChaalSelect');
+      var chaalLbl = (chaalSel && chaalSel.options[chaalSel.selectedIndex]) ? chaalSel.options[chaalSel.selectedIndex].text : 'آتشی چال';
+      // Also clean any leftover Quranic symbol inside rendered table cells
+      if (out) {
+        out.querySelectorAll('#activeGeneratedNaqshBox td').forEach(function(td) {
+          if (!/^\d+$/.test((td.textContent || '').trim())) {
+            td.textContent = stripQuranicSignsForNaqsh(td.textContent);
+          }
+        });
+        appendNaqshVerificationPanel(out, 'auto', chaalLbl);
+      }
+      return res;
+    };
+  }
+
+
+  // Toggle: Show each segment's exact Abjad-e-Kabir number inside each Zul-Kitabat cell (الفاظ مع عدد)
+  function ensureZulAbjadToggle() {
+    var chaalSel = $('naqshChaalSelect');
+    if (!chaalSel || $('zulShowCellAbjadChk')) return;
+    var wrap = document.createElement('label');
+    wrap.style.cssText = 'display:flex; align-items:center; gap:7px; margin:6px 0 8px 0; font-size:0.86rem; font-weight:700; color:#0b1936; cursor:pointer;';
+    wrap.innerHTML = '<input type="checkbox" id="zulShowCellAbjadChk" checked style="width:18px; height:18px; margin:0;" onchange="if(typeof buildSelectedNaqsh===\'function\') buildSelectedNaqsh();"> <span>ذوالکتابت کے ہر خانے میں اسی لفظ/جزء کا ابجد عدد بھی لکھیں</span>';
+    chaalSel.parentNode.insertBefore(wrap, chaalSel.nextSibling);
+  }
+
+  var _origBuildNaqshB23_v2 = window.buildSelectedNaqsh;
+  window.buildSelectedNaqsh = function() {
+    ensureZulAbjadToggle();
+    var res = _origBuildNaqshB23_v2 ? _origBuildNaqshB23_v2.apply(this, arguments) : null;
+    var chk = $('zulShowCellAbjadChk');
+    var showNums = !chk || chk.checked;
+    var out = $('naqshRenderedOutput');
+    if (out && showNums) {
+      var tds = out.querySelectorAll('#activeGeneratedNaqshBox td');
+      var hasWords = Array.prototype.some.call(tds, function(td) { return !/^\d+$/.test((td.textContent || '').trim()); });
+      if (hasWords && typeof window.calculatePureAbjadTotal === 'function') {
+        tds.forEach(function(td) {
+          var cleanTxt = stripQuranicSignsForNaqsh(td.textContent || '');
+          if (!cleanTxt || /^\d+$/.test(cleanTxt)) return;
+          var segAbj = window.calculatePureAbjadTotal(cleanTxt) || 0;
+          td.innerHTML = '<div>' + cleanTxt + '</div>' +
+            '<div style="font-size:0.82rem; font-weight:800; color:#1e3a8a; border-top:1px dashed #cbd5e1; margin-top:3px; padding-top:2px;" dir="ltr">' + segAbj + '</div>';
+        });
+      }
+    }
+    return res;
+  };
+  setTimeout(ensureZulAbjadToggle, 350);
+
+
+  // Point #6 (Unrestricted Freedom): Every Manzil / Wazifa Ayah shows its exact Abjad count + 3 free actions (ذوالکتابت | اوفاقی نقش | کاپی)
+  window.sendAnyAyahToNaqshB23 = function(arText, mode) {
+    var clean = stripQuranicSignsForNaqsh(arText || '');
+    if (!clean) {
+      if (typeof window.showToast === 'function') window.showToast('آیت خالی ہے');
+      return;
+    }
+    var abj = (typeof window.calculatePureAbjadTotal === 'function') ? (window.calculatePureAbjadTotal(clean) || 0) : 0;
+    if (typeof window.openFolder4 === 'function') window.openFolder4('naqsh');
+    if (typeof window.switchNaqshSubTab === 'function') window.switchNaqshSubTab('awfaq');
+    setTimeout(function() {
+      var typeSel = $('naqshTypeSelect');
+      if (typeSel) {
+        if (mode === 'zul') {
+          for (var i = 0; i < typeSel.options.length; i++) {
+            if (typeSel.options[i].value.indexOf('zul') !== -1 || typeSel.options[i].text.indexOf('ذوالکتابت') !== -1) {
+              typeSel.selectedIndex = i; break;
+            }
+          }
+        } else {
+          // Default to Murabba/Musallas numeric Awfaq (user can freely switch to any Naqsh type!)
+          if (typeSel.value && typeSel.value.indexOf('zul') !== -1) typeSel.selectedIndex = 0;
+        }
+      }
+      var inp = $('naqshInputVal');
+      if (inp) inp.value = (mode === 'zul') ? clean : String(abj || clean);
+      if (typeof window.buildSelectedNaqsh === 'function') window.buildSelectedNaqsh();
+      if (typeof window.showToast === 'function') {
+        window.showToast(mode === 'zul' ? ('✅ ذوالکتابت تیار ہے (ابجد: ' + abj + ')') : ('✅ اوفاقی نقش میں منتقل — ابجد عدد: ' + abj));
+      }
+    }, 100);
+  };
+
+  var _origRenderWazaifB23 = window.renderUnifiedWazaifList;
+  if (typeof _origRenderWazaifB23 === 'function') {
+    window.renderUnifiedWazaifList = function() {
+      var res = _origRenderWazaifB23.apply(this, arguments);
+      var box = $('wazaifFolderList');
+      if (!box) return res;
+      box.querySelectorAll('.ar-slim-row.open .ar-arabic-text').forEach(function(arDiv) {
+        if (arDiv.getAttribute('data-zul-enhanced')) return;
+        var raw = (arDiv.textContent || '').trim();
+        var lines = raw.split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean);
+        if (!lines.length) return;
+        arDiv.setAttribute('data-zul-enhanced', '1');
+        arDiv.innerHTML = lines.map(function(ln) {
+          var pure = stripQuranicSignsForNaqsh(ln.replace(/^\d+[\.\)\-]\s*/, ''));
+          var abj = (typeof window.calculatePureAbjadTotal === 'function') ? (window.calculatePureAbjadTotal(pure) || 0) : 0;
+          var safeArg = pure.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          return '<div style="padding:7px 6px; border-bottom:1px dashed #e2e8f0; display:flex; flex-direction:column; gap:5px;">' +
+            '<div style="line-height:2.05;">' + ln + '</div>' +
+            '<div style="display:flex; gap:5px; align-items:center; justify-content:space-between; flex-wrap:wrap;">' +
+              '<span style="font-size:0.78rem; font-weight:800; color:#065f46; background:#ecfdf5; border:1px solid #86efac; border-radius:999px; padding:1px 9px;" dir="ltr">ابجد: ' + abj + '</span>' +
+              '<div style="display:flex; gap:5px; flex-wrap:wrap;">' +
+                '<button type="button" class="ar-unibtn active" style="width:auto !important; min-height:30px !important; padding:1px 9px !important; font-size:0.76rem !important;" onclick="event.stopPropagation(); sendAnyAyahToNaqshB23(\'' + safeArg + '\', \'zul\')">ذوالکتابت</button>' +
+                '<button type="button" class="ar-unibtn" style="width:auto !important; min-height:30px !important; padding:1px 9px !important; font-size:0.76rem !important;" onclick="event.stopPropagation(); sendAnyAyahToNaqshB23(\'' + safeArg + '\', \'awfaq\')">اوفاقی نقش</button>' +
+                '<button type="button" class="ar-unibtn" style="width:auto !important; min-height:30px !important; padding:1px 9px !important; font-size:0.76rem !important;" onclick="event.stopPropagation(); try{navigator.clipboard.writeText(\'' + safeArg + '\');}catch(e){} if(typeof showToast===\'function\') showToast(\'✅ آیت کاپی ہو گئی (ابجد: ' + abj + ')\');">کاپی</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      });
+      return res;
+    };
+  }
+
+
+  // Point #7: Authentic Aamil-e-Kamil (Kash Al-Barni, Vol 1, pp. 48-51) Exact Chaal Matrices & Kasr Rules for Musallas (3x3), Murabba (4x4), Mukhammas (5x5)!
+  var AAMIL_KAMIL_CHAALS_3 = {
+    atishi: [[6,1,8],[7,5,3],[2,9,4]],   // آتشی شرقی (صفحہ ۴۹)
+    badi:   [[6,7,2],[1,5,9],[8,3,4]],   // بادی غربی (صفحہ ۴۹)
+    aabi:   [[2,7,6],[9,5,1],[4,3,8]],   // آبی شمالی (صفحہ ۵۰)
+    khaki:  [[2,9,4],[7,5,3],[6,1,8]]    // خاکی جنوبی (صفحہ ۵۰)
+  };
+  var AAMIL_KAMIL_CHAALS_4 = {
+    atishi: [[1,14,11,8],[12,7,2,13],[6,9,16,3],[15,4,5,10]], // آتشی (صفحہ ۵۱)
+    badi:   [[14,1,8,11],[7,12,13,2],[9,6,3,16],[4,15,10,5]], // بادی (صفحہ ۵۱)
+    aabi:   [[11,8,1,14],[2,13,12,7],[16,3,6,9],[5,10,15,4]], // آبی (صفحہ ۵۱)
+    khaki:  [[8,11,14,1],[13,2,7,12],[3,16,9,6],[10,5,4,15]]  // خاکی (صفحہ ۵۱)
+  };
+  var AAMIL_KAMIL_CHAAL_5_BASE = [
+    [14,10,1,22,18],
+    [20,11,7,3,24],
+    [21,17,13,9,5],
+    [2,23,19,15,6],
+    [8,4,25,16,12]
+  ]; // مخمس (صفحہ ۵۱)
+
+  function buildAamilKamilAuthenticNumericNaqsh(totalNum, order, chaalKey) {
+    var N = parseInt(order, 10) || 3;
+    var tarh = (N === 3) ? 12 : ((N === 4) ? 30 : 60);
+    var remBase = totalNum - tarh;
+    if (remBase < N) remBase = N;
+    var q = Math.floor(remBase / N);
+    var kasr = remBase % N;
+    // Exact Aamil-e-Kamil Kasr house (خانہ کسر) from pp. 49-51:
+    // Musallas (3): rem 1 -> house 7, rem 2 -> house 4
+    // Murabba  (4): rem 1 -> house 13, rem 2 -> house 9, rem 3 -> house 5
+    // Mukhammas(5): rem 1 -> house 21, rem 2 -> house 16, rem 3 -> house 11, rem 4 -> house 6
+    var kasrHouse = 9999;
+    if (kasr > 0) kasrHouse = (N * N) - (kasr * N) + 1;
+
+    var mat = null;
+    if (N === 3) mat = AAMIL_KAMIL_CHAALS_3[chaalKey] || AAMIL_KAMIL_CHAALS_3.atishi;
+    else if (N === 4) mat = AAMIL_KAMIL_CHAALS_4[chaalKey] || AAMIL_KAMIL_CHAALS_4.atishi;
+    else {
+      mat = AAMIL_KAMIL_CHAAL_5_BASE;
+      if (typeof applyChaalTransform === 'function' && chaalKey !== 'atishi') {
+        mat = applyChaalTransform(mat, chaalKey);
+      }
+    }
+    var filled = mat.map(function(row) {
+      return row.map(function(pos) {
+        return q + (pos - 1) + (pos >= kasrHouse ? 1 : 0);
+      });
+    });
+    return {
+      matrix: filled,
+      tarh: tarh,
+      base: q,
+      kasr: kasr,
+      kasrHouse: kasr > 0 ? kasrHouse : 0
+    };
+  }
+
+  var _origBuildNaqshAK = window.buildSelectedNaqsh;
+  window.buildSelectedNaqsh = function() {
+    var typeSel = $('naqshTypeSelect');
+    var tVal = typeSel ? String(typeSel.value || '') : '';
+    var isOrder = (tVal === '3' || tVal === '4' || tVal === '5' || /musallas|murabba|mukhammas|مثلث|مربع|مخمس/.test(tVal));
+    var isZul = /zul|ذوالکتابت/.test(tVal);
+    if (isOrder && !isZul) {
+      var order = (tVal === '4' || /murabba|مربع/.test(tVal)) ? 4 : ((tVal === '5' || /mukhammas|مخمس/.test(tVal)) ? 5 : 3);
+      var inp = $('naqshInputVal');
+      var raw = inp ? inp.value.trim() : '';
+      var num = /^\d+$/.test(raw) ? parseInt(raw, 10) : ((typeof window.calculatePureAbjadTotal === 'function') ? (window.calculatePureAbjadTotal(stripQuranicSignsForNaqsh(raw)) || 786) : 786);
+      var chaalSel = $('naqshChaalSelect');
+      var chaalKey = chaalSel ? (chaalSel.value || 'atishi') : 'atishi';
+      var chaalLbl = (chaalSel && chaalSel.options[chaalSel.selectedIndex]) ? chaalSel.options[chaalSel.selectedIndex].text : 'آتشی چال';
+      var ak = buildAamilKamilAuthenticNumericNaqsh(num, order, chaalKey);
+      var out = $('naqshRenderedOutput');
+      if (out) {
+        var nameMap = { 3: 'نقشِ مثلث (عاملِ کامل ص ۴۹)', 4: 'نقشِ مربع (عاملِ کامل ص ۵۱)', 5: 'نقشِ مخمس (عاملِ کامل ص ۵۱)' };
+        var rowsHtml = ak.matrix.map(function(row) {
+          return '<tr>' + row.map(function(val) {
+            return '<td style="border:1.8px solid #0f172a; padding:8px 10px; font-size:1.08rem; font-weight:800; min-width:54px; text-align:center;" dir="ltr">' + val + '</td>';
+          }).join('') + '</tr>';
+        }).join('');
+        out.innerHTML =
+          '<div style="font-size:0.86rem; color:#1e3a8a; font-weight:700; margin-bottom:6px;">' + nameMap[order] + ' — ' + chaalLbl + ' | کل عدد: <span dir="ltr">' + num + '</span> | طرح: <span dir="ltr">' + ak.tarh + '</span> | خانہ اول: <span dir="ltr">' + ak.base + '</span>' + (ak.kasr ? (' | کسر ' + ak.kasr + ' (خانہ ' + ak.kasrHouse + ')') : '') + '</div>' +
+          '<div id="activeGeneratedNaqshBox" style="display:inline-block; background:#fff; padding:6px; max-width:100%; overflow-x:auto;"><table style="border-collapse:collapse; margin:0 auto;">' + rowsHtml + '</table></div>';
+        appendNaqshVerificationPanel(out, 'numeric', chaalLbl);
+        return;
+      }
+    }
+    return _origBuildNaqshAK ? _origBuildNaqshAK.apply(this, arguments) : null;
+  };
+
+
+  // Point #8: Full Aamil-e-Kamil Vol 2 (pp. 136-157) Universal Tarh N*(N^2-1)/2 & Kasr House N^2 - r*N + 1 for N=3..10 (مثلث تا معشر)!
+  function buildGenericMagicBase(N) {
+    if (N === 3) return AAMIL_KAMIL_CHAALS_3.atishi;
+    if (N === 4) return AAMIL_KAMIL_CHAALS_4.atishi;
+    if (N === 5) return AAMIL_KAMIL_CHAAL_5_BASE;
+    if (N % 2 === 1) {
+      // Siamese odd magic square (7x7 مسبع, 9x9 متسع)
+      var m = Array.from({length: N}, function(){ return Array(N).fill(0); });
+      var r = 0, c = Math.floor(N / 2);
+      for (var v = 1; v <= N * N; v++) {
+        m[r][c] = v;
+        var nr = (r - 1 + N) % N, nc = (c + 1) % N;
+        if (m[nr][nc]) r = (r + 1) % N;
+        else { r = nr; c = nc; }
+      }
+      return m;
+    }
+    if (N % 4 === 0) {
+      // Doubly-even magic square (8x8 مثمن)
+      var m8 = Array.from({length: N}, function(){ return Array(N).fill(0); });
+      var v8 = 1;
+      for (var i = 0; i < N; i++) {
+        for (var j = 0; j < N; j++) {
+          var inDiag = (i % 4 === j % 4) || ((i % 4) + (j % 4) === 3);
+          m8[i][j] = inDiag ? v8 : (N * N + 1 - v8);
+          v8++;
+        }
+      }
+      return m8;
+    }
+    // Singly-even (6x6 مسدس from Aamil-e-Kamil Vol 2 p.136 shape #1, 10x10 معشر via Strachey)
+    if (N === 6) {
+      return [
+        [1,35,34,3,32,6],
+        [30,8,28,27,11,7],
+        [24,23,15,16,14,19],
+        [13,17,21,22,20,18],
+        [12,26,9,10,29,25],
+        [31,2,4,33,5,36]
+      ];
+    }
+    // 10x10 Strachey
+    var half = N / 2, sub = buildGenericMagicBase(half), sq = half * half;
+    var m10 = Array.from({length: N}, function(){ return Array(N).fill(0); });
+    for (var ri = 0; ri < half; ri++) {
+      for (var ci = 0; ci < half; ci++) {
+        var b = sub[ri][ci];
+        m10[ri][ci] = b;
+        m10[ri + half][ci + half] = b + sq;
+        m10[ri][ci + half] = b + 2 * sq;
+        m10[ri + half][ci] = b + 3 * sq;
+      }
+    }
+    var k = (half - 1) / 2;
+    for (var r2 = 0; r2 < half; r2++) {
+      for (var c2 = 0; c2 < k; c2++) {
+        var tmp = m10[r2][c2]; m10[r2][c2] = m10[r2 + half][c2]; m10[r2 + half][c2] = tmp;
+      }
+      for (var c3 = N - k + 1; c3 < N; c3++) {
+        var tmp2 = m10[r2][c3]; m10[r2][c3] = m10[r2 + half][c3]; m10[r2 + half][c3] = tmp2;
+      }
+    }
+    var mid = Math.floor(half / 2);
+    var tA = m10[mid][0]; m10[mid][0] = m10[mid + half][0]; m10[mid + half][0] = tA;
+    var tB = m10[mid][mid]; m10[mid][mid] = m10[mid + half][mid]; m10[mid + half][mid] = tB;
+    return m10;
+  }
+
+  // Upgrade buildAamilKamilAuthenticNumericNaqsh to handle N=3..10 seamlessly!
+  buildAamilKamilAuthenticNumericNaqsh = function(totalNum, order, chaalKey) {
+    var N = Math.max(3, Math.min(10, parseInt(order, 10) || 3));
+    var tarh = (N * (N * N - 1)) / 2;
+    var remBase = totalNum - tarh;
+    if (remBase < N) remBase = N;
+    var q = Math.floor(remBase / N);
+    var kasr = remBase % N;
+    var kasrHouse = (kasr > 0) ? (N * N - kasr * N + 1) : 9999;
+
+    var mat = (N === 3) ? (AAMIL_KAMIL_CHAALS_3[chaalKey] || AAMIL_KAMIL_CHAALS_3.atishi)
+            : (N === 4) ? (AAMIL_KAMIL_CHAALS_4[chaalKey] || AAMIL_KAMIL_CHAALS_4.atishi)
+            : buildGenericMagicBase(N);
+    if (N >= 5 && typeof applyChaalTransform === 'function' && chaalKey !== 'atishi') {
+      mat = applyChaalTransform(mat, chaalKey);
+    }
+    var filled = mat.map(function(row) {
+      return row.map(function(pos) { return q + (pos - 1) + (pos >= kasrHouse ? 1 : 0); });
+    });
+    return { matrix: filled, tarh: tarh, base: q, kasr: kasr, kasrHouse: kasr > 0 ? kasrHouse : 0 };
+  };
+
+/* =========================================================================
+   MODULE 16: QAWAID-E-AMLIYAT + AAMIL-E-KAMIL + AL-SAAAT PRACTICAL ENGINE (v2.1.23)
+   Modular path: Al_Raqi_Modular_Sections_v1/03_Maktaba_Naqsh/aamil_saaat_digital_books_module.js
+   ========================================================================= */
+(function(){
+  'use strict';
+  window.AL_RAQI_DIGITAL_BOOKS_V23 = {"bk_qawaid": {"title": "قواعدِ عملیات (بوقتِ ضرورت حوالہ — مکمل دستور)", "author": "کاش البرنی (اوراق پبلشرز، کراچی)", "pdfUrl": "", "sections": [{"id": "Qawaid_Amliyat_Part_1_Text-v2", "label": "پارٹ ۱ (واجباتِ عامل، لوازمات، چلہ کشی، ابجد، عناصر، موکلات، تعویذات، زکوٰۃ)", "paragraphs": ["قواعد عملیات — پارٹ 1 (اپڈیٹ شدہ مکمل تفصیلی متن — پی ڈی ایف صفحہ 1 تا 37 / کتاب صفحہ 1 تا 69)", "مصنف: کاش البرنی | ناشر: اوراق پبلشرز، کراچی", "مقدمہ و عامل کا علم و واجبات (صفحہ 5 تا 9)", "1. علم عملیات کی بنیاد:جس طرح حکیم یا ڈاکٹر امراض کی تشخیص اور ادویہ کے مزاج، موسم، مقام اور مریض کی حالت کے مطابق نسخہ تجویز کرتا ہے، اسی طرح عامل ابجد کے 28 حروف، 7 ستاروں، 12 بروج اور عناصر اربعہ (آتش، باد، آب، خاک) کے قوانین کے مطابق عمل یا نقش وضع کرتا ہے۔ قرآن مجید میں بروج اور ستاروں کا ذکر موجود ہے (والسماء ذات البروج، وجعل لكم النجوم لتهتدوا بها فی ظلمات البر والبحر، وتبارک الذی جعل فی السماء بروجا وجعل فیہا سراجا وقمرا منیرا)۔2. عامل کا علم:- ابجد کے اعداد زبانی یاد ہوں تاکہ اسم، اسماء، آیات اور عبارات مطلوبہ کے اعداد نکال سکے، اور علم ہندسہ میں خوب دخل ہو۔- بروج کی خاصیتیں، طالع وقت، کواکب کے طلوع و غروب، شرف و ہبوط، رجعت و استقامت، عروج و زوال اور انتقال بروج کا علم ہو (تقویم دیکھنے کی صلاحیت ہو اور بروج و کواکب کے نام زبانی یاد ہوں)۔- ساعات کے علم سے واقف ہو تاکہ سعد و نحس ساعتوں کو سمجھ کر عمل شروع کرے۔- ناموں کی خاصیت، سعد و نحس، اور دوستی و دشمنی جاننے کے طریقوں سے واقف ہو؛ ناموں کے موافق اسمائے الٰہی اور موکلات اخذ کر سکے؛ اور جس عمل کی ضرورت ہو اس کی عزیمت تیار کر سکے (سوگند دینے کے لیے عمل کرنے والا عاشق صادق ہو اور شرع میں جواز موجود ہو)۔- کسی عمل کی زکوٰۃ دینے کے بعد ہر روز 3، 5، 7 یا 11 بار یا زیادہ لیکن طاق مرتبہ اس پر مداومت کرے (40 دن ترک کرنے سے زکوٰۃ اور عمل ختم ہو جاتا ہے)۔- جو اسم یا دعا پڑھے، اگر حرف دعا یا صرف سر نام پڑھنے والے کا آتشی ہو تو مراد جلد پوری ہوتی ہے؛ آتشی میں عداوت ہے اس لیے عمل شروع کرتے وقت حرف اسم درست کر کے پڑھیں۔- عمل کی اجازت صاحب عمل سے لینا ضروری ہے، ورنہ نقصان اور فتور کا احتمال ہے۔- عمل پڑھنے کے لیے مقررہ وقت اور مقام کی پابندی کرے، لوازمات میں کوتاہی نہ کرے اور اپنی چیزیں کسی دوسرے کو استعمال نہ کرنے دے۔- عمل یا تعویذ لکھنے سے پہلے الحمد شریف، آیت الکرسی اور چاروں قل تین تین بار پڑھ کر انگلیوں پر دم کر کے اپنے گرد حصار باندھ کر بیٹھے۔- عطریات، بخورات، قلم اور دیگر لوازمات پہلے سے مہیا کرے اور وقت سے پہلے مشق کر لے۔3. عامل کے واجبات:- باوضو، باطہارت ہو، اکل حلال و صدق مقال رکھتا ہو۔- عمل یا نقش شروع کرتے وقت اسم خود، اسم مطلوب، اسم خدا اور موکلات کو نکال کر یکجا کر کے عزیمت بنائے اور سوگند دے۔- عمل ختم کرتے وقت یہ عزیمت پڑھ کر تعویذ پر دم کرے: 'برشہیہ ہشہیہ دخاخوش دہادیاش ہطش ہفش'۔- کام یا عمل ختم ہونے پر شکرانے کے نفل پڑھے اور پھر ختم دلائے۔- پڑھتے یا تعویذ لکھتے وقت وسوسہ شیطانی اور خیالات لا یعنی کو دل میں نہ آنے دے؛ مقصد کا تصور کامل رکھے۔- کھانے کی چیزوں میں تاثیر بہت ہوتی ہے، اس لیے نقوش لکھتے وقت منہ سے بدبودار چیز (لہسن، پیاز، تمباکو) کی بو نہ آتی ہو۔- بے وضو آیت قرآنی کاغذ یا طشتری پر لکھنا، یا بلا وضو کاغذ/طشتری/تعویذ کو چھونا، ہاتھ میں لینا یا دھونا جائز نہیں ہے۔- تعویذ سے کام ہو چکے تو قبرستان میں احتیاط کی جگہ دفن کر دے۔- اگر کسی کے کیے ہوئے تعویذ گھر یا دکان میں پائے جائیں تو فوراً پانی میں بہانا چاہیے، اور بہا کر آنے والا گھر آ کر نہائے، کپڑے بدلے اور پھر کوئی دنیاوی کام کرے۔", "پہلا باب: لوازمات نقوش (صفحہ 10 تا 13)", "1. قلم:- وجہ حلال یا ہدیہ سے خریدی جائے، اور ہر عمل کے لیے نئی قلم تراشی جائے یا ایسی قلم لی جائے جس سے پہلے کچھ نہ لکھا گیا ہو۔ بعض عامل سعد اعمال کے لیے کاہی یا سرکنڈے کی قلم اور نحس اعمال کے لیے لوہے کا قلم الگ رکھتے ہیں۔- قلم تراشنے کا طریقہ: پہلے 3 بار درود شریف، پھر 5 بار 'اقرا باسم ربک الذی خلق، خلق الانسان من علق، اقرا وربک الاکرم الذی علم بالقلم، علم الانسان ما لم یعلم' پڑھیں۔ اعمال خیر و حب کے لیے قلم کا رخ اپنی طرف کر کے، اور اعمال غضب کے لیے دوسری طرف رخ کر کے تراشیں۔ نقش مکمل ہونے تک قلم زمین پر نہ رکھیں۔- قلم بناتے وقت زبان سے کہیں: 'مستعان اقض حاجتی'۔ قلم تیار ہونے پر پہلے انگوٹھے کے ناخن یا ہتھیلی پر قمر کے برج کے مطابق یہ کلمہ لکھیں:  * قمر بروج آتشی میں ہو: اہطمفشذ  * قمر بروج بادی میں ہو: بومینستض  * قمر بروج آبی میں ہو: جزکسقثظ  * قمر بروج خاکی میں ہو: دحلعرخغ- قلم بنانے کے اوقات: زبان بندی/خواب بندی (ساعت عطارد)، تیغ بندی/جھگڑا/فساد (ساعت مریخ)، دشمنی/جدائی (ساعت زحل)، محبت (ساعت قمر)، ترقی رزق (ساعت زہرہ)، حصول مال و علم (ساعت مشتری)۔2. سیاہی:- سرخ سیاہی (زعفران — نباتاتی رنگ): اعمال خیر کے لیے۔- کالی یا نیلی سیاہی: اعمال غضب کے لیے۔- زعفران کو عرق گلاب یا کیوڑہ میں گھول کر خوشبو کا اضافہ کیا جا سکتا ہے، اور نیلی/کالی سیاہی میں سرکہ ملایا جا سکتا ہے۔3. کاغذ اور کپڑا:- رنگ کواکب کے موافق لیے جاتے ہیں: اعمال خیر کے لیے سفید کاغذ، اعمال شرف کے لیے سنہرا کاغذ یا ریشمی کپڑا، اعمال غضب کے لیے سرخ، نیلا یا ملا جلا رنگ کا کاغذ/کپڑا (ابری کاغذ بھی مفید ہے)۔- نقوش جس کپڑے میں لپیٹے جائیں وہ کوکب کے رنگ کے موافق ہو؛ بصورت عداوت طرفین کے پہنے ہوئے کپڑے میں لپیٹنا انسب ہے۔4. دھاتوں کی لوحیں:- شرف کی لوحیں موافق دھاتوں پر کندہ کی جاتی ہیں:  * شمس: سونا  * قمر: چاندی  * عطارد: پلاٹینیم، ایلومینیم یا پارہ  * زہرہ: تانبا  * مریخ: لوہا  * مشتری: ٹن / قلعی  * زحل: سک / سیسہ5. بخورات:- ہر ستارے کے عمل میں اس کے متعلقہ بخور کی دھونی دی جاتی ہے (انگیٹھی پر سفوف ڈال کر یا بتیاں بنا کر)۔ اگر دو مختلف نام/ستارے ہوں تو دونوں کے بخور ملا کر جلائیں۔ بعض عامل صرف دو بخور (اعمال خیر کے لیے تمام سعد کواکب کی ادویہ، اور اعمال غضب کے لیے مریخ و زحل کی ادویہ) رکھتے ہیں۔- زحل: میعہ سائلہ، رال، سیاہ دانہ، سیاہ مرچ، قرنفل۔- مریخ: سندروس، قسط، رائی، دارچینی، مرچ سرخ، افیون، رال۔- مشتری: حب الغار، صندل سرخ، ناگرموتھا، عود، عنبر، جدوار۔- شمس: عود، صندل سرخ، زعفران، گلنار، گل ڈھاک، ہلدی، مشک۔- زہرہ: زعفران، صندل سفید، کافور، عنبر، مشک، شنگرف۔- عطارد: مصطگی، لوبان، گوگل، چنبیلی کی جڑ، صندل سرخ، بادام کا چھلکا۔- قمر: لوبان، کافور، صندلین، عود۔- جن بھوت کے عملیات میں: گوگل، ہینگ، سرسوں اور بلیلہ گرد کا بخور۔- دن کے بخورات: اتوار (قسط)، پیر (مقل ازرق)، منگل (عود)، بدھ (لبان)، جمعرات (فلفل)، جمعہ (عود)، ہفتہ (پودینہ / حنظل)۔6. طریق نشست، جگہ، لباس اور طریق کار:- نشست: (الف) ایتلاف، توصل، جذب قلوب و طلب حاجات کے لیے دو زانو (التحیات کی طرح) بیٹھیں؛ (ب) حصول خوشی و دفع وحشت کے لیے مربع؛ (ج) خرابی و ہلاکت دشمنی کے لیے عورتوں کی طرح نماز میں بیٹھنے کے انداز میں ایک طرف دونوں پاؤں رکھ کر بیٹھیں۔- جگہ و لباس: اعمال خیر میں صاف و معطر لباس، صاف جگہ، پھل دار/پھول دار درخت کے سائے، جائے نماز یا ہرن کی کھال پر بیٹھیں؛ اعمال غضب میں خالی زمین یا پرانے بوریا پر؛ ترقی و جاہ کے لیے اونچی جگہ/تخت پر (مربع نہ ہو)۔ رجال الغیب کا نقشہ دیکھ کر انہیں پشت پر یا بائیں جانب رکھیں۔- طریق کار: حصار کر کے نیاز کی اشیاء سامنے رکھیں، متعلقہ کوکب کو ایک بار سلام کریں، نیت درست کر کے عزیمت پڑھیں، استخارہ یا استعانت کے بعد نقش لکھیں۔ خیر کے عمل میں کاغذ داہنی ران پر رکھ کر شیریں چیز یا الائچی منہ میں رکھیں؛ غضب کے عمل میں کاغذ بائیں ران پر رکھ کر تلخ/ترش چیز (کالی مرچ، سقوطری، افیون) منہ میں رکھیں؛ زبان بندی میں تھوڑا سا موم منہ میں رکھیں یا زبان دانتوں میں دبائیں۔ نقش ختم ہونے پر 'المنۃ للہ' کہیں اور نیاز پر ختم دلا کر سائل کو استعمال کا دن بتائیں۔", "دوسرا باب: چلہ کشی (صفحہ 14 تا 21)", "1. شرائط چلہ (19 بنیادی قواعد):- (1) کسی استاد کامل سے طریقہ سیکھیں اور اجازت حاصل کریں؛ بے اجازت کرنے سے رجعت کا خوف ہے۔- (2) اکل حلال، صدق مقال، روزہ اور ادائیگی صدقہ۔- (3) عمل شروع کرنے سے پہلے ترک حیوانات جلالی و جمالی کریں اور بدبودار اشیاء نہ کھائیں۔- (4) عمل شروع کرنے سے پہلے صدقہ دینا ضروری ہے۔- (5) روزہ دار رہیں (حدیث شریف کے مطابق روزہ دار کی دعا رد نہیں ہوتی)۔ چلہ کی مدت 40 دن قرآن و حدیث سے ماخوذ ہے (وواعدنا موسیٰ اربعین لیلۃ، وتمام میقات ربہ اربعین لیلۃ)۔- (6) طہارت بدن، پاکیزگی لباس و مکان کا خاص خیال رکھیں، ہر وقت باوضو رہیں؛ خلوت گاہ صاف، کم روشنی والی اور خوشبو سے مہکی ہو، زمین پر بوریا یا بستر ہو، بیکار سامان نہ ہو۔- (7) نیند غالب نہ ہونے دیں؛ جب نیند آئے تو آرام کر لیں۔- (8) جھوٹ بولنے سے پرہیز کریں۔- (9) سادہ غذا کھائیں، عاجزی سے رہیں؛ موکل حاضر ہوں تو ادب سے پیش آئیں۔- (10) گوشہ نشینی اختیار کریں، عام لوگوں، عورتوں اور لڑکوں کے اختلاط سے بچیں۔- (11) التحیات کی طرح دو زانو بیٹھ کر نیت باندھیں۔- (12) عمل سے فوری تاثیر ظاہر نہ ہو تب بھی نہ چھوڑیں، ثابت قدم رہیں؛ ایک چلہ میں کام نہ ہو تو دوسرا یا تیسرا چلہ شروع کریں۔- (13) شروع و ختم پر طاق مرتبہ درود شریف پڑھیں۔- (14) اپنے کھانے پینے کے برتن اور عبادت کے کپڑے علیحدہ رکھیں اور خود دھوئیں۔- (15) مقررہ وقت کی پابندی کریں۔- (16) مقام و جگہ تبدیل نہ کریں۔- (17) چلہ ختم ہونے پر نفل پڑھیں، ختم دلائیں اور روزانہ کی کم از کم تعداد مقرر کر کے مداومت کریں۔- (18) نوچندی دن: نئے چاند کے پہلے تین دن (سوتک) چھوڑ کر 4 سے 10 تاریخ کے درمیان آنے والی پہلی جمعرات (یا مطلوبہ دن) نوچندی کہلاتی ہے۔- (19) اگر خاص ورد/وظیفہ مقررہ وقت پر نہ پڑھ سکیں تو فرصت ملتے ہی پڑھ لیں (رات کا وظیفہ قضا ہو جائے تو فجر و ظہر کے درمیان پڑھنا رات کے شمار میں آتا ہے)۔2. خواص کواکب (جدول):- شمس: رنگ اورنج/طلائی، طبع گرم، سمت مشرق، لذات جلالی، فطرت نیریں، جلالی/جمالی۔- قمر: رنگ سفید/سبز ہلکا، طبع سرد، سمت مغرب، لذات جمالی، فطرت سعد اکبر، جمالی۔- مریخ: رنگ سرخ، طبع گرم، سمت مغرب، لذات جلالی، فطرت نحس اصغر، جلالی۔- عطارد: رنگ فیروزی/سیاہی مائل، طبع ہر دو طبع، سمت مغرب، لذات ذو حدین، فطرت سعد اکبر، ہر دو طبع۔- مشتری: رنگ سبز، طبع گرم، سمت جنوب، لذات جلالی، فطرت سعد اکبر، جمالی۔- زہرہ: رنگ نیلا/سبز، طبع سرد، سمت مغرب، لذات جمالی، فطرت سعد اکبر، جمالی۔- زحل: رنگ سبز، طبع سرد، سمت مشرق، لذات جلالی، فطرت نحس اکبر، جلالی۔3. خواص بروج (سمت، رنگ، مزہ):- حمل: مشرق، زرد و سرخ، شیریں و تیز۔- ثور: شمال، سفید، شیریں۔- جوزا: جنوب، سفیدی مائل زرد، تلخ و تیز۔- سرطان: مغرب، سیاہ و سبز، ترش و شور۔- اسد: مشرق، زرد و سرخ، شیریں۔- سنبلہ: شمال، سفید زردی مائل، شیریں۔- میزان: مغرب، سفید، ترش و شور۔- عقرب: جنوب، سیاہ و سبز، تلخ و تیز۔- قوس: مشرق، زرد و سرخ، شیریں۔- جدی: شمال، سفید و سبز، شیریں۔- دلو: مغرب، سیاہ و سبز، شور و تلخ۔- حوت: جنوب، سفید و سبز، ترش و تیز۔4. غذائیں اور خوشبوئیں:- غذائیں کواکب کے مزاج کے مطابق ہوں: شمس (برنج، میوہ ہائے ولایتی، شیرینی، دال نخود، عطر و عسل خالص)، قمر (زردہ شیریں، برنج سفید، شکر سفید، شیر برنج، گھی، گلاب، میوہ ہندی شیریں)، عطارد (برنج، دال مونگ، پستہ، بادام، چار مغز، انگور، انار، شہد)، مشتری (شیر برنج، زردہ، میوہ ولایتی شیریں، عسل، مصری، نان شیریں)، زہرہ (شیر برنج، زردہ، مغزیات، حلوائے شہد، دال نخود، برنج)، زحل (کھچڑی ماش، کنجد سیاہ، بادنجان، تلخ میوہ جات)، مریخ (گوشت، نان خمیری، کباب، سرخ مرچ، سرسوں کا تیل، دال مسور)۔- خوشبوئیں: شمس (عطر مشک)، قمر (کیوڑہ/گلاب)، عطارد (خوشبو مجموعی)، زہرہ (عطر سہاگ)، مریخ (تیز و تند خوشبو)، مشتری (عطر گلاب)، زحل (عطر گل)۔5. ایام فارغہ و ایام ملانہ (قمری تاریخیں):- اعمال جمالی ایام ملانہ میں اور اعمال جلالی ایام فارغہ میں کیے جاتے ہیں:  * 1 تا 10: ایام فارغہ  * 11، 12، 13، 14: ایام ملانہ  * 15، 16، 17، 18: ایام فارغہ  * 19، 20، 21: ایام ملانہ  * 22، 23، 24: ایام فارغہ  * 25، 26: ایام ملانہ  * 27، 28: ایام فارغہ  * 29، 30: ایام ملانہ6. پرہیز جلالی و پرہیز جمالی:- پرہیز جلالی (ترک حیوانات): گوشت، مچھلی، انڈا، شہد، مشک، کشتہ، دودھ، دہی، گھی، چمڑے کے برتن/جوتے، ہاتھی دانت/شیر ماہی/سینگ کے دستے والی چھری/چاقو، سرکہ، پیاز، ترش، چلغوزہ، خود ساختہ نمک، خرما، عنبر، پھل (مکھیوں کے سبب)، روغن کنجد و سرسوں سے پرہیز؛ جماع، بال تراشنا و ناخن کاٹنا منع؛ زمین پر بستر اور علیحدہ برتن؛ نئی/غیر سلے کپڑے یا ستارہ کے موافق رنگ کا لباس؛ جسم سے خون نہ نکلے، پتا/شاخ نہ توڑیں، سواری نہ کریں۔- پرہیز جمالی: گوشت، مچھلی، مکھن، سرکہ، شہد، پیاز، لہسن سے پرہیز اور جماع سے پرہیز؛ باوضو و صاف رہیں؛ برنج، دال مونگ، میوے، روغن کنجد و سرسوں استعمال کر سکتے ہیں؛ حجامت، ناخن کاٹنا، سلا کپڑا پہننا اور سواری ممنوع نہیں۔7. جدول ماہ قمری جلالی و جمالی:- ماہ ہائے آتشی (جلالی): محرم الحرام، جمادی الاول، رمضان المبارک۔- ماہ ہائے بادی (جلالی): ربیع الاول، رجب المرجب، ذی قعد۔- ماہ ہائے خاکی (جمالی): صفر المظفر، جمادی الثانی، شوال المکرم۔- ماہ ہائے آبی (جمالی): ربیع الثانی، شعبان المعظم، ذی الحجہ۔(آتشی و بادی بروج نر/جلالی اور خاکی و آبی بروج مادہ/جمالی ہیں)۔8. تاریخ سعد و نحس (جن تاریخوں میں عمل یا زکوٰۃ شروع نہیں کرنی چاہیے، باقی تاریخیں سعد ہیں):- محرم: 11، 14- صفر: 2، 11، 20- ربیع الاول: 2، 10، 20- ربیع الثانی: 1، 11، 28- جمادی الاول: 10، 11، 28- جمادی الثانی: 1، 11، 28- رجب: 12، 13- شعبان: 14، 20، 26- رمضان: 3، 12، 24- شوال: 2، 6، 8- ذی قعد: 2، 6، 18- ذی الحجہ: 2، 8، 28", "تیسرا باب: حروف تہجی (صفحہ 22 تا 33)", "1. جدول ابجد قمری و اعداد نکالنے کے اصول:- کلمات ابجد: ابجد (1-4)، ہوز (5-7)، حطی (8-10)، کلمن (20-50)، سعفص (60-90)، قرشت (100-400)، ثخذ (500-700)، ضظغ (800-1000)۔ اردو کے زائد حروف: پ (2)، چ (3)، ڈ (4)، ژ (7)، گ (20)، ٹ (400)، ڑ (200)۔- مکتوبی حروف کے اعداد لیے جاتے ہیں، بولنے میں آنے والے غیر مکتوبی حروف کے نہیں؛ الف لام (جیسے عبدالرحمن میں) اور آخر کا زائد الف (جیسے آمنوا میں) اور الف وصل کے اعداد لیے جاتے ہیں۔- زیر، زبر، پیش، مدات، تنوین اور نون غنہ (مکتوبی نہ ہونے کے سبب) کے اعداد نہیں ہوتے؛ واو عاطفہ (مثلاً دل و جان میں) کے 6 لیے جاتے ہیں۔- ہمزہ: جہاں الف کی آواز دے وہاں 1، جہاں یائے ماقبل مکسور یا اشباع ہو وہاں 10، ساکن یا ضمہ/فتحہ کے اشباع پر کوئی عدد نہیں۔- الف مقصورہ (مرتضیٰ، موسیٰ، عیسیٰ، مصطفیٰ): 10 عدد۔- تائے طویل: 400 عدد؛ تائے تانیث (صلوۃ، زکوٰۃ): 5 عدد (ہائے ہوز کے قائم مقام ہونے کی وجہ سے)۔- مشدد حرف: تحریر میں ایک بار آنے کے باعث ایک ہی مرتبہ شمار ہوگا۔2. نام کے اعداد نکالنے کا اصول:- عورت و مرد کے نام کے اعداد نکالتے وقت نام معہ والدہ لیا جائے (مرد کے لیے 'بن' اور عورت کے لیے 'بنت'؛ نقش کے اندر نام کے ساتھ بن/بنت نہ لکھیں، عزیمت میں لکھیں)۔- پیدائشی یا رائج و تحریری اصل نام (مثلاً اسکول سرٹیفکیٹ یا نکاح نامہ والا نام) لیں؛ مختصر/قائم مقام نام، ذات، لقب، کنیت، تخلص (سید، شیخ، مرزا، مولوی، میر، بیگ) کے اعداد شامل نہ کریں۔ اگر افسر یا شخص کی والدہ کا نام معلوم نہ ہو تو تخصیص کے لیے پورا مروجہ نام معہ عہدہ/شہرت شامل کر سکتے ہیں۔3. ابجد کی اقسام و اعداد:- ابجد قمری، ابجد شمسی (ا 1، ب 2، ت 3، ث 4، ج 5، ح 6، خ 7، د 8، ذ 9، ر 10، ز 20، س 30، ش 40، ص 50، ض 200، ط 300، ظ 400، ع 500، غ 600، ف 700، ق 800، ک 900، ل 1000، م 70، ن 80، و 90، ہ 100، ی 600 — کتاب میں درج جدول کے مطابق)۔- ابجد ملفوظی: الف (635)، با (3)، جیم (53)، دال (35)، ہا (6)، واؤ (13)، زا (8)، حا (9)، طا (10)، یا (11)، کاف (101)، لام (31)، میم (81)، نون (106)، سین (120)، عین (130)، فا (81)، صاد (95)، قاف (181)، را (201)، شین (360)، تا (401)، ثا (501)، خا (601)، ذال (731)، ضاد (805)، ظا (901)، غین (1060)۔- ابجد عربی عددی: الف (احد 13)، با (اثنین 461)، جیم (ثلاثہ 1036)، دال (اربعہ 273)، ہا (خمسہ 205)، واؤ (ستہ 465)، زا (سبعہ 137)، حا (ثمانیۃ 469)، طا (تسعہ 535)، یا (عشرۃ 575)، کاف (عشرین 630)، لام (ثلاثین 1091)، میم (اربعین 333)، نون (خمسین 760)، سین (ستین 520)، عین (سبعین 192)، فا (ثمانین 921)، صاد (تسعین 590)، قاف (مائۃ 456)، را (مائتین 501)، شین (ثلاثمائۃ 1492)، تا (اربعمائۃ 334)، ثا (خمسمائۃ 1141)، خا (ستمائۃ 1161)، ذال (سبعمائۃ 593)، ضاد (ثمانمائۃ 1062)، ظا (تسعمائۃ 991)، غین (الف 111)۔- اعداد ماہ قمری: محرم (205)، صفر (370)، ربیع الاول (1091)، ربیع الثانی (337)، جمادی الاول (423)، جمادی الثانی (889)، رجب (726)، شعبان (28)، رمضان (497)، شوال (365)، ذی قعد (1114)، ذی الحجہ (797)۔- اعداد روز عربی و فارسی: اتوار/یکشنبہ/یوم الاحد (378)، پیر/دوشنبه/یوم الاثنین (367)، منگل/سہ شنبہ/یوم الثلاث (422)، بدھ/چہارشنبہ/یوم الاربعاء (566)، جمعرات/پنجشنبہ/یوم الخمیس (412)، جمعہ/جمعہ/یوم الجمعۃ (498)، ہفتہ/شنبہ/یوم السبت (357)۔4. حروف کی تقسیم، منازل، اعراب اور اسمائے الٰہی:- بروج کے مطابق حروف: حمل (ا، ع، ہ)، ثور (ج، م، ن)، جوزا (ق، ب، ص)، سرطان (س، ل، لا، ط، ح)، اسد (ز، ب، خ)، سنبلہ (ع، ی)، میزان (ط، ش)، عقرب (ر، س)، قوس (ح، ف، ش)، جدی (ط، ض)، دلو (ج، ب، ت)، حوت (ن، و، د)۔- جدول جلالی، جمالی و مشترک: جلالی (ر، ہ، ط، م، ف، ش، ذ، ب، و)، جمالی (د، ح، ل، ع، ر، خ، ن، ع، ی)، مشترک (ج، ک، س، ت، ص، ض، ث، فظ)۔- حروف کی منازل قمر (1 تا 28): شرطین (ا)، بطین (ب)، ثریا (ج)، دبران (د)، ہقعہ (ہ)، ہنعہ (و)، ذراعہ (ز)، نثرہ (ح)، طرفہ (ط)، ج infective/جبہہ (ی)، زبرہ (ک)، صرفہ (ل)، عوا (م)، سماک (ن)، غفرہ (س)، زبانا (ع)، اکلیل (ف)، قلب (ص)، شولہ (ق)، نعائم (ر)، بلدہ (ش)، ذابح (ت)، بلعہ (ث)، سعود (خ)، اخبیہ (ذ)، مقدم (ض)، مؤخر (ظ)، رشا (غ)۔- اعراب دینے کے دو قواعد: قاعدہ اول میں زبر والے (ا، و، ی، ل، م، ن، ع)، پیش والے (ج، ز، ک، س، ف، ت)، زیر والے (ز، ش، ث، ص، ط)، جزم والے (ب، د، ر، خ، ظ، ع، ض، ق، ہ)۔ قاعدہ دوم میں آتشی پیش والے، بادی زبر والے، آبی زیر والے، خاکی جزم والے (اگر حرف خاکی ابتدا میں آئے تو کسرہ/زیر دیں)۔- حروف تہجی کے مطابق اسمائے باری تعالیٰ (الف تا ی)، جدول حروف تہجی معہ تعلقات (موکل، جن، برج، ستارہ، منزل، بخور، عدد، طبع، تاثیر، خاصیت، اسم)، اور مشترک، جمالی و جلالی اسمائے الٰہی کی فہرست۔", "چوتھا باب: عناصر (صفحہ 33 تا 39)", "1. حروف اور عناصر:نام کے سر حرف (پہلے حرف) سے طبع معلوم کی جاتی ہے۔ عناصر ارضی و سماوی کی تقسیم:- آتشی (شرقی): ا، ہ، ط، م، ف، ش، ذ (مجموعہ: اہطمفشذ)- بادی (غربی): ب، و، ی، ن، ص، ت، ض (مجموعہ: بوینصتض)- آبی (شمالی): ج، ز، ک، س، ق، ث، ظ (مجموعہ: جزکسقثظ)- خاکی (جنوبی): د، ح، ل، ع، ر، خ، غ (مجموعہ: دحلعرخغ)آتشی حروف نورانی اور خاکی حروف ظلمانی کہلاتے ہیں؛ بے نقطہ حروف صوامت، اوپر نقطہ والے فوقانی، نیچے نقطہ والے تحتی؛ پہلی سطر کے حروف علوی اور نیچے کے سفلی؛ کواکب بھاری سے منسوب حروف ثقیل اور باقی خفیف کہلاتے ہیں۔2. سعد و نحس حروف:- آتشی: سعد (ا، ہ، ط، م)، نحس (ف، ش، ذ)- بادی: سعد (و، ی، ص، ت)، نحس (ب، ن، ض)- آبی: سعد (ک، س، ق، ث)، نحس (ج، ز، ظ)- خاکی: سعد (د، ح، ل، ع)، نحس (ر، خ، غ)3. کواکب و بروج کے لحاظ سے حروف عنصری، ابجد افشج عنصری، بروج معہ موکل الصبحی، اور سبعہ سیارہ کے کلمات و موکلات:- زحل (افسح — عالم علوی)، مشتری (علم — نور الانوار)، مریخ (مفرز — قابض الشرر)، شمس (معشب — رفیع الدرجات)، زہرہ (خطنخ — مربع الحساب)، عطارد (تحکوت — مصور الصور)، قمر (شصدر — بروج الصد)۔4. عناصر کے باہمی تعلقات:- آتش و باد: دوست / موافق (ہوا کے بغیر آگ نہیں جل سکتی)- آتش و آب: دشمن / ناموافق- آتش و خاک: میمن / مصادق (آتش سینہ خاک میں امان پاتی ہے)- باد و آب: میمن / مصادق- باد و خاک: دشمن / ناموافق- آب و خاک: دوست / موافقاگر طالب و مطلوب میں عنصری مخالفت ہو تو جفری طریقوں، موافق مہینے یا طالع وقت کے انتخاب سے موافقت پیدا کی جاتی ہے۔5. طالعین نکالنے کا طریقہ:نام معہ والدہ کے اعداد کو 12 پر تقسیم کر کے جو باقی بچے اسے برج حمل سے گنیں۔ متجانسین ناموں (عبداللہ، عبدالرب، عبدالغفور وغیرہ) میں 'عبد' نام کا حصہ ہے، اور جہاں 'محمد' برکت کے لیے ہو وہاں اس کے اعداد نہ لیں، جبکہ تاریخی ناموں میں تمام الفاظ شامل ہوں گے۔", "پانچواں باب: مؤکلات (صفحہ 40 تا 44)", "1. عالم ملکوت اور عالم حدیث میں حروف تہجی کے موکلات (ا تا ی) اور دعوت کا طریقہ (بیان و مداریہ طریقے)۔2. دنوں کے علوی و سفلی موکلات:- اتوار: ملائکہ (جبرائیل)، موکل علوی سماوی (روفیائیل)، موکل سفلی ارضی (ابو عبداللہ المذہب)، عون (المذہب)- پیر: ملائکہ (میکائیل)، موکل علوی سماوی (شدحائیل)، موکل سفلی ارضی (ابو النور مرۃ الابیض)، عون (مرۃ الابیض بن الحارث)- منگل: ملائکہ (اسرافیل)، موکل علوی سماوی (سمسمائیل)، موکل سفلی ارضی (ابو محرز الاحمر)، عون (الاحمر)- بدھ: ملائکہ (جبرائیل)، موکل علوی سماوی (نوائيل)، موکل سفلی ارضی (ابو العجائب برقان)، عون (برقان)- جمعرات: ملائکہ (میکائیل)، موکل علوی سماوی (صرفیائیل)، موکل سفلی ارضی (ابو ولید شمهورش)، عون (شمهورش)- جمعہ: ملائکہ (جبرائیل)، موکل علوی سماوی (عینیائیل)، موکل سفلی ارضی (ابو الحسن زوبعہ ابیض)، عون (زوبعہ ابیض)- ہفتہ: ملائکہ (عزرائیل)، موکل علوی سماوی (کسفیائیل)، موکل سفلی ارضی (ابو نوح میمون سیاف السحابی)، عون (میمون سیاف السحابی)3. موکلات چار سمت (مشرق، مغرب، شمال، جنوب)، کواکب و بروج کے موکلات، اور حضرت میططرون علیہ السلام کا بیان (جن کے ماتحت 36 موکل ہیں اور وہ عمل کی قبولیت پر منزل کے موکل کو حکم دیتے ہیں)۔4. موکل و اعوان بنانے کا طریقہ:- استنطاق حرفی: اعداد کے مراتب کے مطابق حروف نکالنا (ہزار کے لیے ہزاروں کے حروف یا مرتبے سے عدد نکالنا)۔- موکل طرحی: اسم کے اعداد میں سے 41 ('ائیل' کے اعداد) کم کر کے استنطاق حرفی کریں اور آخر میں 'ائیل' لگائیں (منسوب موکل اعمال خیر کے لیے اور مقلوب/الٹا موکل اعمال شر کے لیے)۔- موکل حرفی: 41 کم کیے بغیر اصل اعداد کے حروف بنا کر 'ائیل' لگائیں۔- اعوان و جنات: کل تعداد سے 319 کم کر کے 'طیش' لگائیں تو موکل سفلی، 316 کم کر کے 'یوش' لگائیں تو عون، اور 311 کم کر کے 'ہوش' لگائیں تو اسمائے جن برآمد ہوتے ہیں۔", "چھٹا باب: تعویذات (صفحہ 45 تا 60)", "1. ہدایات و شرائط تعویذات:- طہارت و وضو سے لکھیں، خوشبو لگائیں، خاکہ کھینچیں، چاروں اطراف 'قولہ الحق ولہ الملک' لکھیں، اوپر ملائکہ، اطراف میں موکل اور چاروں خادم لکھیں، اور 'یا حافظ یا حفیظ یا رقیب یا وکیل' 7 بار پڑھ کر اپنے اوپر دم کریں۔- محبت کے تعویذات عروج ماہ قمری میں مشک و زعفران سے داہنی ران پر کاغذ رکھ کر اور شیریں چیز منہ میں رکھ کر لکھیں (مرد و عورت میں دوستی ہو تو مرد کا نام پہلے لکھیں)۔- عداوت کے نقوش زوال ماہ قمری میں کالی/نیلی سیاہی سے بائیں ران پر کاغذ رکھ کر، تلخ/ترش چیز منہ میں رکھ کر اور ہینگ کا بخور جلا کر لکھیں (شادی شدہ جوڑے میں جدائی بلا شرعی ضرورت نہ کریں)۔- زبان بندی، خواب بندی و تیغ بندی میں منہ میں موم یا زبان دانتوں میں دبائیں؛ ختم پر 'العنۃ اللہ' کہیں۔- جس تعویذ یا عمل میں اللہ کا نام نہ ہو یا دیوی دیوتاؤں کے نام ہوں وہ جائز نہیں؛ اجرت لینا جائز ہے مگر لالچ نہ ہو۔2. تعویذات کی چار اقسام:- آتشی تعویذات: سمت مشرق، مزاج آتشی (ہلاکت، بیمار کرنا، خرابی، تفرقہ)؛ آگ میں جلائے یا آگ کے نیچے دفن کیے جاتے ہیں یا بتی بنا کر چراغ میں جلائے جاتے ہیں۔- بادی تعویذات: سمت مغرب، مزاج بادی (فتوحات، حاجات، ترقی)؛ ہوا میں لٹکائے جاتے ہیں (خیر کے لیے پھل دار درخت مثل انار/شہتوت، شر کے لیے کانٹے دار/کڑوے پھل کے درخت مثل کیکر/نیم)۔- خاکی تعویذات: سمت جنوب، مزاج خاکی (قید، زبان بندی، خواب بندی، شہوت بندی، سحر دفع کرنا، ثبات)؛ زمین میں یا بھاری پتھر کے نیچے یا مطلوب کی گزرگاہ/چوکھٹ/قبرستان میں دفن کیے جاتے ہیں۔- آبی تعویذات: سمت شمال، مزاج آبی (محبت، شفا، رہائی، قضائے حاجات)؛ کاغذ یا چینی کی طشتری پر لکھ کر پلائے جاتے ہیں، پانی کے کنارے دفن کیے جاتے ہیں یا جاری پانی/دریا/کنوئیں میں بہائے جاتے ہیں۔3. شرف کواکب کی لوحیں، نقوش کا حساب و اقسام:- مثلث (3×3 — 9 خانے، طبعی 15، طرح 12)، مربع (4×4 — 16 خانے، طبعی 34، طرح 30)، مخمس (5×5 — 25 خانے، طبعی 65، طرح 60)، مسدس (6×6 — 36 خانے، طبعی 111، طرح 105)، مسبع (7×7 — 49 خانے، طبعی 175، طرح 168)، مثمن (8×8 — 64 خانے، طبعی 260، طرح 252)، متسع (9×9 — 81 خانے، طبعی 369، طرح 360)، معشر (10×10 — 100 خانے، طبعی 505، طرح 495)، احد عشر (11×11 — 121 خانے، طبعی 671، طرح 660)، اثنا عشر (12×12 — 144 خانے، طبعی 870، طرح 858)۔- نقش بھرنے کا قاعدہ: کل اعداد سے عدد طرح تفریق کر کے باقی کو اضلاع کی تعداد پر تقسیم کریں؛ خارج قسمت خانہ اول میں رکھ کر چال سے بھریں اور کسر بچے تو مقررہ خانے میں 1 کا اضافہ کریں (مثلث میں کسر 1 ہو تو خانہ 7 میں اور کسر 2 ہو تو خانہ 4 میں اضافہ کریں)۔- فرد الفرد (اعمال جلالی — عداوت و بغض)، زوج الزوج (اعمال جمالی — تسخیر و سعد امور)، زوج الفرد (دنیوی اعمال)؛ طبعی و وضعی نقوش؛ مثلث کے 9 خانوں اور مربع کے 16 خانوں کی تاثیر؛ اور بیوت نقش کی پانچ شکلیں۔", "ساتواں و آٹھواں باب: جفری قوانین اور زکوٰۃ (صفحہ 61 تا 69)", "1. چند جفری قوانین:- حروف صوامت (بے نقطہ: ا، د، ح، و، ک، ل، م، س، ع، ص، ر، ط، ہ)، حروف ناطقہ (نقطہ دار)؛ حروف نورانی (14) و ظلمانی (14)۔- زبر و بینات، امتزاج دینا، استنطاق، اساس و نظیر (ہر حرف کا 15 واں حرف نظیر ہے)، کبیر، وسیط و صغیر، تخلیص کرنا (مکرر حروف نکالنا)۔- بسط حرفی، بسط ملفوظی، بسط عدی، بسط عزیزی؛ ترفع عددی، ترفع صرفی، ترفع طبعی، ترفع زوجی؛ بسط تضعیف و تنصیف۔- تکسیر صدر مؤخر: ایک حرف بائیں اور ایک دائیں سے لے کر سطریں بنانا یہاں تک کہ سطر اول آخر میں ظاہر ہو جائے؛ آخری سطر کو زمام کہتے ہیں (شیخ ابو العباس بونی کے مسلک کے مطابق سطر آخر کو شمار نہیں کرتے)۔2. زکوٰۃ اسمائے الٰہی، حروف تہجی، آیات و نقوش:- زکوٰۃ اسمائے الٰہی کے طریقے: حروف کی تعداد کو ہزار سے ضرب دے کر نصاب، اس کا نصف زکوٰۃ، اس کا نصف عشر، اصل کا نصف قفل، پھر دور، بدل اور ختم؛ یا صغیر، وسیط، کبیر، نصاب، خط، کفو، خاتم؛ یا کبیر، اکبر، کبائر، اکبر کبائر، اصغر، صغائر، اصغر صغائر۔- زکوٰۃ حروف تہجی: زکوٰۃ اکبر (ہر حرف 28 دن روزانہ 4444 بار مع موکل) اور زکوٰۃ اصغر (ہر حرف اپنی متعلقہ منزل قمر میں ایک نشست میں 4444 بار)؛ جدول حروف تہجی معہ منازل قمر و عزائم۔- زکوٰۃ آیات: 120 روز میں کل 52348 مرتبہ (روزانہ 436 بار اور آخری دن 464 بار)، قمر زائد النور میں جمعرات سے شروع کریں۔- زکوٰۃ نقوش (اصغر): مثلث (60 دن روزانہ 60 نقش: 15 آتشی، 15 بادی، 15 آبی، 15 خاکی؛ بعد زکوٰۃ روزانہ 4 نقش)، مربع (34 دن روزانہ 34 نقش؛ بعد زکوٰۃ روزانہ 4 نقش)، مخمس (65 دن روزانہ 65 نقش؛ بعد زکوٰۃ روزانہ 5 نقش)۔ زکوٰۃ اکبر نقوش کی سوا لاکھ ہوتی ہے۔"]}, {"id": "Qawaid_Amliyat_Part_2_Text-v2", "label": "پارٹ ۲ (قوانینِ نجوم، قمر در عقرب، تعینِ اوقات، ۳۹ مؤثر اوقات، رجال الغیب و حصار)", "paragraphs": ["قواعد عملیات — پارٹ 2 (اپڈیٹ شدہ مکمل تفصیلی متن — پی ڈی ایف صفحہ 38 تا 73 / کتاب صفحہ 69 تا 124)", "مصنف: کاش البرنی | ناشر: اوراق پبلشرز، کراچی", "نواں باب: قوانین نجوم (صفحہ 69 تا 91)", "1. استخراج شمس و قمر:- استخراج شمس: ماہ جنوری سے مطلوبہ تاریخ تک دن شمار کریں، اس میں 10 دن جمع کریں، اور برج جدی کے 29 دنوں سے گنتے جائیں؛ جہاں عدد ختم ہو اس برج میں اتنے درجے پر آفتاب ہوگا (مثال: 22 اپریل کو شمس برج ثور کے 2 درجہ پر)۔- استخراج قمر: ہجری تاریخ کو 13 سے ضرب دیں، 26 جمع کریں اور 9 پر تقسیم کریں؛ خارج قسمت کے مطابق برج شمس سے گنیں اور باقی کو 4 سے ضرب دے کر درجے نکالیں۔- استخراج منازل قمر (28 منازل): 20 مارچ کو آفتاب برج حمل کے اول درجہ پر ہوتا ہے؛ ہر منزل 13 درجہ 25 دقیقہ کی ہوتی ہے۔ جدول منازل قمر (1 تا 28) اور بروج کے مطابق منازل کی تفصیل۔2. طالع وقت نکالنا و درجات و وقت کا پیمانہ:- طلوع آفتاب سے وقت مطلوب تک کے گھنٹوں اور منٹوں کو اڑھائی (2.5) سے ضرب دیں (گھنٹوں سے دقیقے اور منٹوں سے ثانیے نکلتے ہیں) اور آفتاب کے برج سے تقسیم کریں۔- قدیم پیمانہ: 24 منٹ کی ایک گھڑی، 4 گھڑی کا دن رات (24 گھنٹے)۔ مروجہ پیمانہ: 60 سیکنڈ کا ایک منٹ، 60 منٹ کا ایک گھنٹہ، 24 گھنٹے کا دن رات؛ درجات کا پیمانہ: 20 رابع = 1 ثالثہ، 60 ثالثہ = 1 ثانیہ، 60 ثانیہ = 1 دقیقہ، 60 دقیقہ = 1 درجہ، 30 درجہ = 1 برج۔3. قمر در عقرب و طریقہ محترقہ:- قمر کا برج عقرب میں پہنچنا یا قلب العقرب (18 ویں منزل) پر ہونا قمر در عقرب کہلاتا ہے (قیام تقریباً 2 دن 7 گھنٹے)۔ طریقہ محترقہ 19 درجہ میزان سے 3 درجہ عقرب تک 14 درجات پر مشتمل ہے۔4. بروج و ستاروں کے باہمی تعلقات، رجعت و استقامت، طلوع و غروب اور مراتب سیارگان:- بروج کے تعلقات (بہت زیادہ دوستی، اوسط دوستی، اوسط دشمنی، شدید دشمنی) اور ستاروں کے تعلقات (دوست، مساوی، دشمن)۔- رجعت معزولی و مدوجزر اور استقامت بہتری و ترقی لاتی ہے۔ تحت الشعاع کے درجات: قمر (12°)، عطارد (13°)، زہرہ (12°)، مریخ (18°)، مشتری (15°)، زحل (15°)۔- مراتب سیارگان (شرف، ہبوط، ترفع، وبال، فرح، طرح) اور شرف و ہبوط کی جدول: شمس (شرف 19° حمل، ہبوط 19° میزان)، قمر (شرف 3° ثور، ہبوط 3° عقرب)، زحل (شرف 21° میزان، ہبوط 21° حمل)، مشتری (شرف 15° سرطان، ہبوط 15° جدی)، مریخ (شرف 28° جدی، ہبوط 28° سرطان)، زہرہ (شرف 27° حوت، ہبوط 27° سنبلہ)، عطارد (شرف 15° سنبلہ، ہبوط 15° حوت)، راس (جوزا)، ذنب (قوس)۔5. شرفات کواکب کے اعمال، ماہیت سیارگان، اشکال کواکب، دائرۃ البروج اور شرائط اعمال:- شرف شمس (ہر سال — لوح طلا پر عزت، جاہ و فتوحات)، شرف عطارد (ہر سال — علم، حافظہ، امتحان، تحریر و تقریر)، شرف زہرہ (ہر سال — تسخیر خلق، محبت، رجوع خلق)، شرف مریخ (ہر 2 سال بعد — قوت، شجاعت، غلبہ دشمن)، شرف مشتری (حصول مال، رزق، ترقی)، شرف زحل (جائیداد، استحکام، حفاظت)، شرف قمر (تسخیر، قبولیت، سفر)۔- مستقیمۃ الطلوع (سرطان، اسد، سنبلہ، میزان، عقرب، قوس — اعمال سعد کے لیے) اور معوجۃ الطلوع (جدی، دلو، حوت، حمل، ثور، جوزا — اعمال نحس کے لیے) بروج۔- دائرۃ البروج برائے عملیات، ایام نحس طالع، ستاروں کے متعلقہ کام، اور 11-11 شرائط برائے: (1) اعمال حب و تسخیر و حاجات، (2) اعمال بغض و عداوت، اور (3) اعمال ثبات و استحکام و جمعیت۔", "دسواں باب: تعین اوقات (صفحہ 92 تا 103)", "1. تقسیم سال (شمسی مہینوں کے مطابق بروج کی ماہیت):- بروج منقلب: حمل (22 مارچ تا 20 اپریل)، سرطان (22 جون تا 23 جولائی)، میزان (24 ستمبر تا 23 اکتوبر)، جدی (23 دسمبر تا 20 جنوری) — انقلابی کام، بغض و عداوت، مقہوری اعداء۔- بروج ثابت: ثور (21 اپریل تا 21 مئی)، اسد (24 جولائی تا 23 اگست)، عقرب (24 اکتوبر تا 22 نومبر)، دلو (21 جنوری تا 19 فروری) — ثبات و قیام، جائیداد، رزق و ملازمت کا استحکام۔- بروج ذوجسدین: جوزا (22 مئی تا 21 جون)، سنبلہ (24 اگست تا 23 ستمبر)، قوس (23 نومبر تا 22 دسمبر)، حوت (20 فروری تا 21 مارچ) — حب و تسخیر، شادی، ترقی و کامیابی۔2. تقسیم ماہ و دنوں کی تاثیرات:- قمری مہینے کا پہلا عشرہ (جاہ، مرتبہ، ترقی)، دوسرا عشرہ (ایتلاف، وصل، جذب قلوب، حاجات)، تیسرا عشرہ (ذلت، عداوت، خرابی، ہلاکت دشمن)؛ یا چار ہفتے (دوستی، خواب بندی، زبان بندی، دشمنی)۔- دنوں کی تاثیرات: اتوار (ترقی، امراء و حکام)، پیر (وسعت رزق، تسخیر، شفا)، منگل (مشکل، نفاق و عداوت)، بدھ (ترقی مرتبہ، تسخیر حکام، زبان بندی)، جمعرات (ترقی دولت)، جمعہ (محبت)، ہفتہ (ہلاکی، سرگردانی اعداء، زبان بندی)۔3. جدول تاثیرات منازل قمر (1 تا 28):ہر منزل کا نمبر، نام، حرف، درجہ، تاثیر (سعد، نحس، نحس اکبر، سعد نحس) اور بخور کی مکمل تفصیل۔4. تقسیم اوقات، ساعات شب و روز اور اختیارات دن و ساعت:- صبح (محبت کے نقوش)، نیم چاشت (ترقی و رزق)، ظہر (امراض)، ظہر تا عصر (عداوت)، عشاء (زبان بندی)؛ دن کے بروج روزی اور رات کے بروج لیلی۔- ساعات کا وقفہ نکالنے کا طریقہ: دن کے گھنٹے منٹ کو 12 پر تقسیم کریں (دن کی ایک ساعت کا وقفہ) اور رات کے گھنٹے منٹ کو 12 پر تقسیم کریں (رات کی ایک ساعت کا وقفہ)۔ ساعتوں کی ترتیب کے لیے 'ل ی خ س ہ د ر' (زحل، مشتری، مریخ، شمس، زہرہ، عطارد، قمر)۔- دن و رات کی ساعتوں کے جدول اور مختلف مقاصد کے لیے دن و ساعت کے امتزاج کے اختیارات۔", "گیارھواں باب: مؤثر اوقات عملیات و طلسم (صفحہ 104 تا 116)", "1. 39 مقاصد کے مؤثر اوقات (اعمال 133 تا 169):- دفع سحر و جادو و مرد بستہ کھولنا (عمل 133)- زبان بندی حاسد، غماز و چغلخور (عمل 134)- تباہی و مغلوبی دشمن (عمل 135)- خصومت و عداوت ڈالنا (عمل 136)- جدائی، تفرقہ و طلاق (عمل 137)- تسخیر امراء و ملاقات حکام (عمل 138)- تسخیر خواتین معظمہ (عمل 139)- کشائش کار و جمع حاجات (عمل 140)- قلب عورت کو اپنی طرف کھینچنا (عمل 141)- دو واقف شخصوں میں الفت پیدا کرنا (عمل 142)- عشق و محبت زنان (عمل 143)- بانجھ کرنا و قطع اولاد (عمل 144)- شہر/جگہ تباہ کرنا و فتنہ فساد ڈالنا (عمل 145)- جنگ و جدل (عمل 146)- وبا یا بیماری نازل کرنا (عمل 147)- پیدائش اولاد و بقائے نسل (عمل 148)- زیادتی زر و مال (عمل 149)- بلندی مرتبہ (عمل 150)- انکشافات حالات مخفی (عمل 151)- نزول بارش، کثرت آب یا کمی آب کنواں (عمل 152)- قوت باہ (عمل 153)- حفاظت گزند جانوران (عمل 154)- لکنت زبان و حاضر جوابی (عمل 155)- مستجاب الدعوات (عمل 156)- سلاطین و حکام کے نزدیک مقبولیت و بزرگی (عمل 157)- امساک (عمل 158)- عقد و بستہ کرنا (عمل 159)- دفع درد گردہ (عمل 160)- دفعیہ زہر بچھو و زہریلے جانوران (عمل 161)- دفع تپ سہ روزہ و چہار روزہ (عمل 162)- ہر دلعزیزی خلق، بلندی مرتبہ و عزت (عمل 163)- ترقی حافظہ و حصول علم (عمل 164)- صحت مرض و آفات کا اخراج (عمل 165)- طلب ریاست، املاک و جائیداد (عمل 166)- تسخیر اقارب و عزیزوں کے ہاں جانا (عمل 167)- رفع غضب سلاطین و حکام (عمل 168)- نصرت و طلب جمعیت خاطر (عمل 169)2. اوقات دعا (21 خاص اوقات — عمل 170) اور ہفتہ وار اوقات استخارہ (عمل 171)۔3. نظرات کواکب (عمل 172-173):- قرآن (0°)، تسدیس (60° — تیسرا گھر)، تربیع (90° — چوتھا گھر)، تثلیث (120° — پانچواں گھر)، مقابلہ (180° — ساتواں گھر)، ساقط۔- دائرہ نظرات اور نظرات و قرانات کے عملی نتائج کی جداول۔", "بارھواں باب: متفرقات (صفحہ 117 تا 143)", "1. دعوت کواکب (عمل 174): ساتوں ستاروں کی تسخیر کا ایک ہفتہ کا عمل اور یومیہ سلام کی جدول (شمس/کلینائیل/معشب، قمر/القوئیل/شصدر، مریخ/بیائیل/مفرز، عطارد/اشکائیل/تحکوت، مشتری/بخوائیل/علم، زہرہ/امموبائیل/خطنخ، زحل/اروائیل/افسح)۔2. رجال الغیب (عمل 175): رجال الغیب کی سلامی کی دعا، گردش کی جدول اور قمری تاریخوں کے مطابق سمت معلوم کرنے کا شعر 'کنجغ بامش کنجغ بمس...' (ش شمال، ج جنوب، غ مغرب، م مشرق، ب بائب شمال مغرب، ا ایسان شمال مشرق، ک اگنی جنوب مشرق، ن نیرت جنوب مغرب)۔3. حصار (عمل 176): حصار بدنی، آیت الکرسی با اسمائے الٰہی، حصار جابر حاکم، زمینی حلقے کا حصار، اور وبائی امراض سے حفاظت کا حصار و نقش۔4. درود شریف (عمل 177): بلا تعداد/ذکر، ترقی، مصائب، خیر، استخارہ اور امراض کے لیے مخصوص درود شریف۔5. ذکر اسمائے الٰہی (عمل 178): اعتصام، اختتام، تین روزہ روزہ و تیاری دعوت، اور ذکر کے آداب۔6. ختم دلانا، فاتحہ خوانی، ختم نقوش، ایصال ثواب، صدقہ اور رد دعوت و سحر (اعمال 179 تا 184):- ختم نقوش کی دعا ('اللهم انی اسئلک باسمائک الحسنی کلہا...') اور فاتحہ خوانی و ایصال ثواب کے طریقے۔- صدقہ دینے کا خاص طریقہ (حضرت ابو العباس رحمۃ اللہ علیہ کا طریقہ: بکری ذبح کر کے 60 حصے کرنا اور فقراء کو دینا)۔- رد دعوت و سحر: سورہ عبس پڑھ کر بائیں جانب تھوکنے اور الٹے ہاتھ سے ٹوپی زمین پر مارنے کا عمل۔7. نوچندی دن، نیت نوافل اعمال، غالب و مغلوب اور باطنی اجازت (اعمال 185 تا 188):- نوچندی دن کا قاعدہ (3 تا 10 تاریخ کے درمیان آنے والی پہلی تاریخ/جمعرات)۔- نوافل کی نیت (صلاۃ کشف الارواح)۔- غالب و مغلوب معلوم کرنے کا جدول (نام معہ والدہ کے اعداد کو 9 پر تقسیم کر کے باقی دیکھنا)۔- حضرت شیخ ابو داؤد سبز پوش رحمۃ اللہ علیہ سے باطنی اجازت طلب کرنے کا طریقہ۔8. عزیمتیں (عمل 189): حب، بغض، حاضری مطلوب، تسخیر خلق، جدائی، خواب بندی، زبان بندی، بیماری، خانہ بربادی، غلبہ و تسلط اور زنا سے روکنے کی عربی عزیمتیں۔9. الملائکۃ والاعوان (عمل 190): نقش کے آٹھ مراتب (مفتاح، مغلاق، عدل، وفق، ساحت، ضابطہ، غایت، اصل) سے علوی موکلات ('ائیل' کے لیے 41 طرح)، سفلی موکلات ('طیش' کے لیے 319 طرح)، اور اعوان/جنات نکالنے و عزیمت بنانے کا مکمل طریقہ۔10. اعداد مستخرجہ آیات الٰہی، سورتیں و سطر تکسیر (اعمال 191 تا 193):- قرآنی آیات و سورتوں کے ابجدی اعداد کی مکمل جداول، سطر تکسیر کے حروف و سطور کا جدول، اور کتاب کی مفصل فہرست مضامین۔"]}]}, "bk_aamil": {"title": "عاملِ کامل (بوقتِ ضرورت حوالہ — حصہ اول و دوم)", "author": "کاش البرنی", "pdfUrl": "https://drive.google.com/file/d/1h8q29asD17nknmckIsWQuSaKnfcLty6v/preview", "sections": [{"id": "Aamil_Kaamil_Vol_1_Part_2_Text", "label": "حصہ اول — پارٹ ۲ (اعمالِ قدرت، موکلات، دعوات، منتر جنتر)", "paragraphs": ["عامل کامل (حصہ اول) — پارٹ 2 (صفحہ 36 تا 72)", "مصنف: کاش البرنی | ناشر: اوراق پبلشرز، کراچی", "بقیہ باب دوم: نقوش و عملیات (صفحہ 69 تا 78)", "- دفع آسیب و جادو (مربع نقش مع ناد علی شریف)- حصار: بسم اللہ الرحمن الرحیم لا الہ کا کوٹ الا اللہ کی کھائی شاہ مرداں کی چوکی بحق محمد مصطفیٰ صلی اللہ علیہ وسلم کی دہائی (3 بار پڑھ کر شہادت کی انگلی پر دم کر کے سر کے گرد گھما کر 3 بار چٹکی بجائیں)۔- نقش اجل (برکت و کشائش رزق کے لیے 36 مرتبہ روزانہ 40 دن تک)- عقد اللسان (صم بکم عمی... چوکھٹ کے نیچے دفن کرنا)- برائے چور (نماز عشاء کے بعد دو نفل اور مربع نقش)- عداوت کا ٹوٹکہ (سورہ کوثر کا عمل)- اعطینا برائے حب (41 کالی مرچوں کا عمل)- بستہ کرنے کا عمل (آہنی قفل کا عمل)- نیت فرزند (اسم 'الواحد الاحد' 94 بار اور آیت 'رب لا تذرنی فردا وانت خیر الوارثین')- بچوں کے دانت نکالنا (سیاہ دھاگے کے 32 تار اور سورہ القارعہ 32 بار)- قوت ذہن و امتحان کے لیے مربع نقش (1615 سے شروع)- کشائش رزق و قرض کی ادائیگی (یا کافی یا غنی یا رزاق 84 بار اور مربع نقش)- عمل جمعۃ الوداع (روغن چنبیلی پر سورہ والعادیات اور آیت ولقد مکناکم فی الارض کا مخمس نقش 2199)- قمر در عقرب اور مقابلہ نحسین کے اعمال- گرفتاری چور (نابالغ بچے کی ہتھیلی پر روشنائی لگا کر عزیمت پڑھنا)- کاروبار و ترقی (786 والا مثلث 2692 سے شروع)- مجاور و مسافر (دو سکوں والا عمل دست غیب)", "باب سوم: اعمال قدرت (صفحہ 79 تا 93)", "ان تمام عملیات سے ہر مسلمان فائدہ اٹھا سکتا ہے، کسی چلہ یا اجازت کی ضرورت نہیں تمام اعمال حدیث و قرآن کے ہیں۔1. جن و شیاطین (حرز ابی دجانہ رضی اللہ عنہ):بسم اللہ الرحمن الرحیم ہذا کتاب من محمد رسول رب العالمین الی من طرق الدار من العمار والزوار والسائحین...2. قبول حاجت: بعد وضو دو رکعت نفل اور دعا: اللهم انی اسئلک واتوجہ الیک بنبیک محمد نبی الرحمۃ... (158 مرتبہ روزانہ)۔3. وسوسہ شیطانی: نماز فجر کے بعد سلام پھیرتے ہی 10 بار 'لا الہ الا اللہ وحدہ لا شریک لہ لہ الملک ولہ الحمد یحیی ویمیت بیدہ الخیر وہو علی کل شی قدیر'۔4. نظر بد: 'بسم اللہ اللهم اذہب حرہا وبردہا ووصبہا'۔5. مفلسی دور کرنے کا عمل: گھر میں داخل ہوتے وقت 'السلام علیکم'، پھر 'السلام علیک یا رسول اللہ' اور ایک بار سورہ اخلاص پڑھنا۔6. آیات کفایات: وکفی باللہ ولیا، وکفی باللہ نصیرا، وکفی باللہ حسیبا، وکفی باللہ علیما، وکفی باللہ وکیلا، وکفی باللہ شہیدا (600 بار یا 60 بار)۔7. ادائیگی قرض: 'اللهم اکفنی بحلالک عن حرامک واغننی بفضلک عمن سواک' (فجر کی سنت و فرض کے درمیان 101 بار)۔8. رجوع (جدا شدہ عزیزوں سے ملاقات): چاشت کے وقت 'یا غنی' 50 بار (ہر 10 بار پر ایک انگلی بند کریں)۔9. مصائب سے نجات: سورہ فاتحہ کی مخصوص تعداد کے ساتھ تلاوت (پیر 10، منگل 20، بدھ 30، جمعرات 40، جمعہ 50، ہفتہ 60، اتوار 70 بار)۔10. حل المشکلات: اتوار کی شب تہجد میں 473 بار 'کہیعص حمعسق' پڑھنا (زبان تالو سے لگا کر)۔11. تنگی اور ذلت: 41 روز تک روزانہ اڑھائی ہزار بار بسم اللہ شریف کا عمل۔12. زیارت سرکار دو عالم ﷺ: شب میں 4 رکعت نفل کے بعد 300 بار 'انا ارسلناک شاہدا ومبشرا ونذیرا'۔13. بے سرو سامانی: سورہ لایلاف قریش 110 بار روزانہ 40 دن تک۔14. دفع نحوست: صبح و شام 3 بار 'اصبحت فی امان اللہ وامسیت فی جوار اللہ'۔15. سورہ فاتحہ کا ہفتہ وار عمل (امام غزالی رحمۃ اللہ علیہ کا طریقہ)۔16. گم شدہ کی واپسی: سورہ یوسف کی آیت 'انی لاجد ریح یوسف لولا ان تفندون' ٹہلتے ہوئے پڑھنا۔17. واپسی مال و حق: دو رکعت نفل میں پہلی رکعت میں 40 بار اور دوسری میں 30 بار 'امن یجیب المضطر اذا دعاہ ویکشف السوء'۔18. تسخیر مطلوب: سورہ یاسین کے سات مبینوں پر گرہ لگانے کا عمل۔19. استخارہ: دو رکعت نفل (پہلی میں سورہ الم نشرح 17 بار، دوسری میں 15 بار) اور دعا 'اللهم انی استخیرک بعلمک...' 101 بار۔20. عمل بسم اللہ (19 دن کا مخصوص تعداد والا عمل) اور ناجائز تنگ کرنے والے کے لیے سیسہ کی تختی پر سورہ والعصر کا عمل۔", "باب چہارم: اسماء موکلات (صفحہ 95 تا 107)", "1. زکوٰۃ کا طریقہ:- زکوٰۃ اکبر: سوا لاکھ مرتبہ 40 دن میں پورا کرنا۔- زکوٰۃ اصغر: عمل کے ابجدی اعداد کے برابر پڑھنا۔2. زکوٰۃ حروف تہجی مع موکلات و منازل قمر:ہر حرف کو 4444 مرتبہ 28 روز تک اس کے موکل کے ساتھ پڑھنا ('اجب یا اسرافیل بحق یا الف'...)۔جدول موکلات حروف: ا (اسرافیل)، ب (جبرائیل)، ت (عزرائیل)، ث (میکائیل)، ج (کلکائیل)، ح (تنکفیل)، خ (مہکائیل)، د (ہلرائیم)، ذ (سراکطائیل)، ر (دوریائیل)، ز (فتمائیل)، س (عطرائیل)، ش (الحمائیل)، ص (سرخمائیل)، ض (عطریائیل)، ط (طاطائیل)، ظ (رویائیل)، ع (خولائیل)، غ (لوخائیل)، ف (تومائیل)، ق (لوزائیل)، ک (اسمائیل)، ل (حروزائیل)، م (دردرائیل)، ن (ہمواکیل)، و (شرفائیل)، ہ (امواکیل)، ی (اسرائیل)۔3. موکل بنانے کا طریقہ، اسمائے الٰہی مع اعداد کی جدول، جفر خافیہ، عمل عجیب اور دائرہ دعوت شناخت بروج و سیارہ۔4. طریق دعوت حروف کے چار طریقے: زبریہ، بینہ، مداریہ، مجموعہ۔", "باب پنجم: دعوات (صفحہ 108 تا 124)", "1. شرائط چلہ و دعوت (اکل حلال، صدق مقال، ترک حیوانات، خلوت، طہارت وغیرہ)۔2. دعوت سورہ مزمل شریف (حضرت شیخ نظام الدین کا طریقہ اور دوسرا طریقہ 41 بار روزانہ)۔3. دعوت سورہ یاسین شریف (مبینوں سے لوٹنے والا عمل اور سات بار روزانہ والا چلہ)۔4. کشف قلب (اسلامی مسمریزم: مبین پر رک کر دل پر نورانی شعاعوں کا تصور)۔5. دعوت آیت قطب (ثم انزل علیکم من بعد الغم امنۃ نعاسا... 129 بار 3 دن کا عمل)۔6. دعوت تسمیہ مربع (786 کا مربع نقش)۔7. دعوت اسم باسط (5284 بار روزانہ 41 دن کا عمل)۔8. دعوت اسم وہاب (سوا لاکھ مرتبہ 11 روز میں، 4414 بار 41 دن، اور 11364 بار والا عمل)۔9. دعوت سورہ کوثر (تین دن میں زکوٰۃ: 921، 921، 922 بار اور مربع نقش 2764)۔10. دعوت مثلث خالی البطن (11 دن کا چلہ اور اس کے موکلات و خدام)۔11. عمل طحال (تلی کے درد کے لیے اتوار کے دن مٹی کی روٹی کاٹنے کا عمل)۔12. سانپ کے دو عمل (شب عاشورہ میں آیت 'قال القہا یا موسیٰ...' 500 بار پڑھ کر زکوٰۃ دینا)۔13. مرض مرگی کا تانبے کی تختی والا نقش اور تپ لرزہ کا نیلے سوت والا گنڈا۔14. نقش سورہ اخلاص برائے حب (3125 بار روزانہ زکوٰۃ)۔15. ترکیب چہاردہ رکعت نماز برائے تسخیر خلائق و محبوب۔16. ترکیب عمل بسم اللہ شریف (786 بار) اور برائے تباہی (الٹی بسم اللہ کا عمل)۔", "باب ششم: منتر جنتر (صفحہ 125 تا 134)", "1. برائے تپ، برائے درد شکم، منتر حب (سوا لاکھ زکوٰۃ)، درد دندان (شکل کرم اور چھری گاڑنے کا عمل)، عمل دافع درد داڑھ و شقیقہ، عمل گلہری موہنی برائے حب، جھاڑہ ڈبہ، عورت کا خون جاری کرنا، درد چھاتی، آدھے سر کا درد (اسمائے توریت بیر کی لکڑی پر تراشنا)، عمل دفع درد، دیوالی کا عمل، عطر موہنی (2100 بار روزانہ 21 دن)۔2. مندرا (بندش و دفع جنات و آسیب کا جامع کلام)۔3. دفع نحوست سیارگان و رجعت عمل اور عمل چھوڑنے کا طریقہ (ختم دلانا)۔4. مفصل فہرست مضامین و ابواب (صفحہ 135 تا 142)۔"]}, {"id": "Aamil_Kaamil_Vol_2_Part_1_Text", "label": "حصہ دوم — پارٹ ۱ (قواعدِ نقوش، مثلث ۳×۳، مربع ۴×۴)", "paragraphs": ["عامل کامل (حصہ دوم) — پارٹ 1 (صفحہ 1 تا 48)", "علم الالواح، علم الاعداد، وفق اعداد، علم النقوش معہ قواعد، وضع اور خواص | مصنف: کاش البرنی | ناشر: اوراق پبلشرز، کراچی", "فہرست ابواب (عامل کامل حصہ دوم)", "مقدمہ (صفحہ 5)پہلا باب: قواعد استخراج موازین عملیات (صفحہ 7)دوسرا باب: اصطلاحات اعداد و تکسیر اعداد (صفحہ 14)تیسرا باب: نقش زوج 2×2 (صفحہ 20)چوتھا باب: خواص نقش مثلث 3×3 (صفحہ 22)- فصل اول: لوح مزوجات و مفردات (صفحہ 23)- فصل دوم: قانون زکوٰۃ مثلث (صفحہ 33)- فصل سوم: تیاری نقش (صفحہ 37)- فصل چہارم: خواص مثلث طبعی (صفحہ 40)- فصل پنجم: عملیات مثلث وضعی (صفحہ 47)- فصل ششم: خواص مثلث برنیہ (صفحہ 59)- فصل ہفتم: خواص مثلث دو پایہ (صفحہ 61)- فصل ہشتم: خواص مثلث خالی الوسط (صفحہ 65)- فصل نہم: خواص خاتم سلیمانی (صفحہ 67)- فصل دہم: خواص مثلث ہندی (صفحہ 69)- فصل یازدہم: خواص مثلث ذوالکتابت (صفحہ 71)پانچواں باب: نقش مربع 4×4 (صفحہ 74) — (فصل اول تا ششم پارٹ 1 میں، اور فصل ہفتم تا دہم پارٹ 2 میں)۔", "مقدمہ و پہلا باب: قواعد استخراج موازین عملیات (صفحہ 5 تا 13)", "1. موازین عملیات کا استخراج:طلسم اس بات کے محتاج ہوتے ہیں کہ ان کے لیے پوری پوری موافقت کے سامان مہیا کیے جائیں۔ قمر ہماری دنیا کے فعلی نظام کا حکمران ہے؛ جب تک یہ موافق نہ ہو افعال میں تاثیر پیدا نہیں ہوتی۔- دن کے اعمال طالع بروج روزی (حمل، جوزا، اسد، میزان، قوس، دلو) میں اور رات کے اعمال طالع بروج لیلی (ثور، سرطان، سنبلہ، عقرب، جدی، حوت) میں کیے جاتے ہیں۔- بروج مستقیمۃ الطلوع (سرطان، اسد، سنبلہ، میزان، عقرب، قوس): اعمال سعد کے لیے موزوں ہیں۔- بروج معوجۃ الطلوع (جدی، دلو، حوت، حمل، ثور، جوزا): اعمال نحس کے لیے تیز اثر رکھتے ہیں۔- بروج کی ماہیت: منقلب (حمل، سرطان، میزان، جدی — عداوت و تفریق کے لیے)، ذوجسدین (جوزا، سنبلہ، قوس، حوت — محبت و تسخیر کے لیے)، ثابت (ثور، اسد، عقرب، دلو — ثبات و قیام، روزگار، جائیداد اور الفت کے لیے)۔2. منسوبات کواکب:- زحل: غم و اندوہ، محنت، بیماری، قید و بند۔- مشتری: مرادوں کا بر آنا، کشائش کار، حصول دولت، ترقی کاروبار۔- مریخ: دشمنی، نفاق، دشمن پر فتح۔- شمس: جاہ و حشمت، ترقی مراتب، تسخیر افسران و حکام۔- زہرہ: محبت، دوستی، شادی، تسخیر مطلوب و مستورات۔- عطارد: حفظ و فہم، ذکاوت، دفع وسوسہ و سحر۔- قمر: صحت و تندرستی، یاری و دوستی، عام کاروباری امور۔3. لوازمات کتابت:- قلم: وجہ حلال سے خریدا جائے۔ اعمال خیر کے لیے اپنی طرف رخ کر کے اور اعمال غضب کے لیے دوسری طرف رخ کر کے تراشیں۔ تراشتے وقت 3 بار درود شریف اور 5 بار 'اقرا باسم ربک الذی خلق...' پڑھیں، اور 'یا مستعان اقض حاجتی' کہیں۔ ناخن پر قمر کے برج کے مطابق کلمہ لکھیں (آتشی: اہطمفشذ، بادی: بومینستض، آبی: جزکسقثظ، خاکی: دحلعرخغ)۔- سیاہی و کاغذ: اعمال خیر کے لیے زعفران اور سفید کاغذ؛ اعمال غضب کے لیے کالی یا نیلی روشنائی اور سرخ یا نیلا کاغذ۔- بخور: زحل کا میعہ، مشتری کا حب الغار، مریخ کا سندروس، شمس کا عود، زہرہ کا زعفران، عطارد کا مصطکی، قمر کا لوبان۔- نقوش کا انتخاب: انفصال و تفریق کے لیے مثلث؛ محبت و جذب القلوب کے لیے مخمس؛ اتصال، دولت اور دنیوی مطالب کے لیے مربع؛ بندش کے لیے مثلث ہندی و مخروطی۔", "دوسرا باب: اصطلاحات اعداد و تکسیر اعداد (صفحہ 14 تا 19)", "1. جمل کبیر و جمل صغیر: ابجد قمری کے 28 حروف کے اعداد 1 سے 1000 تک جمل کبیر ہیں، اور ان کا مفرد عدد (1 سے 9 تک) جمل صغیر کہلاتا ہے۔2. مراتب لوح یا نقش (6 مراتب): مفتاح (خانہ اول)، مغلاق (خانہ آخر)، عدل (خانہ اول و آخر کا مجموعہ)، ضلع (ایک سمت کے خانوں کا مجموعہ)، وفق یا میزان (جس عدد کا نقش بھرا جائے)، مساحت (کل خانوں کا مجموعہ)۔3. نقش بھرنے کا اصول (5 بنیادی چیزیں):- اعداد طبعی: مثلث (15)، مربع (34)، مخمس (65)، مسدس (111)۔- اعداد طرح: مثلث (12)، مربع (30)، مخمس (60)، مسدس (105)۔- عدد تقسیم: مثلث (3)، مربع (4)، مخمس (5)، مسدس (6)۔- عدد کسر اور خانہ کسر: تقسیم سے بچنے والا باقی عدد کسر ہے، جس کا اضافہ مقررہ خانے میں کیا جاتا ہے۔4. اقسام نقوش و اعداد: فرد الفرد (مثلث 3×3 — اعمال جلالی)، زوج الزوج (مربع 4×4 — اعمال جمالی)، زوج الفرد (مسدس 6×6 — دنیوی اعمال)۔5. نقش میں ناموں کا لینا: ہمیشہ طالب معہ والدہ اور مطلوب معہ والدہ کا نام لیا جائے (پیدائشی یا سرکاری اسناد والا اصل نام)۔", "تیسرا باب: خواص نقش زوج 2×2 (صفحہ 20 تا 21)", "اس نقش کو 'فتح الباب' کہتے ہیں۔ اس کے خانوں میں 2، 4، 6، 8 (بدوح) آتے ہیں۔ یہ قید و بند سے نجات، حفاظت، کشائش رزق، ضیاع نطفہ سے تحفظ (قران السطرین کے دو نقوش) اور محبت و کشش قلب کے لیے مجرب ہے۔- کامل اعداد کا راز: عدد حوا (15)، عدد آدم (45)، عدد کمال (91)، اور عدد آدم و کمال (136)۔", "چوتھا باب: خواص نقش مثلث 3×3 — گیارہ فصول (صفحہ 22 تا 73)", "- فصل اول (لوح مزوجات و مفردات): مثلث کا وفق 15 (حوا) اور مساحت 45 (آدم) ہے۔ جفت اعداد (2، 4، 6، 8 — بدوح) کی لوح جمالی (اعمال خیر و محبت) اور طاق اعداد (1، 3، 5، 7، 9 — اجهزط) کی لوح جلالی (اعمال شر و تباہی) ہوتی ہے۔ اطراف میں چار ملائکہ (جبرائیل، عزرائیل، میکائیل، اسرافیل) اور چار کلمات (قولہ، الحق، ولہ، الملک) لکھے جاتے ہیں۔- فصل دوم (قانون زکوٰۃ مثلث): زکوٰۃ ادا کرنے کے پانچ طریقے بیان کیے گئے ہیں، جن میں 45 روز تک روزانہ 45 نقش لکھنا، سوا لاکھ کا نصاب، اور اسم 'یا حی' (18) کا نصاب شامل ہے۔- فصل سوم (تیاری نقش و مثلث کی عنصری چالیں): آتشی چال (شرقی — ہلاکت و تفریق)، بادی چال (غربی — فتوحات و ترقی)، آبی چال (شمالی — محبت، شفا اور رہائی)، خاکی چال (جنوبی — زبان بندی، خواب بندی اور ثبات)۔- فصل چہارم (خواص مثلث طبعی): اعمال خیر (قیدی کی خلاصی، حفاظت چوری و زراعت، تسخیر حکام، صلح، گریختہ کی واپسی، آسانی وضع حمل، حفاظت اطفال، بطلان سحر) اور اعمال شر (نفاق و تفریق)، نیز آٹھ چالیں اور آٹھ موکلان عمل۔- فصل پنجم (عملیات مثلث وضعی): مثلث وضعی بھرنے کے تین طریقے و ادوار (بلا کسر مثلث بھرنے کا دور سوم جس میں 8 تفریق کرتے ہیں)، دل سرد کرنے، عداوت، اخراج دشمن، عقد اللسان و شہوت کے اعمال، عزیمت برہتیہ (24 اسماء مع اعداد 14559)، حاضری مطلوب (تانبے کے چراغ اور یا امواکیل کا عمل)، اور حل المقصود کا نقش۔- فصل ششم (مثلث برنیہ): ایسا نقش جس کی میزان اسم الٰہی یا آیت کے برابر ہو اور اس کے خانوں میں طالب و مطلوب کے ناموں کے اعداد بھی قائم رہیں۔- فصل ہفتم (مثلث دو پایہ): دو پایہ مثلث بھرنے کے قواعد، اسم باسط کا وظیفہ (72 نقش روزانہ 40 دن) اور دست غیب کا عمل۔- فصل ہشتم (مثلث خالی الوسط): مرکز خالی چھوڑ کر مقصد لکھنا، اور تباہی ظالم کے لیے مثلث ہندی و مربع مصری کا عمل۔- فصل نہم (خاتم سلیمانی): دو مثلثوں کے تقاطع سے بننے والا ستارہ نما نقش (مجموعہ 28)، حاضری اور جنات سے خبر حاصل کرنے کا عمل۔- فصل دہم (مثلث ہندی و مثلث صنوبری): شہوت باندھنے، بدکاری روکنے اور جدائی ڈالنے کے نقوش۔- فصل یازدہم (مثلث ذوالکتابت): آیت یا اسمائے حسنیٰ کو خانوں میں تقسیم کر کے بھرنا، زیارت رسالت مآب ﷺ کا نقش، امام فخر الدین رازی کا نو اسمائے حسنیٰ والا مثلث، اور افزونی رزق کے لیے 'اللہ لطیف بعبادہ' (وفق 279) کا نقش۔", "پانچواں باب: نقش مربع 4×4 — فصل اول تا ششم (صفحہ 74 تا 99)", "- فصل اول (قانون زکوٰۃ مربع): مربع اسم 'یا ودود' (20) یا 'یا وہاب' (14) اور کوکب عطارد سے متعلق ہے۔ زکوٰۃ ادا کرنے کے پانچ طریقے (136 کی سات زکوٰتیں، سوا لاکھ کا نصاب وغیرہ)۔- فصل دوم (رفتار و خواص مربع طبعی): چاروں عناصر کی چالیں اور غلبہ بر دشمن، رفعت و جاہ، تسخیر خلق، تحفظ، الفت مرد و زن، زراعت اور صحت اطفال کے لیے شرف کواکب میں لوح بنانے کے طریقے۔- فصل سوم (قانون مربع وضعی و ادوار مربع): پانچ ادوار (بشمول دور چہارم بلا کسری جس میں 21، 25، 29 یا 33 طرح کرتے ہیں) اور سات خاص قواعد (60، 90، 120، 150، 180، 210، 240 طرح کرنے کے قواعد جو کواکب کے نظرات کے درجات پر مبنی ہیں)۔- فصل چہارم (مربع کے خانوں کے خواص): عقد اللسان، عقد النوم، عقد الذکر، عقد الطریق، عقد النظر، تسخیر بادشاہان، کشائش کار، صلح، محبت اور خانہ نمبر 1 تا 16 سے شروع ہونے والی مختلف چالوں کے خواص۔- فصل پنجم (مربع کے چھ مجرب قاعدے): حاضری مطلوب، برنیہ مربع، سریع التاثیر مربع اور مربع نصفی کے نقوش۔- فصل ششم (مربع ذوالکتابت میں خواص آیات و اسماء): آیات قرآنیہ (سورہ فتح، سورہ تغابن، سورہ طلاق، سورہ احزاب، سورہ یاسین، سورہ بنی اسرائیل، چار قل وغیرہ) کے مربع ذوالکتابت اور مدور الواح۔"]}, {"id": "Aamil_Kaamil_Vol_2_Part_2_Text", "label": "حصہ دوم — پارٹ ۲ (مخمس تا معشر، شرفِ کواکب، زکوٰۃ و موکلات)", "paragraphs": ["عامل کامل (حصہ دوم) — پارٹ 2 (صفحہ 49 تا 96)", "علم الالواح، علم الاعداد، وفق اعداد، علم النقوش معہ قواعد، وضع اور خواص | مصنف: کاش البرنی | ناشر: اوراق پبلشرز، کراچی", "بقیہ پانچواں باب: نقش مربع 4×4 — فصل ہفتم تا دہم (صفحہ 99 تا 126)", "- فصل ہفتم (الواح الاسماء): اسمائے حسنیٰ کے 59 مربع نقوش (صبور، رب ہب لی، مانع، لطیف، وکیل، ہادی، نور، ضار، غنی، حق، مذل، باطن، رشید، وارث، نافع، معطی، مغنی، جامع، مقسط، غفار، قہار، رزاق، یا مالک الملک ذی الجلال والاکرام، بسم اللہ الرحمن الرحیم، خالق، فتاح، علیم، باسط، حمید، حفیظ، قابض، علی، شہید، معز، عظیم، کبیر، غفور، مجید، خافض، خبیر، متین، شکور، بصیر، رقیب، کریم، قوی، محصی، ولی، عفو، رؤف، ظاہر، مقدم، قادر، صمد، معید، ماجد، واسع، حکیم، باعث، سمیع، رافع) اور ان کے مختصر خواص۔- فصل ہشتم (خواص مربع غیر طبعی اور ان کے اوفاق): سدسی اور ربع النصفی طریقے، عمل حب اور طریق احضار (دریا کی ابلق ریت کے 1001 دانوں پر ناد علی اور سورہ شمس کا عمل)۔- فصل نہم (رفتار دوائر الواح معہ خواص آیات): شرف کواکب میں گول (مدور) الواح بنانے کا طریقہ اور 12 مقاصد کی آیات کے نقوش۔- فصل دہم (مربع جوف خالی و اعمال تصرفات و دست غیب): اسم 'یا منعم' (4444 بار) اور 'یا رزاق' (308 بار) کے اعمال، سورہ مزمل، سورہ فتح، سورہ یاسین، ناد علی اور 99 اسمائے باری تعالیٰ کے بڑے نقوش، اور عمل 'مائدہ' (طعام و برکت کے لیے)۔", "چھٹا باب: نقش مخمس 5×5 (صفحہ 127 تا 137)", "- مخمس کا عدد طبعی 65 اور عدد طرح 60 ہے۔- چاروں عناصر کی چالیں (آتشی، بادی، آبی، خاکی)۔- زکوٰۃ مخمس ادا کرنے کا طریقہ، مخمس ذوالکتابت (آیات حب و تسخیر، سورہ اخلاص، سورہ کوثر، سورہ قدر، یا بدوح وغیرہ) اور مخمس خالی القلب کے عملیات۔", "ساتواں باب: نقش مسدس 6×6 (صفحہ 138 تا 143)", "- مسدس کوکب شمس سے منسوب ہے، اس کا عدد طبعی 111 اور عدد طرح 105 ہے۔- مسدس کی چالیں، زکوٰۃ مسدس، اور تسخیر حکام، علو مرتبت، دفع دشمنان و امراض کے لیے مسدس کے عملیات و نقوش۔", "آٹھواں باب تا چودھواں باب: بڑے نقوش کے قواعد و خواص (صفحہ 144 تا 164)", "- آٹھواں باب: نقش مسبع 7×7 (عدد طبعی 175، طرح 168 — کوکب زہرہ سے متعلق، محبت، شادی اور فنون لطیفہ کے اعمال)۔- نواں باب: نقش مثمن 8×8 (عدد طبعی 260، طرح 252 — کوکب عطارد سے متعلق، علم و حکمت، تجارت اور زبان بندی کے اعمال)۔- دسواں باب: نقش متسع 9×9 (عدد طبعی 369، طرح 360 — کوکب قمر سے متعلق، سفر، شفا اور گھریلو امور کے اعمال)۔- گیارھواں باب: نقش معشر 10×10 (عدد طبعی 505، طرح 495 — کوکب مریخ سے متعلق، غلبہ و فتح کے اعمال)۔- بارھواں باب: نقش یازدہ 11×11 (عدد طبعی 671، طرح 660)۔- تیرھواں باب: نقش دوازدہ 12×12 (عدد طبعی 870، طرح 858 — بارہ بروج سے متعلق)۔- چودھواں باب: نقش صد در صد 100×100 (عظیم الشان لوح کے اصول و فوائد)۔", "پندرھواں باب: عملیات شرف کواکب (صفحہ 165 تا 169)", "ساتوں ستاروں کے درجات شرف میں مخصوص دھاتوں پر الواح تیار کرنے کے مجرب طریقے:1. شرف شمس (19 درجہ حمل): سونے کی لوح — عزت، حکومت اور ترقی کے لیے۔2. شرف قمر (3 درجہ ثور): چاندی کی لوح — تسخیر خلق، سفر اور قبولیت کے لیے۔3. شرف زحل (21 درجہ میزان): لوہے یا سیسے کی لوح — جائیداد کی بقاء اور تحفظ کے لیے۔4. شرف مشتری (15 درجہ سرطان): قلعی یا چاندی کی لوح — دولت، رزق اور برکت کے لیے۔5. شرف مریخ (28 درجہ جدی): تانبے کی لوح — دشمن پر غلبہ اور مقدمات میں فتح کے لیے۔6. شرف زہرہ (27 درجہ حوت): جست یا چاندی کی لوح — محبت، شادی اور دلعزیزی کے لیے۔7. شرف عطارد (15 درجہ سنبلہ): کانسی یا پارہ بستہ کی لوح — ذہانت، امتحان میں کامیابی اور کاروبار کے لیے۔", "سولہواں باب: طریقہ زکوٰۃ و اصلاح عددین (صفحہ 170 تا 173)", "- نقوش اور اسمائے الٰہی کی زکوٰۃ ادا کرنے کے جامع قواعد۔- اصلاح عددین: اگر کسی اسم یا آیت کے اعداد میں کسر آ رہی ہو تو اس میں موافق اسمائے الٰہی یا حروف کا اضافہ کر کے عدد کو بے کسر بنانے کا فنی طریقہ۔", "سترھواں باب: استخراج موکلات و اسمائے نقوش (صفحہ 174 تا 192)", "- فصل اول: نقش مثلث کے موکلات اور اعوان (سفلی و علوی) استخراج کرنے کا طریقہ۔- فصل دوم: موکلات سے کام لینے کا طریق کار، عزیمت کی ترتیب اور بخورات۔- فصل سوم: نقوش مربع کے موکلات نکالنے کا طریقہ۔- فصل چہارم: اصول موکلات (علوی موکلات کے آخر میں 'ائیل' اور سفلی اعوان کے آخر میں 'طیش' یا 'یوش' لگانے کے جفری قوانین)۔- کتاب کے آخر میں مفصل فہرست مضامین اور اوراق پبلشرز کی مطبوعات کی فہرست درج ہے۔"]}]}, "bk_saaat": {"title": "الساعات (بوقتِ ضرورت حوالہ — حصہ اول و دوم)", "author": "کاش البرنی", "pdfUrl": "", "sections": [{"id": "Al_Saat_Part_1_Section_1_Text", "label": "حصہ اول — پارٹ ۱ (ساعاتِ لیل و نہار، ستاروں کے اثرات و منسوبات)", "paragraphs": ["الساعات (حصہ اول) — پارٹ 1 (صفحہ 1 تا 43)", "مصنف: کاش البرنی | ناشر: اوراق پبلشرز، پی آئی بی سی، کراچی", "فہرست مندرجات (الساعات حصہ اول)", "مقدمہ: ساعات لیل و نہار، ساعات سے کیا کام لیا جا سکتا ہے؟، ایک خاص باتباب اول: کیا بدقسمتی اور مصائب سے چھٹکارا حاصل کیا جا سکتا ہے؟، وقت اور کام کا تعلق، صحیح سوچنا اور صحیح فیصلہ کرناباب دوم: ستاروں کے اثرات جدید سائنس کی نظر میں، سیاروں سے آنے والی شعاعیںباب سوم: سیاروں کے ناموں پر دنوں کے ناموں کا تعین، سیاروں سے دنوں کے تعلقات کی وجوہات، دنوں کی ترتیبباب چہارم: ستاروں کی روزانہ تقسیم، نقشہ ساعات، ساعتوں کی منسوبات (قمری، عطاردی، زہرہ، شمس، مریخی، مشتری، زحل، اور نئے سیارے: یورینس، نیپچون، پلوٹو)", "ساعات لیل و نہار اور ان کا فائدہ", "حدیث پاک ہے: کل امر مرہون باوقاتہا (ہر امر کسی خاص وقت کا مرہون ہوتا ہے)۔قدرت نے ہر کام کے لیے خاص وقت مقرر کیے ہیں۔ انسانی زندگی کے تمام امور خوش بختی اور بدبختی پر منحصر ہیں۔ روزانہ امور زندگی سرانجام دینے کے لیے ساعتوں کا علم بہتر رہنمائی کرتا ہے۔ساعات سے کیا کام لیا جا سکتا ہے؟1. ساعتیں انسان کے روزانہ کاروبار کے نفع نقصان، خوشی و غم اور ہر قسم کے مدوجزر کو ظاہر کرتی ہیں۔2. ہر کام میں رہنمائی کرتیں اور ان کے نتائج سے آگاہ کرتی ہیں۔3. نماز کے صحیح اوقات، طلوع و غروب شمس، نصف النہار، نصف اللیل اور سحری و افطاری کے اوقات ظاہر کرتی ہیں۔4. اطباء و ڈاکٹروں کے لیے پیچیدہ امراض کی تشخیص میں مدد کرتی ہیں۔5. ہر آدمی کی شخصیت، پوزیشن، مرتبہ اور کام سے اطلاع دیتی ہیں۔6. بتاتی ہیں کہ حاملہ کیا جنے گی۔7. منحوس اور ممنوع العمل وقت سے باخبر رکھتی ہیں۔8. ریس میں جیتنے والے گھوڑے کا اظہار کرتی ہیں۔9. دوسرے کے ضمیر کا حال بتاتی ہیں۔10. شرکت، دوستی، محبت اور موافق و غیر موافق لوگوں سے آگاہ کرتی ہیں۔", "باب اول: مصائب سے چھٹکارا، وقت اور کام کا تعلق", "ہر زمانے میں انسان کے دل و دماغ کو جس مسئلہ نے پریشان بنائے رکھا ہے وہ مصائب کا سامنا ہے۔ اجتماعی مصائب پر انسان نے علم و تجربہ سے قابو پایا، لیکن انفرادی مصائب ہر شخص کے اپنے ہوتے ہیں جن کا تعلق غلط وقت پر کام کرنے یا علم نہ رکھنے سے ہے۔ کامیابی کے حصول کے لیے ہمیں جس علم کی ضرورت ہے وہ 'وقت کا علم' ہے۔جدید سائنس اس امر کی شاہد ہے کہ انسانی ذہن ہر وقت فضا کی کاسمک شعاعوں سے متاثر ہوتا ہے جو سورج اور دیگر سیاروں سے خارج ہو کر زمین تک پہنچتی ہیں۔", "باب دوم: ستاروں کے اثرات جدید سائنس کی نظر میں", "سات ستاروں کے سسٹم پر ہماری شمسی کائنات کا مکمل نظام ہے: زحل، مشتری، مریخ، شمس، زہرہ، عطارد اور قمر۔ سورج سے شعاعیں سیاروں کے راستے سے منعکس ہو کر زمین پر پڑتی ہیں اور ہمیں متاثر کرتی ہیں۔- سورج سے حکومت (عرفان و اخلاقی ترقی)- قمر سے حرکت (افزائش جسمانی)- مریخ سے قوت- عطارد سے علم- مشتری سے وجدان- زحل سے زمین و جائیداد- زہرہ سے قوت حیوانی و جذبات منسوب ہیں۔سیارگان سے آنے والی شعاعوں کی اقسام: پیمائی شعاعیں، آرکٹرس شعاعیں، موت کی شعاع، وائرلیس شعاعیں، ماورائے بنفشی (Ultraviolet) شعاعیں، کاسمک شعاعیں، ریڈیو شعاعیں، قمری شعاعیں، اور ایکس ریز شعاعیں۔", "باب سوم: ستاروں کے ناموں پر دنوں کا تعین اور سات آسمان", "ہفتے کے سات دن قدیم اقوام نے سات ستاروں کے نام پر رکھے:1. فلک چہارم: شمس — موکل: اسرافیل — دن: اتوار (Sunday) — عنصر: آتشی2. فلک اول: قمر — موکل: اسمائیل — دن: سوموار (Monday) — عنصر: آبی3. فلک پنجم: مریخ — موکل: عزرائیل — دن: منگلوار (Tuesday) — عنصر: آتشی4. فلک دوم: عطارد — موکل: یوحائیل — دن: بدھوار (Wednesday) — عنصر: بادی5. فلک ششم: مشتری — موکل: میکائیل — دن: جمعرات (Thursday) — عنصر: آتشی6. فلک سوم: زہرہ — موکل: صورائیل — دن: جمعہ (Friday) — عنصر: بادی7. فلک ہفتم: زحل — موکل: جبرائیل — دن: ہفتہ (Saturday) — عنصر: خاکی(آٹھواں آسمان لوح محفوظ / عرش / دائرۃ البروج ہے)۔مصنف نے ابجد عربی عددی کے حساب سے ثابت کیا ہے کہ ہر ستارے کے نام کے اعداد کو 7 پر تقسیم کرنے سے اس کے دن کا نمبر حاصل ہوتا ہے (مثلاً شمس 1940 ÷ 7 باقی 1 یعنی اتوار)۔", "باب چہارم: ستاروں کی روزانہ تقسیم اور ساعتوں کی منسوبات", "قدرتی دن طلوع آفتاب سے دوسرے طلوع آفتاب تک ہوتا ہے۔ طلوع سے غروب تک دن کے 12 حصے (ساعتیں) اور غروب سے طلوع تک رات کے 12 حصے (ساعتیں) کیے جاتے ہیں۔ ہر دن کی پہلی ساعت اس دن کے حاکم ستارے کی ہوتی ہے اور باقی ترتیب فلکی نزول (زحل، مشتری، مریخ، شمس، زہرہ، عطارد، قمر) کے مطابق چلتی ہے۔- قمری ساعتیں (قمر): نمبر 2، دن سوموار، دھات چاندی، رنگ سفید، عنصر آبی، سمت شمال، سعد اکبر، برج سرطان۔- عطاردی ساعتیں (عطارد): نمبر 5، دن بدھ، دھات کانسی/سیماب، رنگ سبز/فاختائی، عنصر بادی، سمت مغرب، برج جوزا و سنبلہ۔- زہرہ کی ساعتیں (زہرہ): نمبر 6، دن جمعہ، دھات جست/تانبا، رنگ سفید و نیلا، عنصر بادی، سمت مغرب و جنوب مشرق، سعد اصغر، برج ثور و میزان۔- شمس کی ساعتیں (شمس): نمبر 1 (مثبت) / 4 (منفی)، دن اتوار، دھات سونا، رنگ سنہرا/زعفرانی، عنصر آتشی، سمت مشرق، برج اسد۔"]}, {"id": "Al_Saat_Part_1_Section_2_Text", "label": "حصہ اول — پارٹ ۲ (اختیاراتِ سیارگان، دوستی و دشمنی کواکب)", "paragraphs": ["الساعات (حصہ اول) — پارٹ 2 (صفحہ 44 تا 86)", "مصنف: کاش البرنی | ناشر: اوراق پبلشرز، کراچی", "بقیہ باب چہارم: مریخی، مشتری، زحل اور نئے سیاروں کی ساعتیں", "- مریخی ساعتیں (مریخ): نمبر 9، دن منگل، دھات لوہا/فولاد، رنگ سرخ/قرمزی، عنصر آتشی، سمت جنوب، نحس اصغر، برج حمل و عقرب۔- مشتری کی ساعتیں (مشتری): نمبر 3، دن جمعرات، دھات ٹن/چاندی، رنگ سنہرا/زرد/بنفشی، عنصر آتشی، سمت شمال مشرق، سعد اکبر، برج قوس و حوت۔- زحل کی ساعتیں (زحل): نمبر 8، دن ہفتہ، دھات سیسہ، رنگ کالا/نیوی بلو، عنصر خاکی، سمت جنوب/جنوب مشرق، نحس اکبر، برج جدی و دلو۔- نئے سیارے: یورینس (عطارد کے ماتحت، ایجادات و غیر متوقع تبدیلیاں)، نیپچون (زہرہ کے ماتحت، آرٹ، سمندر، مخفی امور)، پلوٹو (مریخ کے ماتحت، تحت الشعور، ٹیکس و میراث)۔", "باب پنجم: اختیارات سیارگان (صفحہ 49 تا 70)", "اس باب میں ساتوں ستاروں کے تحت مختلف سوالات کے جوابات دیے گئے ہیں:1. یہ شخص کیا کام کرتا ہے یا کون ہے؟ (ہر ستارے کے تحت پیشہ ور افراد کی پہچان)2. کون سے کاروبار کرنے چاہئیں؟3. روپیہ آئے گا یا نہیں؟ (مشتری، زہرہ اور عطارد آمدن کے لیے سازگار؛ مریخ اخراجات لاتا ہے)4. شراکت کیسی رہے گی؟5. سفر کیسا رہے گا؟ (مشتری لمبے سفر، زہرہ تفریحی سفر، عطارد چھوٹے سفر کے لیے بہترین؛ زحل و مریخ میں احتیاط)6. محبت اور دوستی کا انجام کیا ہوگا؟7. فلاں وقت کس قسم کے لوگوں سے ملنا چاہیے؟8. مددگار اور مفید لوگ کون ہیں؟ (پیدائش کی تاریخوں کے لحاظ سے موافق افراد)9. کس کام کے لیے کون سا وقت مفید ہے؟10. کامیابی کے لیے صحیح راہ عمل اور کن باتوں سے پرہیز کرنا چاہیے؟11. فلاں وقت مجھے کیا کرنا چاہیے اور کس قسم کے حالات پیش آتے ہیں؟12. سیارگان کے احکامات و اثرات، آپ واقعات کو کیسے بدل سکتے ہیں؟ اور ساتوں ستاروں کے لیے عملی تجاویز و ہدایات۔", "باب ششم: اعداد اور علم الساعات (صفحہ 71 تا 86)", "1. کواکب کے اعداد (فیثاغورث کے اصول کے مطابق):شمس (مثبت 1، منفی 4)، قمر (مثبت 7، منفی 2)، مشتری (3)، زحل (8)، مریخ (9)، زہرہ (6)، عطارد (5)۔2. دوستی و دشمنی کواکب کی جدول:- شمس: دوست (قمر، مریخ، مشتری)، دشمن (زہرہ، زحل)، غیر جانبدار (عطارد)۔- قمر: دوست (شمس، عطارد)، غیر جانبدار (مریخ، مشتری، زہرہ، زحل)۔- مریخ: دوست (شمس، قمر، مشتری)، دشمن (عطارد)، غیر جانبدار (زہرہ، زحل)۔- عطارد: دوست (شمس، زہرہ)، دشمن (قمر)، غیر جانبدار (مریخ، مشتری، زحل)۔- مشتری: دوست (شمس، قمر، مریخ)، دشمن (عطارد، زہرہ)، غیر جانبدار (زحل)۔- زہرہ: دوست (عطارد، زحل)، دشمن (شمس، قمر)، غیر جانبدار (مریخ، مشتری)۔- زحل: دوست (عطارد، زہرہ)، دشمن (شمس، قمر، مریخ)، غیر جانبدار (مشتری)۔3. ساعات کی تقسیم اور منٹوں کے دائرے (ہر ساعت کے 15 حصے فی 4 منٹ)۔4. وقت کا نمبر اور کوکب معلوم کرنا، مطلوبہ کام کے موافق ساعت نکالنا، دور اور ساعتیں۔5. ریس میں کون جیتے گا؟ (نہ بہرہ قمری، جدول نہ بہرہ و نمبر، انگریزی و اردو ابجد کے اعداد، اور گھوڑوں کے رنگوں کی تفصیل)۔"]}, {"id": "Al_Saat_Part_1_Section_3_Text", "label": "حصہ اول — پارٹ ۳ (صحت، صدقاتِ کواکب، اوقاتِ ممنوع العمل)", "paragraphs": ["الساعات (حصہ اول) — پارٹ 3 (صفحہ 87 تا 125)", "مصنف: کاش البرنی | ناشر: اوراق پبلشرز، کراچی", "باب ہفتم: صحت کے خطرات اور احتیاط (صفحہ 88 تا 96)", "1. صحت کے خطرات:- زحل: ہڈی کے زخم، سردی اور خشکی زکام سے بچیں۔- مشتری: انجماد خون اور ثقیل غذا سے احتیاط۔- مریخ: آگ، گرنے، زخم اور حادثات سے بچاؤ۔- شمس: زیادہ سوچنے سے ضعف قلب کا اندیشہ۔- زہرہ: حلق کے امراض اور چوٹوں کا فوری علاج کرائیں۔- عطارد: غم و فکر اور خوف صحت کے لیے خطرہ۔- قمر: دست اور بدہضمی کا فوری علاج کرائیں۔2. نومولود کے حالات (دن اور ساعت پیدائش کے لحاظ سے بچے کا مستقبل)۔3. ضمیر کا حال معلوم کرنا (ہر ساعت کے تین بیس بیس منٹ کے حصوں کی منسوبات)۔4. حاملہ کیا جنے گی؟ مشتری، زہرہ یا قمر کی ساعت میں دختر؛ شمس، مریخ یا عطارد کی ساعت میں پسر؛ زحل کی ساعت میں حمل گرنے کا اندیشہ۔5. اوقات ممنوع العمل ہر روز: نصف النہار (زوال) اور نصف اللیل سے 8 منٹ پہلے اور 8 منٹ بعد (کل 16 منٹ) ہر کام اور عبادت ممنوع ہے۔6. صدقات کواکب:- شمس: گندم، صندل سرخ، قند سیاہ، تانبا، سرخ جانور (اتوار طلوع آفتاب کے وقت)۔- قمر: برنج، دہی، نقرہ، کافور، سفید کپڑا (پیر شام کے وقت)۔- مریخ: گندم، قند سیاہ، دال مسور، تانبا، مونگا، سرخ کپڑا (منگل دو گھڑی دن چڑھے)۔- عطارد: لونگ، کانسی کا برتن، روغن زرد، سبز کپڑا (بدھ پانچ گھڑی دن چڑھے)۔- مشتری: دال چنا، زرد کپڑا، شکر، ہلدی، نمک، زرد عقیق (جمعرات شام کے وقت)۔- زہرہ: چاول، سفید و سرخ کپڑا، چاندی، گھی، کافور (جمعہ طلوع کے وقت)۔- زحل: لوہا، کالا کپڑا، ماش سیاہ، سرسوں کا تیل، کالا نمک (ہفتہ دوپہر کے وقت)۔7. اسم حاجت (ہر ساعت کے مطابق ورد کے اسمائے الٰہی) اور تاریخ پیدائش معلوم کرنے کا طریقہ۔8. سوال کا جواب نکالنا: 'یہ کام ہوگا یا نہ؟' کی تشریحات (سعد، نحس، ممتزج، بد، سعد اتصال، سعد انفصال، نحس اتصال، نحس انفصال) اور دن و رات کی ساعتوں کے جدول (صفحہ 95-96)۔", "باب ہشتم: ساعات کے نقشے — حصہ اول (صفحہ 97 تا 125)", "1. نقشہ ساعات استعمال کرنے کے قواعد:- عرض بلد (10 درجہ تا 36 درجہ شمال مشرقی) اور مقامی وقت (Local Mean Time) کا فرق (+ یا -) جمع یا تفریق کرنا۔- مغربی پاکستان کا معیاری وقت گرینچ سے 75 درجہ مشرقی طول بلد (مع 30 منٹ اضافہ)، مشرقی پاکستان 90 درجہ، اور بھارت 82.5 درجہ ہے۔2. اختصارات ستارگان و اوقات نماز:- ستارے: ل (زحل)، ی (مشتری)، خ (مریخ)، س (شمس)، ہ (زہرہ)، د (عطارد)، ر (قمر)۔- اوقات: ط (طلوع آفتاب)، ن (نصف النہار)، ظ (ظہر)، ع (عصر)، غ (غروب آفتاب)، ش (عشاء)، ن ل (نصف اللیل)، س (سحری)، ف (فجر)۔3. ہفتہ وار نقشہ تقسیم ساعات (جنوری تا 4 جون):اس حصے میں 10 درجہ سے 36 درجہ عرض بلد تک درج ذیل تاریخوں کے دن اور رات کی ساعتوں اور نماز کے اوقات کے مکمل عددی نقشے درج ہیں:- جنوری: 1 تا 8، 9 تا 15، 16 تا 22، 23 تا 29، اور 30 جنوری تا 5 فروری۔- فروری: 6 تا 12، 13 تا 19، 20 تا 26، اور 27 فروری تا 5 مارچ۔- مارچ: 6 تا 12، 13 تا 19، 20 تا 26، اور 27 مارچ تا 2 اپریل۔- اپریل: 3 تا 9، 10 تا 16، 17 تا 23، اور 24 تا 30 اپریل۔- مئی: 1 تا 7، 8 تا 14، 15 تا 21، 22 تا 28، اور 29 مئی تا 4 جون۔"]}, {"id": "Al_Saat_Part_1_Section_4_Text", "label": "حصہ اول — پارٹ ۴ (جدول تفاوتِ وقت — پاکستان و کشمیر کے شہر)", "paragraphs": ["الساعات (حصہ اول) — پارٹ 4 (صفحہ 126 تا 162)", "مصنف: کاش البرنی | ناشر: اوراق پبلشرز، کراچی", "بقیہ باب ہشتم: ساعات کے نقشے — حصہ دوم (صفحہ 125 تا 154)", "اس حصے میں 10 درجہ سے 36 درجہ عرض بلد تک سال کے بقیہ مہینوں کے دن اور رات کی ساعتوں اور اوقات نماز کے مکمل ہفتہ وار عددی نقشے درج ہیں:- جون: 5 تا 11، 12 تا 18، 19 تا 25، اور 26 جون تا 2 جولائی۔- جولائی: 3 تا 9، 10 تا 16، 17 تا 23، 24 تا 30، اور 31 جولائی تا 6 اگست۔- اگست: 7 تا 13، 14 تا 20، 21 تا 27، اور 28 اگست تا 3 ستمبر۔- ستمبر: 4 تا 10، 11 تا 17، 18 تا 24، اور 25 ستمبر تا یکم اکتوبر۔- اکتوبر: 2 تا 8، 9 تا 15، 16 تا 22، 23 تا 29، اور 30 اکتوبر تا 5 نومبر۔- نومبر: 6 تا 12، 13 تا 19، 20 تا 26، اور 27 نومبر تا 3 دسمبر۔- دسمبر: 4 تا 10، 11 تا 17، 18 تا 24، اور 25 تا 31 دسمبر۔", "جدول تفاوت وقت (صفحہ 155 تا 157)", "اس جدول میں مغربی پاکستان، کشمیر، مشرقی پاکستان اور ہندوستان کے سینکڑوں شہروں اور قصبوں کا عرض بلد اور منٹوں کا تفاوت (+ یا -) درج ہے تاکہ مقامی گھڑی کا صحیح وقت معلوم کیا جا سکے۔ چند اہم شہروں کا ریکارڈ:- اسلام آباد / راولپنڈی: عرض بلد 33، تفاوت +8 منٹ- لاہور: عرض بلد 32، تفاوت +3 منٹ- کراچی: عرض بلد 25، تفاوت +32 منٹ- پشاور: عرض بلد 34، تفاوت +14 منٹ- کوئٹہ: عرض بلد 30، تفاوت +30 منٹ- ملتان: عرض بلد 30، تفاوت +14 منٹ- فیصل آباد (لائلپور): عرض بلد 31، تفاوت +8 منٹ- سیالکوٹ: عرض بلد 33، تفاوت +2 منٹ- حیدرآباد: عرض بلد 25، تفاوت +26 منٹ- سرگودھا: عرض بلد 32، تفاوت +9 منٹ- گوجرانوالہ: عرض بلد 32، تفاوت +3 منٹ- بہاولپور: عرض بلد 29، تفاوت +13 منٹ- سکھر: عرض بلد 28، تفاوت +24 منٹ- مظفرآباد (کشمیر): عرض بلد 34، تفاوت +6 منٹ- سری نگر (کشمیر): عرض بلد 34، تفاوت +1 منٹ- ڈھاکہ (مشرقی پاکستان): عرض بلد 24، تفاوت -6 منٹ- چٹاگانگ: عرض بلد 22، تفاوت -7 منٹ- دہلی (بھارت): عرض بلد 29، تفاوت +21 منٹ- بمبئی: عرض بلد 19، تفاوت +38 منٹ- کلکتہ: عرض بلد 23، تفاوت -24 منٹ", "فہرست تصنیفات حضرت کاش البرنی و تعارف کتب (صفحہ 158 تا 162)", "آخری صفحات میں مصنف کی دیگر کتب (آثار النجوم، عددوں کی حکومت، روحانی دنیا، عامل کامل، رموز الجفر، حل المقاصد، رجوع ہمزاد، اسباق النجوم، برنی تقویم وغیرہ) کا تعارف اور قیمتیں درج ہیں۔"]}, {"id": "Al_Saat_Part_2_Section_1_Text", "label": "حصہ دوم — پارٹ ۱ (احکامِ ساعت شمس، قمر اور عطارد)", "paragraphs": ["الساعات (حصہ دوم) — پارٹ 1 (صفحہ 1 تا 44)", "ساعۃ الاخبار و ساعۃ الآثار | مصنف: کاش البرنی | ناشر: اوراق پبلشرز، کراچی", "فہرست ابواب و عنوانات", "1. احکام ساعت شمس (صفحہ 7)2. احکام ساعت قمر (صفحہ 23)3. احکام ساعت عطارد (صفحہ 38)4. احکام ساعت زہرہ (صفحہ 54)5. احکام ساعت مریخ (صفحہ 68)6. احکام ساعت مشتری (صفحہ 81)7. احکام ساعت زحل (صفحہ 96)8. منسوبات کواکب (صفحہ 112)9. نقشہ ساعات روز و شب (صفحہ 117)ہر ستارے کے تحت درج ذیل 31 عنوانات کی مقررہ ترتیب ہے:1- اثرات، 2- منسوبات، 3- اسماء و موکل، 4- مقابلہ دشمن، 5- خاتم تحفظ و غلبہ، 6- خاتم و لوح عروج، 7- افراد، 8- تجارت، 9- چوری، 10- حمل و اولاد، 11- خبر، 12- دفین، 13- زراعت، 14- سلطان و سلطنت، 15- سکونت، 16- سفر، 17- شکار، 18- شراکت، 19- شادی، 20- ضمیر، 21- عورت، 22- غلبہ، 23- غائب، 24- کام سے نیت، 25- گم شدہ، 26- گریختہ، 27- موسم، 28- مرض، 29- حالت مریض، 30- احوال یوم ساعت، 31- نوروز۔", "پیش لفظ: الساعات اخبار و آثار", "ساعتوں کے قانون اور اس کی اہمیت کو حصہ اول میں ظاہر کیا گیا۔ اب اس حصہ دوم میں ساعتوں کی تدبیر کے لیے کواکب کی باطنی فطرت، اسماء، موکلین، عزیمتیں، نقوش، الواح، ادویات اور صدقات کو کتاب الاذکار، کتاب مجموع، کتاب مندل، کتاب ساعت خبر اور سیدی محی الدین ابن عربی قدس سرہ کی کتب سے مرتب کر کے پیش کیا گیا ہے۔ امراض کے باب میں روحانی امراض، سحر و آسیب کی تشخیص اور علاج درج کیے گئے ہیں۔", "احکام ساعت شمس (صفحہ 7 تا 22)", "شمس بارہ بروج کا دورہ ایک سال میں کرتا ہے، ایک برج میں ایک ماہ رہتا ہے اور اتوار کے دن کا مالک ہے۔- منسوبات: برج اسد، دھات سونا، پوشاک حریر زرد، عنصر آتشی۔- اسماء و موکل: موکل 'روقبائیل'، ورد 'یا حی یا قیوم' (اعداد 174)۔- مقابلہ دشمن: سفید خاک پر سورہ والشمس اور سورہ واللیل پڑھ کر دشمن کی طرف پھینکنا۔- خاتم تحفظ و غلبہ: سونے کی لوح یا شمعی موم پر کافور سے چار اسماء (طالع، سعلیط، کلعلک، کلع للک) لکھ کر حریر زرد میں لپیٹ کر دائیں بازو پر باندھنا۔- خاتم و لوح عروج: مسدس نقش (وفق 111) اور خاتم سربلندی شمسی (یا حی یا قیوم)۔- سوالات و احکام: افراد، تجارت (خرید بہتر، فروخت میں کمی)، چوری (سرخ مرغی کے انڈے پر عزیمت لکھ کر گرم جگہ دفن کرنا)، حمل و اولاد (اول ساعت میں لڑکا، آخر میں لڑکی؛ تسہیل ولادت کے لیے سورہ انشقاق کا تعویذ)، خبر، دفین، زراعت، سلطان و سلطنت، سکونت، سفر، شکار، شراکت، شادی، ضمیر، عورت (میاں بیوی میں الفت کا تعویذ 'یا حبیب من لا حبیب لہ...')، غلبہ، غائب، کام پورا ہونا (دو رکعت نفل اور 70 سانسوں میں 'یا ربی یا اللہ' کا عمل)، گم شدہ، گریختہ، مرض و علاج (زعفران، روغن زیتون، لونگ، لیموں، پھٹکری، عنبر کی مالش اور آیت الکرسی پینے کا عمل)، حالت مریض (اتوار کی بارہ ساعتوں کا حکم)، احوال یوم ساعت اتوار اور نوروز شمسی۔", "احکام ساعت قمر (صفحہ 23 تا 37)", "قمر بارہ بروج کا دورہ 28 یا 29 دنوں میں کرتا ہے اور سوموار کے دن کا مالک ہے۔- منسوبات: برج سرطان، شرف برج ثور، دھات چاندی، پوشاک سفید، عنصر آبی۔- اسماء و موکل: ملک حضرت جبرائیل علیہ السلام، ورد 'یا رحمن یا رحیم' (اعداد 556)۔- مقابلہ دشمن: ایک مشت خاک پر سورہ فجر پڑھ کر دشمن کی طرف پھینکنا۔- خاتم تحفظ و غلبہ و عروج: چاندی کی لوح پر اسماء اور مثلث قمری (وفق 45) مع لوح اسمائے حسنیٰ۔- سوالات و احکام: افراد، تجارت (وظیفہ 'کہیعص حمعسق' 2051 بار روزانہ)، چوری، حمل و اولاد (ناریل کا پانی پلانا اور تحفظ حمل کے اعمال)، خبر، دفین (چہل کاف لکھ کر سفید مرغ کے گلے میں باندھنا)، زراعت، سلطان، سکونت، سفر (چلتے وقت اذان و اقامت، آیت الکرسی اور 'فاللّٰہ خیر حافظا وہو ارحم الراحمین')، شکار، شراکت، شادی، ضمیر، غلبہ، غائب، کام یا مقصد کا حصول، گم شدہ، گریختہ، مرض و علاج (سفید مرغی کا صدقہ، سورہ کافرون و قریش چینی کے برتن پر لکھ کر پلانا اور بخور)، حالت مریض (سوموار کی بارہ ساعتوں کا حکم)، احوال یوم ساعت قمر اور نوروز قمری۔", "احکام ساعت عطارد (صفحہ 38 تا 44 — ابتدائی حصہ)", "عطارد بارہ بروج کا دورہ چھ سات ماہ میں کرتا ہے اور بدھ کے دن کا مالک ہے۔- منسوبات: برج جوزا و سنبلہ، پوشاک زرد، دن بدھ۔- اسماء و موکل: ملک حضرت میکائیل علیہ السلام، ورد 'یا علی یا عظیم' (اعداد 1130)۔- مقابلہ دشمن: سرخ خاک پر سورہ زلزال اور سورہ لم یکن پڑھ کر پھینکنا۔- خاتم تحفظ و غلبہ و عروج: چاندی و تانبے کی لوح اور ہفت در ہفت نقش (وفق 175)۔- سوالات و احکام: افراد، چوری، حمل و اولاد (سورہ رعد کی آیات اور تحفظ حمل کا حرز)، خبر، اور دفین (خاتم و لوح مربع)۔"]}, {"id": "Al_Saat_Part_2_Section_2_Text", "label": "حصہ دوم — پارٹ ۲ (احکامِ ساعت زہرہ، مریخ اور مشتری)", "paragraphs": ["الساعات (حصہ دوم) — پارٹ 2 (صفحہ 45 تا 85)", "ساعۃ الاخبار و ساعۃ الآثار | مصنف: کاش البرنی | ناشر: اوراق پبلشرز، کراچی", "بقیہ احکام ساعت عطارد (صفحہ 45 تا 53)", "- سلطان و سلطنت، سکونت، سفر (چلتے وقت صدقہ اور 'بسم اللہ لا حول ولا قوۃ الا باللہ توکلت علی اللہ' کا مربع نقش)۔- شکار (حروف صوامت 'بدوح اجهزط' شکار گاہ میں لٹکانا)، شراکت، شادی (جمعہ کے دن طلوع شمس کے وقت مشک و زعفران سے اسماء لکھنا اور استقامت زوجین کے لیے سورہ رحمن آیت 32 تا 34 کا نقش)۔- ضمیر، غلبہ (آیات سورہ رعد، یوسف و طارق کا تعویذ)، غائب، کام (صبح کی نماز کے بعد طلوع آفتاب کے وقت سورہ کافرون 10 بار)، گم شدہ (گھر کے چاروں کونوں میں 'بسم اللہ مکین...' کے نقوش)، گریختہ۔- مرض و علاج (پگڑی یا ٹوپی میں رکھنے اور باسی پانی چھڑکنے کی عزیمت 'اذہب الباس رب الناس...'، کبوتر کے بچے کا نسخہ اور سورہ حشر کی آخری آیات)۔- حالت مریض (بدھ کی بارہ ساعتوں کا حکم)، احوال یوم ساعت بدھ اور نوروز عطاردی۔", "احکام ساعت زہرہ (صفحہ 54 تا 67)", "زہرہ بارہ بروج کا دورہ دس گیارہ ماہ میں کرتا ہے اور جمعہ کے دن کا مالک ہے۔- منسوبات: برج ثور (خاکی) و میزان (بادی)، شرف برج حوت، دھات جست/چاندی و تانبا، پوشاک سفید، سعد اصغر۔- اسماء و موکل: موکل 'عینیائیل'، ورد 'یا کافی یا غنی' (اعداد 1171)۔- مقابلہ دشمن: سیاہ مٹی پر سورہ قریش و کافرون پڑھ کر پھینکنا۔- لوح عشق و محبت و تسخیر و عروج: ہفت در ہفت نقش (وفق 175) اور خاتم زہرہ۔- سوالات و احکام: افراد، تجارت، چوری، حمل و اولاد، خبر، دفین، زراعت، سلطان، سکونت، سفر، شکار، شراکت، شادی، ضمیر، عورت، غلبہ، غائب (رات کو تنہائی میں 'یا معید' 70 بار اور 'یا معید رد علی فلاں بن فلاں' 70 بار)، کام (قضائے حاجات کا تعویذ)، گم شدہ، گریختہ (عزیمت 'انہ علی رجعہ لقادر یوم تبلی السرائر')، مرض و علاج (سحر و آسیب کے لیے جامع تعویذ 'واتبعوا ما تتلوا الشیاطین...' اور دعا محی الرفات)، حالت مریض (جمعہ کی بارہ ساعتوں کا حکم)، احوال یوم ساعت جمعہ اور نوروز زہرہ۔", "احکام ساعت مریخ (صفحہ 68 تا 80)", "مریخ آسمان پنجم پر طلوع کرتا ہے، بارہ بروج کا دورہ بیس ماہ میں کرتا ہے اور منگل کے دن کا مالک ہے۔- منسوبات: برج حمل (آتشی) و عقرب (آبی)، دھات لوہا، پوشاک حریر زرد، نحس منسوب۔- اسماء و موکل: ملک حضرت عزرائیل علیہ السلام، ورد 'یا مالک یا قدوس' (اعداد 261)۔- مقابلہ دشمن: سرخ مشت خاک پر سورہ الم نشرح اور سورہ انا انزلنا پڑھ کر پھینکنا۔- خاتم تحفظ و غلبہ و عروج: سرخ تانبے کی لوح اور نقش مخمس (وفق 65)۔- سوالات و احکام: افراد، تجارت (آیت 'ان تقرضوا اللہ قرضا حسنا...' کا مربع ذوالکتابت)، چوری، حمل و اولاد (آیات الحفظ اور سرخ دنبہ کا صدقہ)، خبر، دفین، زراعت (کھیت کی حفاظت کے لیے چار ٹھیکریوں کا نقش)، سلطان، سکونت، سفر، شکار، شراکت، شادی، ضمیر، غلبہ، غائب، کام، گم شدہ، گریختہ (روغن زیتون پر سورہ یاسین 7 بار پڑھ کر شیشی بند کرنا)، مرض و علاج (25 قسم کی ادویہ کا معجون اور آیات شفا)، حالت مریض (منگل کی بارہ ساعتوں کا حکم)، احوال یوم ساعت منگل اور نوروز مریخ۔", "احکام ساعت مشتری (صفحہ 81 تا 85 — ابتدائی حصہ)", "مشتری آسمان ششم پر طلوع کرتا ہے، بارہ بروج کا دورہ تیرہ سال میں کرتا ہے اور جمعرات کے دن کا مالک ہے۔- منسوبات: برج قوس و حوت، دھات ٹن/چاندی، رنگ سفید، سعد اکبر۔- اسماء و موکل: ملک حضرت اسرافیل علیہ السلام، ورد 'یا کبیر یا متعال' (اعداد 773)۔- مقابلہ دشمن: سفید خاک پر سورہ عادیات اور سورہ عصر پڑھ کر پھینکنا۔- خاتم تحفظ و غلبہ و عروج: چاندی و قلعی کی لوح اور خاتم مشتری۔- سوالات و احکام: افراد اور تجارت۔"]}, {"id": "Al_Saat_Part_2_Section_3_Text", "label": "حصہ دوم — پارٹ ۳ (احکامِ ساعت زحل، دعائے محی الرفات، جامع جدول)", "paragraphs": ["الساعات (حصہ دوم) — پارٹ 3 (صفحہ 86 تا 124)", "ساعۃ الاخبار و ساعۃ الآثار | مصنف: کاش البرنی | ناشر: اوراق پبلشرز، کراچی", "بقیہ احکام ساعت مشتری (صفحہ 86 تا 95)", "- چوری: سورہ قدر، اخلاص، ناس اور فلق 7-7 بار پڑھ کر بزرگ کی روح کو بخشنے اور اسماء ہوا میں لٹکانے کا عمل۔- حمل و اولاد، خبر، دفین (سحر باطل کرنے کے لیے سورہ بقرہ آیت 102 دریا کے پانی پر پڑھ کر چھڑکنا)۔- زراعت (چار کوری ٹھیکریوں پر 'یا موسی انہ عیسی انہ من سلیمان وانہ بسم اللہ الرحمن الرحیم' لکھ کر گاڑنا)۔- سلطان و سلطنت، سکونت، سفر، شراکت، شادی (رکاوٹ دور کرنے کا تعویذ 'یا ملطیاہا یا ہلطیاہا...')، ضمیر، غلبہ، غائب، کام، گم شدہ۔- مرض و علاج: کبوتر یا مینڈھے کا صدقہ، سورہ فجر کے پانی سے غسل، آیات شفا کا تعویذ، حرز ابی دجانہ اور سات قاریوں کے نام۔- حالت مریض (جمعرات کی بارہ ساعتوں کا حکم)، احوال یوم ساعت جمعرات اور نوروز مشتری۔", "احکام ساعت زحل (صفحہ 96 تا 110)", "زحل آسمان ہفتم پر واقع ہے، بارہ بروج کا دورہ تیس سال میں کرتا ہے اور ہفتہ کے دن کا مالک ہے۔- منسوبات: برج جدی (خاکی) و دلو (بادی)، دھات لوہا/سیسہ، رنگ سیاہ، نحس اکبر۔- اسماء و موکل: موکل حضرت سیدنا کسفیائیل علیہ السلام، ورد 'یا فتاح یا رزاق' (اعداد 797)۔- مقابلہ دشمن: سفید خاک پر سورہ اخلاص، فلق اور ناس پڑھ کر پھینکنا۔- لوح محبت و تسخیر و عروج: لوہے کی دھات یا موم پر اسماء اور نقش نو در نو (وفق 369)۔- سوالات و احکام: افراد، تجارت، چوری، حمل و اولاد (آیات حفاظت 'فسیفیکہم اللہ...'، 'انا نحن نزلنا الذکر...' وغیرہ)، خبر، دفین (سحر و جنات کے دفعیہ کی عزیمت)، زراعت (سورہ انعام آیت 95 'ان اللہ فالق الحب والنوى...' کا عمل)، سلطان، سکونت، سفر (چلتے وقت چار کنکروں پر دم کر کے چاروں سمتوں میں پھینکنے کا عمل)، شراکت، شادی (مخمس اور مربع نقش 786)، ضمیر، غلبہ، غائب، کام، گم شدہ، موسم۔- مرض و علاج: سوداوی امراض اور جنات کے اثر کے لیے 25 ادویہ کا معجون، سورہ حشر، سورہ بینہ، سورہ قلم (وان یکاد الذین کفروا...) اور اسمائے اصحاب کہف (مکسلمینا، یملیخا، مرطونس، بینونس، سارینونس، ذونوانس، کشفططیونس و کلبہم قطمیر) کا تعویذ۔- حالت مریض (ہفتہ کی بارہ ساعتوں کا حکم)، احوال یوم ساعت ہفتہ اور نوروز زحل۔", "دعائے محی الرفات (صفحہ 111)", "تمام آفات و بلیات کے دفعیہ اور تحفظ کی جامع دعا:اللهم یا محی الرفات یا دافع الآفات یا واقی المخافات ویا کریم المكافات ویا مولی العفاۃ ویا ولی العفو والمعافاۃ صل علی محمد خاتم انبیائک وعلی مصابیح اسرتہ ومفاتیح نصرتہ واعذنی اللهم من نزغات الشیاطین... (مکمل عربی دعا)۔", "منسوبات کواکب کی جامع جدول (صفحہ 112 تا 116)", "ان صفحات میں ساتوں سیاروں (شمس، قمر، عطارد، زہرہ، مریخ، مشتری، زحل) کی 30 خصوصیات کا تقابلی جدول دیا گیا ہے:1- اشخاص، 2- حلیہ، 3- پیشہ و مشابہت، 4- اوصاف و خصائل، 5- مزاج، 6- سمت، 7- لیلی و نہاری، 8- جنس، 9- رنگ، 10- شکل، 11- دن، 12- اعضاء، 13- امراض، 14- زمانہ قوت طبیعی، 15- قوائے انسانی، 16- جگہ، 17- عزیزان، 18- اسلحہ، 19- میوہ جات، 20- بوئے، 21- ذائقہ، 22- بخور، 23- خوراک، 24- معدنیات، 25- جواہر، 26- حیوانات، 27- اسم الٰہی، 28- صدقات، 29- وقت صدقہ۔", "نقشہ ساعات روز و شب اور فہرست کتب (صفحہ 117 تا 124)", "- صفحہ 117 پر طلوع سے غروب تک دن کی 12 ساعتوں (الشروق، الرد، المنور، الرحیل، العابرة، الزوال، القیلولہ، الجوع، الابرار، العصر، الاصیل، الطفل) اور غروب سے طلوع تک رات کی 12 ساعتوں (الشفق، العتمۃ، الغسق، السرفۃ، المظلمۃ، الجوزاء، الزلفۃ، المغفرۃ، السحر، الفجر، الصبح، الابراد) کا ہفتہ وار مکمل نقشہ دیا گیا ہے۔- آخری صفحات (118 تا 124) میں مصنف حضرت کاش البرنی کی تصنیفات (الساعات، عامل کامل، آثار النجوم، اسباق النجوم، رجوع ہمزاد، حل المقاصد، قواعد عملیات، پتھروں کے سحری خواص، برنی تقویم، رموز الجفر، عددوں کی حکومت) کا تعارف اور قیمتیں درج ہیں۔"]}]}};
+  window.AL_RAQI_SAAET_REFERENCE_V23 = {"forbidden_times": "نصف النہار (زوال) اور نصف اللیل سے ۸ منٹ پہلے اور ۸ منٹ بعد (کل ۱۶ منٹ) ہر عمل اور تعویذ ممنوع ہے۔", "day_hours_ar": ["الشروق", "الرد", "المنور", "الرحیل", "العابرة", "الزوال", "القیلولة", "الجوع", "الابرار", "العصر", "الاصیل", "الطفل"], "night_hours_ar": ["الشفق", "العتمة", "الغسق", "السرق", "المظلمة", "الجوزاء", "الزلفة", "المغفرة", "السحر", "الفجر", "الصبح", "الابراد"], "nahs_hijri_dates": {"1": [11, 14], "2": [2, 11, 20], "3": [2, 10, 20], "4": [1, 11, 28], "5": [10, 11, 28], "6": [1, 11, 28], "7": [12, 13], "8": [14, 20, 26], "9": [3, 12, 24], "10": [2, 6, 8], "11": [2, 6, 18], "12": [2, 8, 28]}, "ayyam_malana": [11, 12, 13, 14, 19, 20, 21, 25, 26, 29, 30], "planets": [{"id": "sun", "name": "شمس (اتوار)", "dayIdx": 0, "angel": "روقیائیل (علوی) / ابو عبداللہ المذہب (سفلی)", "wird": "یا حی یا قیوم (۱۷۴ بار)", "elem": "آتشی (مشرق)", "metal": "سونا", "bakhoor": "عود، صندل سرخ، زعفران (دن: قسط)", "friends": "قمر، مریخ، مشتری", "enemies": "زہرہ، زحل", "neutral": "عطارد", "sadqa": "گندم، صندل سرخ، قند سیاہ، تانبا، سرخ جانور (اتوار طلوعِ آفتاب)", "health": "زیادہ سوچنے سے ضعفِ قلب کا اندیشہ — ذہنی دباؤ سے بچیں۔", "use": "حکومت، عزت و مرتبت، تسخیرِ افسران، مسدس (۱۱۱) اور ترقیِ کاروبار (شرف: ۱۹° حمل، ہبوط: ۱۹° میزان)۔"}, {"id": "moon", "name": "قمر (پیر)", "dayIdx": 1, "angel": "جبرائیل / شدحائیل (علوی) / مرہ الابیض (سفلی)", "wird": "یا رحمٰن یا رحیم (۵۵۶ بار)", "elem": "آبی (شمال)", "metal": "چاندی", "bakhoor": "لوبان، کافور، صندلین، عود (دن: مقل ازرق)", "friends": "شمس، عطارد", "enemies": "کوئی نہیں", "neutral": "مریخ، مشتری، زہرہ، زحل", "sadqa": "برنج (چاول)، دہی، نقرہ، کافور، سفید کپڑا (پیر شام)", "health": "دست اور بدہضمی کا فوری علاج کرائیں۔", "use": "صحت و شفا، سفر، گھریلو امور، تسخیرِ خلق اور مثلث قمری (شرف: ۳° ثور، ہبوط: ۳° عقرب — قمر در عقرب میں پرہیز)۔"}, {"id": "mars", "name": "مریخ (منگل)", "dayIdx": 2, "angel": "سمسمائیل / عزرائیل (علوی) / ابو محرز الاحمر (سفلی)", "wird": "یا مالک یا قدوس (۲۶۱ بار)", "elem": "آتشی (جنوب)", "metal": "لوہا / تانبا", "bakhoor": "سندروس، قسط، رائی، دارچینی (دن: عود)", "friends": "شمس، قمر، مشتری", "enemies": "عطارد", "neutral": "زہرہ، زحل", "sadqa": "گندم، قند سیاہ، دال مسور، تانبا، مونگا، سرخ کپڑا (منگل دو گھڑی دن چڑھے)", "health": "آگ، گرمی، زخم اور حادثات سے بچاؤ کی احتیاط کریں۔", "use": "دشمن پر فتح، مقدمات میں غلبہ، حفاظت اور مخمس/معشر (شرف: ۲۸° جدی، ہبوط: ۲۸° سرطان)۔"}, {"id": "mercury", "name": "عطارد (بدھ)", "dayIdx": 3, "angel": "میکائیل / نوائیل (علوی) / برقان (سفلی)", "wird": "یا علی یا عظیم (۱۱۳۰ بار)", "elem": "بادی (مغرب)", "metal": "پلاٹینیم / کانسی / پارہ", "bakhoor": "مصطکی، لوبان، گوگل، چنبیلی کی جڑ (دن: لبان)", "friends": "شمس، زہرہ", "enemies": "قمر", "neutral": "مریخ، مشتری، زحل", "sadqa": "لونگ، کانسی کا برتن، روغنِ زرد، سبز کپڑا (بدھ پانچ گھڑی دن چڑھے)", "health": "غم و فکر اور خوف صحت کے لیے خطرہ ہیں — سکون اختیار کریں۔", "use": "علم و حافظہ، امتحان، تجارت، زبان بندی، دفعِ وسوسہ و سحر (شرف: ۱۵° سنبلہ، ہبوط: ۱۵° حوت)۔"}, {"id": "jupiter", "name": "مشتری (جمعرات)", "dayIdx": 4, "angel": "صرفیائیل / اسرافیل (علوی) / شمہورش (سفلی)", "wird": "یا کبیر یا متعال (۷۷۳ بار)", "elem": "آتشی (شمال مشرق)", "metal": "ٹن / قلعی / چاندی", "bakhoor": "حب الغار، صندل سرخ، عود، عنبر (دن: فلفل)", "friends": "شمس، قمر، مریخ", "enemies": "عطارد، زہرہ", "neutral": "زحل", "sadqa": "دال چنا، زرد کپڑا، شکر، ہلدی، نمک، زرد عقیق (جمعرات شام)", "health": "انجمادِ خون اور ثقیل غذا سے احتیاط کریں۔", "use": "مرادوں کا بر آنا، کشائشِ رزق، دولت، ترقیِ کاروبار، شادی و لمبے سفر (شرف: ۱۵° سرطان، ہبوط: ۱۵° جدی)۔"}, {"id": "venus", "name": "زہرہ (جمعہ)", "dayIdx": 5, "angel": "عینیائیل (علوی) / زوبعہ ابیض (سفلی)", "wird": "یا کافی یا غنی (۱۱۷۱ بار)", "elem": "بادی (مغرب/جنوب مشرق)", "metal": "تانبا / جست / چاندی", "bakhoor": "زعفران، صندل سفید، کافور، مشک (دن: عود)", "friends": "عطارد، زحل", "enemies": "شمس، قمر", "neutral": "مریخ، مشتری", "sadqa": "چاول، سفید و سرخ کپڑا، چاندی، گھی، کافور (جمعہ طلوعِ آفتاب)", "health": "حلق کے امراض اور چوٹوں کا فوری علاج کرائیں۔", "use": "محبت، دوستی، شادی، تسخیرِ مطلوب، سحر و آسیب کا جامع تعویذ (شرف: ۲۷° حوت، ہبوط: ۲۷° سنبلہ)۔"}, {"id": "saturn", "name": "زحل (ہفتہ)", "dayIdx": 6, "angel": "کسفیائیل (علوی) / میمون سیاف السحابی (سفلی)", "wird": "یا فتاح یا رزاق (۷۹۷ بار)", "elem": "خاکی (جنوب/جنوب مشرق)", "metal": "سکہ / سیسہ / لوہا", "bakhoor": "میعہ سائلہ، رال، سیاہ دانہ، قرنفل (دن: پودینہ/حنظل)", "friends": "عطارد، زہرہ", "enemies": "شمس، قمر، مریخ", "neutral": "مشتری", "sadqa": "لوہا، کالا کپڑا، ماش سیاہ، سرسوں کا تیل، کالا نمک (ہفتہ دوپہر)", "health": "ہڈی کے زخم، سردی اور خشکی زکام سے بچیں؛ حمل میں احتیاط۔", "use": "جائیداد کی بقاء و تحفظ، بندش، ثبات اور دفعِ سحر و جنات (شرف: ۲۱° میزان، ہبوط: ۲۱° حمل — نحسِ اکبر)۔"}], "city_lmt_offsets": [{"city": "اسلام آباد / راولپنڈی", "lat": 33, "offset_min": "+8"}, {"city": "لاہور", "lat": 32, "offset_min": "+3"}, {"city": "کراچی", "lat": 25, "offset_min": "+32"}, {"city": "پشاور", "lat": 34, "offset_min": "+14"}, {"city": "کوئٹہ", "lat": 30, "offset_min": "+30"}, {"city": "ملتان", "lat": 30, "offset_min": "+14"}, {"city": "فیصل آباد", "lat": 31, "offset_min": "+8"}, {"city": "سیالکوٹ", "lat": 33, "offset_min": "+2"}, {"city": "حیدرآباد", "lat": 25, "offset_min": "+26"}, {"city": "سرگودھا", "lat": 32, "offset_min": "+9"}, {"city": "گوجرانوالہ", "lat": 32, "offset_min": "+3"}, {"city": "بہاولپور", "lat": 29, "offset_min": "+13"}, {"city": "سکھر", "lat": 28, "offset_min": "+24"}, {"city": "مظفرآباد (کشمیر)", "lat": 34, "offset_min": "+6"}]};
+  window.AL_RAQI_AAMIL_PRACTICAL_V23 = {"taweez": [{"cat": "رزق و قرض", "title": "برکت و کشائشِ رزق (نقشِ اجل و اللہ لطیف بعبادہ)", "naqsh": "مثلث ۳×۳ (وفق ۲۷۹) یا نقشِ اجل (۳۶ بار روزانہ ۴۰ دن)", "seed": "الله لطيف بعباده", "type": "musallas", "note": "جمعہ یا مشتری کی ساعت میں زعفران سے سفید کاغذ پر لکھیں؛ داہنی ران پر رکھ کر شیریں چیز منہ میں رکھیں۔"}, {"cat": "رزق و قرض", "title": "کاروبار اور ترقی (تسمیہ ۷۸۶ و مخمس ۲۱۹۹)", "naqsh": "مثلث (۷۸۶) یا مربع (۷۸۶) یا مخمس (۲۱۹۹ — ولقد مکناکم فی الارض)", "seed": "بسم الله الرحمن الرحيم", "type": "murabba", "note": "کاروبار کی کشائش کے لیے بادی چال میں لکھ کر پھل دار درخت (انار/شہتوت) پر لٹکائیں یا پاس رکھیں۔"}, {"cat": "رزق و قرض", "title": "ادائیگیِ قرض اور تنگی سے نجات", "naqsh": "مربع (یا کافی یا غنی یا رزاق — ۸۴ بار روزانہ) + اللھم اکفنی بحلالک عن حرامک (۱۰۱ بار)", "seed": "يا كافي يا غني يا رزاق", "type": "murabba", "note": "فجر کی سنت و فرض کے درمیان ۱۰۱ بار دعا پڑھنا مجرب ہے۔"}, {"cat": "جادو و آسیب", "title": "دفعِ آسیب و سحر (حرزِ ابی دجانہؓ و حصار)", "naqsh": "مربع نقش + حرزِ ابی دجانہؓ (اعمالِ قدرت — بلا چلہ و اجازت)", "seed": "فسيكفيكهم الله وهو السميع العليم", "type": "murabba", "note": "جن بھوت کے عملیات میں گوگل، ہینگ، سرسوں اور بلیلہ گرد کا بخور دیں (قواعدِ عملیات)۔"}, {"cat": "جادو و آسیب", "title": "دعائے محی الرفات اور سحر کا توڑ", "naqsh": "ساعتِ زہرہ/زحل میں آیاتِ ابطالِ سحر و دعائے محی الرفات کا تعویذ", "seed": "واتبعوا ما تتلوا الشياطين", "type": "zulkitabat", "note": "اگر گھر/دکان میں کسی کا کیا تعویذ ملے تو فوراً پانی میں بہائیں اور گھر آ کر نہا کر کپڑے بدلیں۔"}, {"cat": "محبت و شادی", "title": "محبت، الفت اور شادی کی رکاوٹ دور کرنا", "naqsh": "مخمس ۵×۵ (یا نقش زوج ۲×۲ فتح الباب — ۲، ۴، ۶، ۸ بدوح) یا مسبع ۷×۷ (زہرہ)", "seed": "يا ودود يا لطيف", "type": "mukhammas", "note": "عروجِ ماہِ قمری میں مشک و زعفران سے داہنی ران پر کاغذ اور منہ میں شیریں چیز رکھ کر لکھیں (مرد کا نام پہلے)۔"}, {"cat": "حفاظت و دشمن", "title": "دشمن پر فتح، زبان بندی (عقد اللسان) اور حفاظت", "naqsh": "مربع ۴×۴ (صم بکم عمی) یا مثلث خاکی چال (زبان بندی و ثبات)", "seed": "صم بكم عمي فهم لا يرجعون", "type": "murabba", "note": "زبان بندی میں منہ میں تھوڑا موم رکھیں یا زبان دانتوں میں دبائیں؛ خاکی تعویذ بھاری پتھر کے نیچے دفن کریں۔"}, {"cat": "حفاظت و دشمن", "title": "قید و بند سے نجات اور ہر آفت سے تحفظ (فتح الباب)", "naqsh": "نقش زوج ۲×۲ (فتح الباب: ۲، ۴، ۶، ۸) اور آیاتِ کفایات (۶۰۰ یا ۶۰ بار)", "seed": "وكفى بالله وليا وكفى بالله نصيرا", "type": "murabba", "note": "شروع کرنے سے پہلے الحمد، آیت الکرسی اور چاروں قل ۳-۳ بار پڑھ کر حصار باندھ لیں۔"}, {"cat": "بیماری و شفا", "title": "شفا، صحت اور جسمانی امراض (آبی چال و متسع)", "naqsh": "مثلث آبی چال (شمالی — شفا و رہائی) یا متسع ۹×۹ (قمر)", "seed": "واذا مرضت فهو يشفين", "type": "musallas", "note": "آبی تعویذ کاغذ یا چینی کی طشتری پر زعفران سے لکھ کر پلائیں یا جاری پانی میں بہائیں۔"}, {"cat": "اولاد و حمل", "title": "نیتِ فرزند اور حفاظتِ حمل", "naqsh": "الواحد الاحد (۹۴ بار) + رب لا تذرنی فردا وانت خیر الوارثین کا تعویذ", "seed": "رب لا تذرني فردا وانت خير الوارثين", "type": "zulkitabat", "note": "ساعتِ مشتری یا شمس اور سعد قمری تاریخ میں لکھیں؛ زحل کی ساعت اور نحس تاریخوں سے بچیں۔"}, {"cat": "امتحان و حافظہ", "title": "قوتِ ذہن، امتحان میں کامیابی اور علم (عطارد)", "naqsh": "مربع (۱۶۱۵ سے شروع) یا مثمن ۸×۸ (کوکب عطارد — علم و حکمت)", "seed": "رب زدني علما", "type": "murabba", "note": "بدھ کو ساعتِ عطارد میں مصطکی/لوبان کا بخور دے کر زعفران سے لکھیں۔"}, {"cat": "گمشدہ و سفر", "title": "گمشدہ شخص یا مال کی واپسی", "naqsh": "یا معید (۷۰ بار) + انہ علی رجعہ لقادر یوم تبلی السرائر کا تعویذ", "seed": "انه على رجعه لقادر", "type": "musallas", "note": "سفر میں حفاظت کے لیے قمر کی ساعت میں آیت الکرسی اور اقامت کا عمل کریں۔"}], "chaals": [{"name": "آتشی چال و تعویذ (سمت مشرق — ناری)", "use": "جلالی و تیز اثر اعمال، تفریق، دشمن پر غلبہ — استعمال: آگ میں جلائے جائیں، آگ کے نیچے دفن ہوں یا بتی بنا کر چراغ میں جلائے جائیں۔"}, {"name": "بادی چال و تعویذ (سمت مغرب — ہوائی)", "use": "فتوحات، ترقی، حاجات، تسخیرِ قلوب — استعمال: ہوا میں لٹکائے جائیں (خیر: پھل دار درخت انار/شہتوت؛ شر: کانٹے دار درخت کیکر/نیم)۔"}, {"name": "آبی چال و تعویذ (سمت شمال — مائی)", "use": "محبت، شفا، رہائی، قضائے حاجات — استعمال: کاغذ/چینی کی طشتری پر لکھ کر پلائیں، پانی کنارے دفن کریں یا جاری پانی/دریا میں بہائیں۔"}, {"name": "خاکی چال و تعویذ (سمت جنوب — ترابی)", "use": "قید، زبان بندی، خواب بندی، دفعِ سحر، ثبات — استعمال: زمین میں یا بھاری پتھر کے نیچے یا مطلوب کی گزرگاہ/چوکھٹ میں دفن کریں۔"}], "orders": [{"order": "زوج ۲×۲ (فتح الباب)", "use": "قید و بند سے نجات، حفاظت، کشائشِ رزق اور محبت (خانے: ۲، ۴، ۶، ۸)"}, {"order": "مثلث ۳×۳ (طرح ۱۲ — زکوٰۃ اصغر: ۶۰ دن)", "use": "فرد الفرد (اعمالِ جلالی)، انفصال، قیدی کی خلاصی اور فوری اثر"}, {"order": "مربع ۴×۴ (طرح ۳۰ — زکوٰۃ اصغر: ۳۴ دن)", "use": "زوج الزوج (اعمالِ جمالی)، تسخیر، دولت، زبان بندی اور ۵۹ اسمائے حسنیٰ کے نقوش"}, {"order": "مخمس ۵×۵ (طرح ۶۰ — زکوٰۃ اصغر: ۶۵ دن)", "use": "محبت، جذبِ قلوب، تسخیر اور ذوالکتابت آیاتِ حب"}, {"order": "مسدس ۶×۶ (طرح ۱۰۵ — شمس)", "use": "زوج الفرد (دنیوی اعمال)، تسخیرِ حکام، علوِ مرتبت اور دفعِ دشمنان"}, {"order": "مسبع ۷×۷ (طرح ۱۶۸ — زہرہ)", "use": "محبت، شادی، دلعزیزی اور فنونِ لطیفہ کے اعمال"}, {"order": "مثمن ۸×۸ (طرح ۲۵۲ — عطارد)", "use": "علم و حکمت، امتحان، تجارت اور زبان بندی"}, {"order": "متسع ۹×۹ (طرح ۳۶۰ — قمر)", "use": "سفر، شفا، صحت اور گھریلو امور"}, {"order": "معشر ۱۰×۱۰ (طرح ۴۹۵ — مریخ)", "use": "دشمن پر غلبہ، مقدمات میں فتح اور حفاظت"}], "precautions": [{"t": "اوقاتِ ممنوع العمل اور شرعی حدود (الساعات و قواعدِ عملیات)", "d": "ہر روز نصف النہار (زوال) اور نصف اللیل سے ۸ منٹ پہلے اور ۸ منٹ بعد (کل ۱۶ منٹ) ہر عمل ممنوع ہے۔ نیز جس تعویذ میں اللہ کا نام نہ ہو یا غیر شرعی نام ہوں وہ جائز نہیں؛ شادی شدہ جوڑے میں بلا شرعی ضرورت جدائی ہرگز نہ کریں۔"}, {"t": "طہارت، حصار اور واجباتِ عامل", "d": "باوضو، باطہارت، اکلِ حلال اور صدقِ مقال لازم ہے۔ منہ میں لہسن، پیاز یا تمباکو کی بو نہ ہو۔ لکھنے سے پہلے الحمد، آیت الکرسی اور چاروں قل ۳-۳ بار پڑھ کر حصار باندھیں اور «یا حافظ یا حفیظ یا رقیب یا وکیل» ۷ بار پڑھ کر دم کریں۔ بے وضو قرآنی تعویذ چھونا یا دھونا جائز نہیں۔"}, {"t": "قلم تراشنے کا قانون اور ناخن پر کلمہ", "d": "وجِ حلال سے نیا قلم لیں؛ اعمالِ خیر میں اپنی طرف اور غضب میں دوسری طرف رخ کر کے تراشیں (۳ بار درود، ۵ بار اقرا باسم ربک...، «یا مستعان اقض حاجتی»)۔ مکمل ہونے تک قلم زمین پر نہ رکھیں۔ ناخن پر قمر کے برج کا کلمہ لکھیں: آتشی: اطمفشذ | بادی: بومینستض | آبی: جزکسقثظ | خاکی: دحلعرخغ۔"}, {"t": "طریقِ نشست، سیاہی، کاغذ اور رجال الغیب", "d": "اعمالِ خیر میں دو زانو (التحیات)، سفید کاغذ، زعفران (مع عرقِ گلاب/کیوڑہ)، داہنی ران پر کاغذ اور منہ میں شیریں چیز/الائچی رکھیں۔ غضب میں سرخ/نیلا کاغذ، کالی/نیلی سیاہی، بائیں ران پر کاغذ اور منہ میں تلخ چیز؛ زبان بندی میں موم/زبان دانتوں میں۔ رجال الغیب کو پشت پر یا بائیں جانب رکھیں۔"}, {"t": "بخورات (سیارے، دن اور جن بھوت)", "d": "زحل: میعہ سائلہ/سیاہ دانہ | مریخ: سندروس/قسط | مشتری: حب الغار/صندل سرخ | شمس: عود/زعفران | زہرہ: زعفران/صندل سفید | عطارد: مصطکی/لوبان | قمر: لوبان/کافور۔ دن کے بخور: اتوار قسط، پیر مقل ازرق، منگل عود، بدھ لبان، جمعرات فلفل، جمعہ عود، ہفتہ پودینہ/حنظل۔ جن بھوت: گوگل، ہینگ، سرسوں، بلیلہ گرد۔"}, {"t": "ابجد، نام اور اصلاحِ عددین کا قانون", "d": "ہمیشہ طالب مع والدہ اور مطلوب مع والدہ کا اصل نام لیں (نقش کے اندر بن/بنت نہ لکھیں، عزیمت میں لکھیں)۔ مکتوبی حروف شمار ہوں گے، مشدد حرف ایک بار، الفِ مقصورہ (موسیٰ/عیسیٰ) = ۱۰، تائے تانیث (صلوٰۃ/زکوٰۃ) = ۵۔ کسر آنے پر موافق اسمِ الٰہی/حرف سے اصلاحِ عددین کریں۔"}, {"t": "تعویذ کا خاتمہ، ادب اور پرہیز", "d": "نقش کے چاروں طرف «قولہ الحق ولہ الملک» و ملائکہ، اور ختم پر «الحمد للہ» کہیں۔ کام ہو جانے پر تعویذ کو قبرستان میں احتیاط سے دفن کریں۔ نوچندی دن: نئے چاند کے ۳ دن (سوتک) چھوڑ کر ۴ تا ۱۰ تاریخ کی پہلی جمعرات۔ پرہیزِ جلالی میں گوشت، مچھلی، انڈا، دودھ، گھی، لہسن، پیاز ترک؛ پرہیزِ جمالی میں گوشت، مچھلی، مکھن، سرکہ، پیاز، لہسن ترک۔"}]};
+
+  function escHtml(s){
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ---- 0. LIVE HIJRI NAHS/SAAD + AYYAM FARIGHA/MALANA + NOCHANDI CHECKER (Qawaid-e-Amliyat) ----
+  window.getTodayQawaidStatusV23 = function(){
+    var now = new Date();
+    var hD = 1, hM = 1;
+    try {
+      var fmt = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { day: 'numeric', month: 'numeric', year: 'numeric' });
+      fmt.formatToParts(now).forEach(function(p){
+        if (p.type === 'day') hD = parseInt(p.value, 10);
+        if (p.type === 'month') hM = parseInt(p.value, 10);
+      });
+    } catch(e){}
+    var ref = window.AL_RAQI_SAAET_REFERENCE_V23;
+    var nahsList = ref.nahs_hijri_dates[String(hM)] || [];
+    var isNahs = nahsList.indexOf(hD) !== -1;
+    var isMalana = ref.ayyam_malana.indexOf(hD) !== -1;
+    var isSootak = (hD >= 1 && hD <= 3);
+    var isNochandiWindow = (hD >= 4 && hD <= 10 && now.getDay() === 4);
+    var isForbiddenNow = false;
+    var hr = now.getHours(), mn = now.getMinutes();
+    var totalMin = hr * 60 + mn;
+    // Approximate solar noon (~12:00-12:25) & midnight (~00:00-00:25) fallback if exact sun times unavailable
+    if ((totalMin >= 712 && totalMin <= 738) || (totalMin >= 0 && totalMin <= 18) || (totalMin >= 1432)) {
+      isForbiddenNow = true;
+    }
+    return {
+      hDay: hD, hMonth: hM,
+      isNahs: isNahs,
+      nahsList: nahsList,
+      ayyamType: isMalana ? 'ایامِ ملانہ (اعمالِ جمالی و خیر کے لیے موزوں)' : 'ایامِ فارغہ (اعمالِ جلالی و دفعیہ کے لیے موزوں)',
+      isSootak: isSootak,
+      isNochandi: isNochandiWindow,
+      isForbiddenNow: isForbiddenNow
+    };
+  };
+
+  // ---- 1. DIGITAL REFERENCE READER (بوقتِ ضرورت حوالہ in Kutub Library) ----
+  window.renderDigitalBookInlineV23 = function(bookKey, activeSecIdx, searchQ){
+    var bk = window.AL_RAQI_DIGITAL_BOOKS_V23 && window.AL_RAQI_DIGITAL_BOOKS_V23[bookKey];
+    if (!bk) return '';
+    var q = String(searchQ || '').trim();
+    var idx = (typeof activeSecIdx === 'number' && activeSecIdx >= 0 && activeSecIdx < bk.sections.length) ? activeSecIdx : 0;
+
+    var html = '<div class="ar-inline-acc" id="digBookBox_' + bookKey + '" onclick="event.stopPropagation()" style="margin-top:8px;">';
+    html += '<div style="font-size:0.78rem; color:#475569; margin-bottom:6px;">📌 بوقتِ ضرورت مکمل حوالہ (تمام عملی قوانین، تعویذات، چالیں، احتیاط اور صدقات براہِ راست نقوش اور ساعات اسکرین میں شامل ہیں)</div>';
+    html += '<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">';
+    html += '<input type="text" id="digBookSearch_' + bookKey + '" value="' + escHtml(q) + '" placeholder="حوالہ تلاش کریں (مثلاً: بخور، نحس، نوچندی، حصار، صدقات، شرف، زکوٰۃ)..." oninput="updateDigitalBookViewV23(\'' + bookKey + '\',' + idx + ',this.value)" style="flex:1; min-width:160px; padding:7px 10px; border:1px solid #cbd5e1; border-radius:8px; font-family:inherit; font-size:0.86rem;">';
+    if (bk.pdfUrl) {
+      html += '<a href="' + bk.pdfUrl + '" target="_blank" rel="noopener" class="ar-unibtn active" style="text-decoration:none; width:auto; padding:6px 12px;">📖 اصل PDF کھولیں</a>';
+    }
+    html += '</div>';
+
+    if (!q) {
+      html += '<div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:10px;">';
+      bk.sections.forEach(function(sec, i){
+        var active = (i === idx);
+        html += '<button type="button" onclick="updateDigitalBookViewV23(\'' + bookKey + '\',' + i + ',\'\')" style="padding:5px 9px; border-radius:8px; border:1px solid ' + (active ? '#1e3a8a' : '#cbd5e1') + '; background:' + (active ? '#1e3a8a' : '#f8fafc') + '; color:' + (active ? '#fff' : '#1e293b') + '; font-family:inherit; font-size:0.78rem; cursor:pointer;">' + escHtml(sec.label) + '</button>';
+      });
+      html += '</div>';
+    }
+
+    html += '<div style="max-height:360px; overflow-y:auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:12px; line-height:2.05; font-size:0.9rem; color:#0f172a;">';
+    var matchedCount = 0;
+    var targetSections = q ? bk.sections : [bk.sections[idx]];
+    targetSections.forEach(function(sec){
+      var matchingParas = q ? sec.paragraphs.filter(function(p){ return p.indexOf(q) !== -1; }) : sec.paragraphs;
+      if (!matchingParas.length) return;
+      matchedCount += matchingParas.length;
+      html += '<div style="font-weight:700; color:#1e3a8a; background:#eff6ff; padding:6px 10px; border-radius:8px; margin:6px 0 8px; border-right:3px solid #1e3a8a;">' + escHtml(sec.label) + '</div>';
+      matchingParas.forEach(function(p){
+        var pHtml = escHtml(p).replace(/\n/g, '<br>');
+        if (q) {
+          var safeQ = escHtml(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          pHtml = pHtml.replace(new RegExp(safeQ, 'g'), '<mark style="background:#fef08a; padding:0 2px; border-radius:3px;">' + escHtml(q) + '</mark>');
+        }
+        html += '<p style="margin:0 0 10px; text-align:right; border-bottom:1px dashed #f1f5f9; padding-bottom:6px;">' + pHtml + '</p>';
+      });
+    });
+    if (!matchedCount) {
+      html += '<div style="text-align:center; color:#64748b; padding:16px;">اس لفظ سے متعلق کوئی اندراج نہیں ملا۔</div>';
+    }
+    html += '</div></div>';
+    return html;
+  };
+
+  window.updateDigitalBookViewV23 = function(bookKey, secIdx, searchQ){
+    var box = document.getElementById('digBookBox_' + bookKey);
+    if (!box) return;
+    var wrapper = document.createElement('div');
+    wrapper.innerHTML = window.renderDigitalBookInlineV23(bookKey, secIdx, searchQ);
+    if (wrapper.firstChild) {
+      box.parentNode.replaceChild(wrapper.firstChild, box);
+      var inp = document.getElementById('digBookSearch_' + bookKey);
+      if (inp && searchQ !== '') {
+        inp.focus();
+        try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch(e){}
+      }
+    }
+  };
+
+  // ---- 2. PRACTICAL NAQSH TOOLBOX (Qawaid-e-Amliyat + Aamil-e-Kamil) ----
+  window.applyPracticalTaweezV23 = function(seedText, naqshType){
+    var inp = document.getElementById('naqshInputText') || document.getElementById('naqshVerseInput') || document.querySelector('#scr_folders input[type="text"], #scr_folders textarea');
+    var typeSel = document.getElementById('naqshTypeSelect');
+    if (inp) {
+      inp.value = seedText;
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    if (typeSel && naqshType) {
+      for (var i = 0; i < typeSel.options.length; i++) {
+        if (typeSel.options[i].value === naqshType || typeSel.options[i].value.indexOf(naqshType) !== -1) {
+          typeSel.value = typeSel.options[i].value;
+          typeSel.dispatchEvent(new Event('change', { bubbles: true }));
+          break;
+        }
+      }
+    }
+    if (typeof window.generateCustomNaqsh === 'function') {
+      try { window.generateCustomNaqsh(); } catch(e){}
+    }
+    var box = document.getElementById('activeGeneratedNaqshBox');
+    if (box) box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  window.switchNaqshPracticalTabV23 = function(tabKey){
+    var body = document.getElementById('arAamilPracticalBodyV23');
+    if (!body) return;
+    ['taweez','chaals','precautions'].forEach(function(k){
+      var b = document.getElementById('arAamilTabBtn_' + k);
+      if (b) {
+        b.style.background = (k === tabKey) ? '#1e3a8a' : '#f8fafc';
+        b.style.color = (k === tabKey) ? '#fff' : '#1e293b';
+        b.style.borderColor = (k === tabKey) ? '#1e3a8a' : '#cbd5e1';
+      }
+    });
+    var data = window.AL_RAQI_AAMIL_PRACTICAL_V23;
+    if (tabKey === 'taweez') {
+      var cats = ['سب'];
+      data.taweez.forEach(function(x){ if (cats.indexOf(x.cat) === -1) cats.push(x.cat); });
+      var activeCat = window._arAamilTaweezCatV23 || 'سب';
+      var html = '<div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:8px;">' +
+        cats.map(function(c){
+          var act = (c === activeCat);
+          return '<button type="button" onclick="window._arAamilTaweezCatV23=\'' + c + '\'; switchNaqshPracticalTabV23(\'taweez\')" style="padding:4px 9px; border-radius:999px; border:1px solid ' + (act ? '#065f46' : '#cbd5e1') + '; background:' + (act ? '#065f46' : '#fff') + '; color:' + (act ? '#fff' : '#1e293b') + '; font-family:inherit; font-size:0.76rem; cursor:pointer;">' + escHtml(c) + '</button>';
+        }).join('') + '</div>';
+      var items = (activeCat === 'سب') ? data.taweez : data.taweez.filter(function(x){ return x.cat === activeCat; });
+      html += items.map(function(x){
+        return '<div style="background:#fff; border:1px solid #e2e8f0; border-right:3px solid #1e3a8a; border-radius:8px; padding:8px 10px; margin-bottom:7px;">' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">' +
+            '<b style="color:#0f172a; font-size:0.88rem;">' + escHtml(x.title) + '</b>' +
+            '<button type="button" onclick="applyPracticalTaweezV23(\'' + escHtml(x.seed).replace(/'/g, "\\'") + '\',\'' + escHtml(x.type) + '\')" style="padding:3px 10px; border-radius:6px; border:none; background:#1e3a8a; color:#fff; font-family:inherit; font-size:0.75rem; cursor:pointer;">⚡ نقش بنائیں</button>' +
+          '</div>' +
+          '<div style="font-size:0.8rem; color:#065f46; margin-top:3px;"><b>نقش و عمل:</b> ' + escHtml(x.naqsh) + '</div>' +
+          '<div style="font-size:0.78rem; color:#475569; margin-top:2px;">' + escHtml(x.note) + '</div>' +
+        '</div>';
+      }).join('');
+      body.innerHTML = html;
+    } else if (tabKey === 'chaals') {
+      var html = '<div style="font-weight:700; color:#1e3a8a; margin-bottom:6px; font-size:0.86rem;">چاروں عنصری چالیں اور تعویذ استعمال کرنے کا طریقہ (قواعدِ عملیات):</div>';
+      html += data.chaals.map(function(c){
+        return '<div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:7px 10px; margin-bottom:5px; font-size:0.82rem;"><b style="color:#0f172a;">' + escHtml(c.name) + ':</b> ' + escHtml(c.use) + '</div>';
+      }).join('');
+      html += '<div style="font-weight:700; color:#065f46; margin:10px 0 6px; font-size:0.86rem;">مقصد کے مطابق درست نقش کا انتخاب و زکوٰۃ (زوج تا معشر):</div>';
+      html += data.orders.map(function(o){
+        return '<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; margin-bottom:4px; font-size:0.8rem;"><b style="color:#1e3a8a;">' + escHtml(o.order) + ':</b> ' + escHtml(o.use) + '</div>';
+      }).join('');
+      body.innerHTML = html;
+    } else {
+      var html = data.precautions.map(function(p, idx){
+        var isWarn = (idx === 0);
+        return '<div style="background:' + (isWarn ? '#fef2f2' : '#fff') + '; border:1px solid ' + (isWarn ? '#fecaca' : '#e2e8f0') + '; border-right:3px solid ' + (isWarn ? '#dc2626' : '#b45309') + '; border-radius:8px; padding:8px 10px; margin-bottom:6px; font-size:0.82rem;">' +
+          '<b style="color:' + (isWarn ? '#991b1b' : '#92400e') + ';">' + escHtml(p.t) + ':</b> ' + escHtml(p.d) +
+        '</div>';
+      }).join('');
+      body.innerHTML = html;
+    }
+  };
+
+  function injectNaqshPracticalPanelV23(){
+    var typeSel = document.getElementById('naqshTypeSelect');
+    if (!typeSel || document.getElementById('arAamilPracticalCardV23')) return;
+    var hostCard = typeSel.closest('.card') || typeSel.parentNode;
+    if (!hostCard || !hostCard.parentNode) return;
+    var st = window.getTodayQawaidStatusV23();
+
+    var statusBanner = '<div style="font-size:0.76rem; color:' + (st.isNahs ? '#991b1b' : '#065f46') + '; background:' + (st.isNahs ? '#fef2f2' : '#f0fdf4') + '; border:1px solid ' + (st.isNahs ? '#fecaca' : '#bbf7d0') + '; border-radius:6px; padding:6px 8px; margin-top:6px;">' +
+      '<b>📅 آج کی قمری تاریخ (' + st.hDay + ') — قواعدِ عملیات:</b> ' +
+      (st.isNahs ? '⚠️ <b>نحس تاریخ</b> (نیا عمل یا زکوٰۃ شروع کرنے سے پرہیز کریں)' : '✅ <b>سعد تاریخ</b> (عمل شروع کرنے کے لیے موزوں)') +
+      ' | ' + escHtml(st.ayyamType) +
+      (st.isSootak ? ' | ⚠️ <b>ابتدائی ۳ دن (سوتک)</b>' : '') +
+      (st.isNochandi ? ' | 🌟 <b>آج نوچندی جمعرات ہے</b>' : '') +
+    '</div>';
+
+    var panel = document.createElement('div');
+    panel.id = 'arAamilPracticalCardV23';
+    panel.className = 'card no-print';
+    panel.style.cssText = 'border-top:3px solid #b45309; background:#fffbeb; margin-top:10px;';
+    panel.innerHTML =
+      '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer;" onclick="var c=document.getElementById(\'arAamilPracticalWrapV23\'); c.style.display=(c.style.display===\'none\'?\'block\':\'none\'); if(c.style.display===\'block\' && !c.dataset.init){c.dataset.init=\'1\'; switchNaqshPracticalTabV23(\'taweez\');}">' +
+        '<h4 style="margin:0; color:#92400e; font-size:0.95rem;">🧭 قواعدِ عملیات، تعویذات، چالیں اور احتیاطِ کتابت</h4>' +
+        '<span style="font-size:0.78rem; color:#b45309; font-weight:700;">کھولیں / بند کریں ▼</span>' +
+      '</div>' +
+      statusBanner +
+      '<div style="font-size:0.75rem; color:#991b1b; background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:5px 8px; margin-top:5px;">⚠️ <b>احتیاطِ وقت:</b> ' + escHtml(window.AL_RAQI_SAAET_REFERENCE_V23.forbidden_times) + '</div>' +
+      '<div id="arAamilPracticalWrapV23" style="display:none; margin-top:10px;">' +
+        '<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:10px;">' +
+          '<button type="button" id="arAamilTabBtn_taweez" onclick="switchNaqshPracticalTabV23(\'taweez\')" style="padding:7px 6px; border-radius:8px; border:1px solid #1e3a8a; background:#1e3a8a; color:#fff; font-family:inherit; font-size:0.8rem; font-weight:700; cursor:pointer;">📜 مجرب تعویذات</button>' +
+          '<button type="button" id="arAamilTabBtn_chaals" onclick="switchNaqshPracticalTabV23(\'chaals\')" style="padding:7px 6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; color:#1e293b; font-family:inherit; font-size:0.8rem; font-weight:700; cursor:pointer;">🧭 چالیں و طریقہ</button>' +
+          '<button type="button" id="arAamilTabBtn_precautions" onclick="switchNaqshPracticalTabV23(\'precautions\')" style="padding:7px 6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; color:#1e293b; font-family:inherit; font-size:0.8rem; font-weight:700; cursor:pointer;">⚠️ قوانین و احتیاط</button>' +
+        '</div>' +
+        '<div id="arAamilPracticalBodyV23"></div>' +
+      '</div>';
+
+    hostCard.parentNode.insertBefore(panel, hostCard.nextSibling);
+  }
+
+  // ---- 3. PRACTICAL SAAAT TOOLBOX (Planetary Rules, Sadqat, Hijri Nahs/Saad, 24 Arabic Names, City Offsets) ----
+  window.renderSaaatPlanetPracticalV23 = function(planetId){
+    var box = document.getElementById('arSaaatPracticalBodyV23');
+    if (!box) return;
+    var ref = window.AL_RAQI_SAAET_REFERENCE_V23;
+    var pl = ref.planets.filter(function(p){ return p.id === planetId; })[0] || ref.planets[0];
+
+    ref.planets.forEach(function(p){
+      var b = document.getElementById('arSaaatPlBtn_' + p.id);
+      if (b) {
+        b.style.background = (p.id === pl.id) ? '#1e3a8a' : '#f8fafc';
+        b.style.color = (p.id === pl.id) ? '#fff' : '#1e293b';
+        b.style.borderColor = (p.id === pl.id) ? '#1e3a8a' : '#cbd5e1';
+      }
+    });
+
+    var html = '<div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; font-size:0.84rem; line-height:1.9;">' +
+      '<div style="font-weight:700; color:#1e3a8a; font-size:0.94rem; margin-bottom:6px; border-bottom:1px solid #e2e8f0; padding-bottom:4px;">🪐 ' + escHtml(pl.name) + ' — عملی احکام، بخور و احتیاط</div>' +
+      '<div><b>موکلین:</b> ' + escHtml(pl.angel) + ' | <b>مخصوص ورد:</b> <span style="color:#065f46; font-weight:700;">' + escHtml(pl.wird) + '</span></div>' +
+      '<div><b>عنصر و سمت:</b> ' + escHtml(pl.elem) + ' | <b>دھات:</b> ' + escHtml(pl.metal) + '</div>' +
+      '<div><b>بخور (قواعدِ عملیات):</b> <span style="color:#92400e; font-weight:700;">' + escHtml(pl.bakhoor) + '</span></div>' +
+      '<div><b>دوست سیارے:</b> <span style="color:#065f46;">' + escHtml(pl.friends) + '</span> | <b>دشمن:</b> <span style="color:#b91c1c;">' + escHtml(pl.enemies) + '</span> | <b>غیر جانبدار:</b> ' + escHtml(pl.neutral) + '</div>' +
+      '<div style="background:#f0fdf4; border-right:3px solid #065f46; padding:6px 8px; border-radius:6px; margin-top:6px;"><b>💰 صدقہ و وقتِ صدقہ:</b> ' + escHtml(pl.sadqa) + '</div>' +
+      '<div style="background:#fef2f2; border-right:3px solid #dc2626; padding:6px 8px; border-radius:6px; margin-top:5px;"><b>🩺 صحت و احتیاط:</b> ' + escHtml(pl.health) + '</div>' +
+      '<div style="background:#eff6ff; border-right:3px solid #1e3a8a; padding:6px 8px; border-radius:6px; margin-top:5px;"><b>📜 موزوں اعمال و شرف/ہبوط:</b> ' + escHtml(pl.use) + '</div>' +
+    '</div>';
+
+    html += '<details style="margin-top:8px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:7px 10px;">' +
+      '<summary style="cursor:pointer; font-weight:700; color:#1e3a8a; font-size:0.82rem;">🕰️ ۲۴ ساعات کے عربی نام اور شہروں کا تفاوتِ وقت (الساعات)</summary>' +
+      '<div style="margin-top:7px; font-size:0.78rem; line-height:1.8;">' +
+        '<div><b>☀️ دن کی ۱۲ ساعات:</b> ' + ref.day_hours_ar.map(function(n,i){ return (i+1) + '. ' + n; }).join(' ، ') + '</div>' +
+        '<div style="margin-top:4px;"><b>🌙 رات کی ۱۲ ساعات:</b> ' + ref.night_hours_ar.map(function(n,i){ return (i+1) + '. ' + n; }).join(' ، ') + '</div>' +
+      '</div>' +
+      '<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:4px; margin-top:7px; font-size:0.78rem;">' +
+      ref.city_lmt_offsets.map(function(c){
+        return '<div style="background:#fff; padding:4px 7px; border-radius:6px; border:1px solid #e2e8f0;"><b>' + escHtml(c.city) + ':</b> عرض ' + c.lat + '° | تفاوت ' + escHtml(c.offset_min) + ' منٹ</div>';
+      }).join('') +
+      '</div></details>';
+
+    box.innerHTML = html;
+  };
+
+  function injectSaaatPracticalPanelV23(){
+    var scr = document.getElementById('scr_saaat');
+    if (!scr || document.getElementById('arSaaatPracticalCardV23')) return;
+    var wrap = scr.querySelector('.wrap') || scr;
+    var ref = window.AL_RAQI_SAAET_REFERENCE_V23;
+    var st = window.getTodayQawaidStatusV23();
+    var todayIdx = new Date().getDay();
+    var todayPl = ref.planets.filter(function(p){ return p.dayIdx === todayIdx; })[0] || ref.planets[0];
+
+    var card = document.createElement('div');
+    card.id = 'arSaaatPracticalCardV23';
+    card.className = 'card';
+    card.style.cssText = 'border-top:3px solid #065f46; background:#f8fafc; margin-top:10px;';
+    card.innerHTML =
+      '<h3 style="margin-top:0; color:#065f46;">⚖️ الساعات و قواعدِ عملیات — عملی احکام، صدقات اور احتیاطیں</h3>' +
+      '<div style="font-size:0.8rem; color:' + (st.isNahs ? '#991b1b' : '#065f46') + '; background:' + (st.isNahs ? '#fef2f2' : '#f0fdf4') + '; border:1px solid ' + (st.isNahs ? '#fecaca' : '#bbf7d0') + '; border-radius:8px; padding:7px 10px; margin-bottom:7px;">' +
+        '<b>📅 آج کی قمری تاریخ (' + st.hDay + '):</b> ' + (st.isNahs ? '⚠️ نحس تاریخ (نیا عمل/زکوٰۃ شروع نہ کریں)' : '✅ سعد تاریخ') + ' | ' + escHtml(st.ayyamType) +
+        '<div style="font-size:0.75rem; color:#475569; margin-top:2px;">اس ماہ کی نحس تاریخیں: ' + st.nahsList.join('، ') + ' (باقی تاریخیں سعد ہیں)</div>' +
+      '</div>' +
+      '<div style="font-size:0.8rem; color:#991b1b; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:7px 10px; margin-bottom:10px;">⚠️ <b>اوقاتِ ممنوع العمل:</b> ' + escHtml(ref.forbidden_times) + (st.isForbiddenNow ? ' <b>(🔴 اس وقت ممنوع وقفے کے قریب ہیں — احتیاط کریں!)</b>' : '') + '</div>' +
+      '<div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:10px;">' +
+        ref.planets.map(function(p){
+          return '<button type="button" id="arSaaatPlBtn_' + p.id + '" onclick="renderSaaatPlanetPracticalV23(\'' + p.id + '\')" style="padding:5px 9px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; color:#1e293b; font-family:inherit; font-size:0.78rem; font-weight:700; cursor:pointer;">' + escHtml(p.name) + '</button>';
+        }).join('') +
+      '</div>' +
+      '<div id="arSaaatPracticalBodyV23"></div>';
+
+    wrap.appendChild(card);
+    window.renderSaaatPlanetPracticalV23(todayPl.id);
+  }
+
+  function bootPracticalModule16(){
+    injectNaqshPracticalPanelV23();
+    injectSaaatPracticalPanelV23();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootPracticalModule16);
+  } else {
+    bootPracticalModule16();
+  }
+  setTimeout(bootPracticalModule16, 800);
+  setTimeout(bootPracticalModule16, 2200);
+})();
+
+/* =========================================================================
+   MODULE 17: V2.1.23 FINAL POLISH — DIRECT GMAIL AUTH + CLASSIC RESTORE
+   Modular path: Al_Raqi_Modular_Sections_v1/12_Admin_Panel_And_Nav/v23_classic_restore_and_gmail_auth_module.js
+   Includes:
+   1. Easy 1-Step Direct Gmail Sign-Up & Sign-In inside #clientLoginGateModal
+   2. Qamar-dar-Aqrab (Moon Burj) + Urooj/Huboot-e-Qamar live card (#scr_saaat)
+   3. Rijal-ul-Ghaib live direction + Qibla Bearing (#scr_saaat)
+   4. Solar & Lunar Eclipses (2026-2028) schedule + Amaal-e-Grahn (#scr_saaat)
+   5. Practitioner Fee Receipts (#scr_settings) + Admin Fee Ledger & Pay Accounts (#scr_admin)
+   ========================================================================= */
+(function(){
+  'use strict';
+
+  function escH(s){
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ---- 1. DIRECT 1-STEP GMAIL SIGN-UP / LOGIN ----
+  window.submitQuickGmailAuthV23 = function(){
+    var gInp = document.getElementById('v23_quickGmailInput');
+    var nInp = document.getElementById('v23_quickGmailName');
+    var alertBox = document.getElementById('loginStatusAlertBox');
+    var gmail = ((gInp && gInp.value) || '').trim().toLowerCase();
+    var fullName = ((nInp && nInp.value) || '').trim();
+
+    if (!gmail || gmail.indexOf('@') === -1 || gmail.indexOf('.') === -1) {
+      if (alertBox) {
+        alertBox.style.display = 'block';
+        alertBox.style.background = '#fef2f2';
+        alertBox.style.color = '#991b1b';
+        alertBox.textContent = '⚠️ براہِ کرم درست جی میل ایڈریس درج کریں (مثلاً: name@gmail.com)۔';
+      }
+      return;
+    }
+
+    var handle = gmail.split('@')[0].replace(/[^a-zA-Z0-9._-]/g, '') || ('user' + Date.now().toString().slice(-4));
+    var displayName = fullName || handle;
+
+    // Save seamless local session so user enters immediately without friction
+    var sess = {
+      username: handle,
+      fullName: displayName,
+      gmail: gmail,
+      role: 'practitioner',
+      status: 'ACTIVE',
+      authMethod: 'gmail_quick',
+      loginAt: new Date().toISOString()
+    };
+    try {
+      localStorage.setItem('al_mualij_session_v14', JSON.stringify(sess));
+      localStorage.setItem('al_mualij_saved_login_creds_v16', JSON.stringify({ username: handle, gmail: gmail, fullName: displayName }));
+      var pCfg = JSON.parse(localStorage.getItem('al_raqi_practitioner_profile_v1') || '{}');
+      if (!pCfg.name) pCfg.name = displayName;
+      pCfg.gmail = gmail;
+      pCfg.username = handle;
+      localStorage.setItem('al_raqi_practitioner_profile_v1', JSON.stringify(pCfg));
+    } catch(e){}
+
+    // Sync quietly with Cloud Backend in background
+    if (typeof window.alRaqiCloudPost === 'function') {
+      try {
+        window.alRaqiCloudPost({
+          action: 'register_request',
+          username: handle,
+          fullName: displayName,
+          gmail: gmail,
+          password: 'GMAIL_DIRECT_' + handle.slice(0, 6),
+          phone: ''
+        }).catch(function(){});
+      } catch(e){}
+    }
+
+    if (alertBox) {
+      alertBox.style.display = 'block';
+      alertBox.style.background = '#ecfdf5';
+      alertBox.style.color = '#065f46';
+      alertBox.textContent = '✅ خوش آمدید ' + displayName + '! جی میل (' + gmail + ') سے لاگ ان مکمل ہو گیا۔';
+    }
+
+    setTimeout(function(){
+      var modal = document.getElementById('clientLoginGateModal');
+      if (modal) modal.style.display = 'none';
+      if (typeof window.refreshAuthUiV21 === 'function') {
+        try { window.refreshAuthUiV21(); } catch(e){}
+      }
+    }, 650);
+  };
+
+  function injectQuickGmailAuthBoxV23(){
+    var modal = document.getElementById('clientLoginGateModal');
+    if (!modal || document.getElementById('v23_quickGmailCard')) return;
+    var alertBox = document.getElementById('loginStatusAlertBox');
+    if (!alertBox || !alertBox.parentNode) return;
+
+    var box = document.createElement('div');
+    box.id = 'v23_quickGmailCard';
+    box.style.cssText = 'background:#f0fdf4; border:1.5px solid #16a34a; border-radius:12px; padding:11px 12px; margin-bottom:12px;';
+    box.innerHTML =
+      '<div style="font-weight:800; color:#065f46; font-size:0.9rem; margin-bottom:6px;">📧 جی میل سے ۱ کلک آسان لاگ ان / سائن اپ</div>' +
+      '<div style="font-size:0.76rem; color:#334155; margin-bottom:7px;">طویل فارم اور پاسورڈ کے بغیر براہِ راست اپنے جی میل ایڈریس سے فوری داخل ہوں:</div>' +
+      '<input type="email" id="v23_quickGmailInput" dir="ltr" placeholder="yourname@gmail.com" style="width:100%; margin-bottom:6px; padding:8px 10px; border:1px solid #86efac; border-radius:8px; font-size:0.88rem; box-sizing:border-box;">' +
+      '<input type="text" id="v23_quickGmailName" placeholder="آپ کا نام (نئے اکاؤنٹ کے لیے — اختیاری)" style="width:100%; margin-bottom:8px; padding:7px 10px; border:1px solid #cbd5e1; border-radius:8px; font-family:inherit; font-size:0.84rem; box-sizing:border-box;">' +
+      '<button type="button" onclick="submitQuickGmailAuthV23()" style="width:100%; padding:9px 12px; border:none; border-radius:9px; background:#065f46; color:#fff; font-family:inherit; font-size:0.9rem; font-weight:700; cursor:pointer;">✅ جی میل سے فوری آگے بڑھیں</button>';
+
+    alertBox.parentNode.insertBefore(box, alertBox);
+  }
+
+  // ---- 2. QAMAR DAR AQRAB, UROOJ/HUBOOT, RIJAL-UL-GHAIB, QIBLA & ECLIPSES ----
+  var ZODIAC_UR_V23 = ['حمل','ثور','جوزا','سرطان','اسد','سنبلہ','میزان','عقرب','قوس','جدی','دلو','حوت'];
+
+  function getMoonZodiacV23(d){
+    var ref = Date.UTC(2000, 0, 1, 12, 0, 0);
+    var days = (d.getTime() - ref) / 86400000;
+    var L = (218.316 + 13.176396 * days) % 360;
+    var M = (134.963 + 13.064993 * days) % 360;
+    var tropLon = (L + 6.289 * Math.sin(M * Math.PI / 180)) % 360;
+    if (tropLon < 0) tropLon += 360;
+    // Lahiri Ayanamsha (~24.22 deg)
+    var sidLon = (tropLon - 24.22 + 360) % 360;
+    var idx = Math.floor(sidLon / 30) % 12;
+    var degInSign = Math.round(sidLon % 30);
+    return {
+      burj: ZODIAC_UR_V23[idx],
+      deg: degInSign,
+      isAqrab: (idx === 7),
+      isTareeqMuhtariq: (idx === 6 && degInSign >= 19) || (idx === 7 && degInSign <= 3)
+    };
+  }
+
+  function getHijriDayApproxV23(d){
+    try {
+      var fmt = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { day: 'numeric' });
+      return parseInt(fmt.format(d), 10) || 1;
+    } catch(e){ return 1; }
+  }
+
+  function getRijalDirV23(hDay){
+    var map = {
+      1:'مشرق', 2:'شمال مشرق', 3:'شمال', 4:'شمال مغرب', 5:'مغرب', 6:'جنوب مغرب', 7:'جنوب', 8:'جنوب مشرق',
+      9:'مشرق', 10:'شمال مشرق', 11:'شمال', 12:'شمال مغرب', 13:'مغرب', 14:'جنوب مغرب', 15:'جنوب',
+      16:'مشرق', 17:'شمال مشرق', 18:'شمال', 19:'شمال مغرب', 20:'مغرب', 21:'جنوب مغرب', 22:'جنوب', 23:'جنوب مشرق',
+      24:'مشرق', 25:'شمال مشرق', 26:'شمال', 27:'شمال مغرب', 28:'مغرب', 29:'جنوب مغرب', 30:'جنوب'
+    };
+    return map[hDay] || 'مشرق';
+  }
+
+  function getUroojHubootV23(hDay){
+    if (hDay >= 1 && hDay <= 14) return '📈 عروجِ ماہِ قمری (اعمالِ خیر، محبت و ترقی کے لیے بہترین)';
+    if (hDay === 15) return '🌕 بدرِ کامل (چودھویں کا چاند — نہایت پُراثر)';
+    return '📉 زوال / ہبوطِ ماہِ قمری (دفعِ سحر، بیماری و شر کے خاتمے کے لیے موزوں)';
+  }
+
+  function getQiblaBearingV23(lat, lng){
+    var rad = Math.PI / 180;
+    var kLat = 21.4225 * rad, kLng = 39.8262 * rad;
+    var pLat = lat * rad, pLng = lng * rad;
+    var y = Math.sin(kLng - pLng);
+    var x = Math.cos(pLat) * Math.tan(kLat) - Math.sin(pLat) * Math.cos(kLng - pLng);
+    var brng = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+    return Math.round(brng) + '° (مغرب مائل جنوب)';
+  }
+
+  var ECLIPSES_V23 = [
+    { date: '17 فروری 2026', type: '☀️ سورج گرہن (حلقہ نما)', vis: 'جنوبی نصف کرہ (پاکستان میں نظر نہیں آیا)' },
+    { date: '3 مارچ 2026', type: '🌕 چاند گرہن (مکمل)', vis: 'ایشیا و بحر الکاہل (جزوی/طلوع پر اثر)' },
+    { date: '12 اگست 2026', type: '☀️ سورج گرہن (مکمل)', vis: 'یورپ و شمالی امریکہ' },
+    { date: '28 اگست 2026', type: '🌕 چاند گرہن (جزوی)', vis: 'مغربی ایشیا، یورپ و افریقہ' },
+    { date: '6 فروری 2027', type: '☀️ سورج گرہن (حلقہ نما)', vis: 'جنوبی امریکہ و افریقہ' },
+    { date: '20 فروری 2027', type: '🌕 چاند گرہن (نیم سایہ)', vis: 'پاکستان، ایشیا، یورپ و افریقہ میں نمایاں' },
+    { date: '2 اگست 2027', type: '☀️ سورج گرہن (مکمل)', vis: 'مشرقِ وسطیٰ، شمالی افریقہ اور پاکستان میں جزوی نمایاں' },
+    { date: '17 اگست 2027', type: '🌕 چاند گرہن (نیم سایہ)', vis: 'مشرقی ایشیا و امریکہ' },
+    { date: '12 جنوری 2028', type: '🌕 چاند گرہن (جزوی)', vis: 'یورپ، افریقہ و امریکہ' },
+    { date: '6 جولائی 2028', type: '🌕 چاند گرہن (جزوی)', vis: 'پاکستان، ایشیا و یورپ میں نمایاں' }
+  ];
+
+  function injectClassicAstroAndEclipsesCardV23(){
+    var scr = document.getElementById('scr_saaat');
+    if (!scr || document.getElementById('v23_classicAstroCard')) return;
+    var wrap = scr.querySelector('.wrap') || scr;
+    var now = new Date();
+    var hDay = getHijriDayApproxV23(now);
+    var moon = getMoonZodiacV23(now);
+    var rijal = getRijalDirV23(hDay);
+    var urooj = getUroojHubootV23(hDay);
+    var qibla = getQiblaBearingV23(33.6844, 73.0479);
+
+    var card = document.createElement('div');
+    card.id = 'v23_classicAstroCard';
+    card.className = 'card';
+    card.style.cssText = 'border-top:3px solid #1e3a8a; background:#ffffff; margin-top:10px;';
+    card.innerHTML =
+      '<h3 style="margin-top:0; color:#1e3a8a;">🌙 قمر در عقرب، رجال الغیب، قبلہ اور گرہن شیڈول</h3>' +
+      '<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:8px; margin-bottom:10px;">' +
+        '<div style="background:' + (moon.isAqrab || moon.isTareeqMuhtariq ? '#fef2f2' : '#f0fdf4') + '; border:1px solid ' + (moon.isAqrab || moon.isTareeqMuhtariq ? '#fecaca' : '#bbf7d0') + '; border-radius:10px; padding:9px 11px; font-size:0.83rem;">' +
+          '<div style="font-weight:800; color:' + (moon.isAqrab ? '#991b1b' : '#065f46') + ';">🌙 آج کا برجِ قمر: ' + escH(moon.burj) + ' (' + moon.deg + '°)</div>' +
+          '<div style="margin-top:3px; color:#334155;">' + (moon.isAqrab ? '⚠️ <b>قمر در عقرب جاری ہے!</b> اہم خیر کے اعمال، نکاح اور نئے سفر سے احتیاط کریں۔' : (moon.isTareeqMuhtariq ? '⚠️ <b>طریقِ محترق:</b> احتیاط برتیں۔' : '✅ قمر در عقرب نہیں ہے — خیر کے اعمال کے لیے موزوں۔')) + '</div>' +
+          '<div style="margin-top:4px; font-size:0.78rem; color:#1e3a8a;">' + escH(urooj) + '</div>' +
+        '</div>' +
+        '<div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:9px 11px; font-size:0.83rem;">' +
+          '<div style="font-weight:800; color:#1e3a8a;">🧭 رجال الغیب (قمری تاریخ ' + hDay + '): <span style="color:#b45309;">' + escH(rijal) + '</span></div>' +
+          '<div style="margin-top:3px; color:#334155; font-size:0.78rem;">قواعدِ عملیات: تعویذ لکھتے وقت رجال الغیب کو اپنی <b>پشت پر یا بائیں جانب</b> رکھیں (سامنے نہ ہوں)۔</div>' +
+          '<div style="margin-top:5px; font-weight:700; color:#065f46;">🕋 قبلہ رخ (اسلام آباد): ' + escH(qibla) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<details style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:8px 11px;">' +
+        '<summary style="cursor:pointer; font-weight:800; color:#92400e; font-size:0.86rem;">🌘 سورج اور چاند گرہن شیڈول (2026–2028) اور اعمالِ گرہن</summary>' +
+        '<div style="margin-top:8px; font-size:0.8rem; color:#334155; background:#fffbeb; border-right:3px solid #d97706; padding:7px 9px; border-radius:6px; margin-bottom:8px;"><b>اعمالِ گرہن:</b> گرہن کے دوران نمازِ کسوف/خسوف، کثرتِ استغفار، صدقہ، سورہ اخلاص، آیت الکرسی اور خصوصی دفاعی/شفائی اعمال (بمطابق شریعت و قواعدِ عملیات) نہایت مؤثر ہوتے ہیں۔</div>' +
+        '<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:6px;">' +
+        ECLIPSES_V23.map(function(e){
+          return '<div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:6px 9px; font-size:0.78rem;"><b style="color:#1e3a8a;">' + escH(e.date) + '</b> — ' + escH(e.type) + '<div style="color:#64748b; margin-top:2px;">' + escH(e.vis) + '</div></div>';
+        }).join('') +
+        '</div>' +
+      '</details>';
+
+    wrap.appendChild(card);
+  }
+
+  // ---- 3. PRACTITIONER FEE RECEIPTS (#scr_settings) & ADMIN FEE LEDGER (#scr_admin) ----
+  var K_FEES = 'al_raqi_fee_receipts_v23';
+  var K_PAY_ACC = 'al_raqi_admin_pay_accounts_v23';
+
+  function loadFees(){ try { return JSON.parse(localStorage.getItem(K_FEES) || '[]'); } catch(e){ return []; } }
+  function saveFees(arr){ try { localStorage.setItem(K_FEES, JSON.stringify(arr)); } catch(e){} }
+
+  window.submitFeeReceiptV23 = function(){
+    var amt = ((document.getElementById('v23_feeAmt') || {}).value || '').trim();
+    var mnth = ((document.getElementById('v23_feeMonth') || {}).value || '').trim();
+    var trx = ((document.getElementById('v23_feeTrx') || {}).value || '').trim();
+    if (!amt) { alert('براہِ کرم فیس کی رقم درج کریں۔'); return; }
+    var sess = {};
+    try { sess = JSON.parse(localStorage.getItem('al_mualij_session_v14') || '{}'); } catch(e){}
+    var item = {
+      id: 'FEE-' + Date.now(),
+      user: sess.fullName || sess.username || 'معالج',
+      amount: amt,
+      month: mnth || 'ماہانہ فیس',
+      trx: trx || '—',
+      status: 'زیرِ تصدیق',
+      date: new Date().toLocaleDateString('ur-PK')
+    };
+    var list = loadFees();
+    list.unshift(item);
+    saveFees(list);
+    if (typeof window.alRaqiCloudPost === 'function') {
+      try { window.alRaqiCloudPost({ action: 'submit_fee_receipt', receipt: item }).catch(function(){}); } catch(e){}
+    }
+    if (document.getElementById('v23_feeAmt')) document.getElementById('v23_feeAmt').value = '';
+    if (document.getElementById('v23_feeTrx')) document.getElementById('v23_feeTrx').value = '';
+    renderFeeListsV23();
+    alert('✅ فیس رسید کامیابی سے محفوظ اور ایڈمن کو ارسال کر دی گئی!');
+  };
+
+  window.approveFeeReceiptV23 = function(id){
+    var list = loadFees().map(function(x){
+      if (x.id === id) x.status = '✅ منظور شدہ';
+      return x;
+    });
+    saveFees(list);
+    renderFeeListsV23();
+  };
+
+  window.saveAdminPayAccountsV23 = function(){
+    var val = ((document.getElementById('v23_adminPayAccInput') || {}).value || '').trim();
+    try { localStorage.setItem(K_PAY_ACC, val); } catch(e){}
+    renderFeeListsV23();
+    alert('✅ پیمنٹ اکاؤنٹس کی تفصیل محفوظ ہو گئی!');
+  };
+
+  function renderFeeListsV23(){
+    var list = loadFees();
+    var payAcc = '';
+    try { payAcc = localStorage.getItem(K_PAY_ACC) || 'ایزی پیسہ / جاز کیش / بینک تفصیل ایڈمن سیٹنگز سے درج کریں'; } catch(e){}
+
+    var pAccEl = document.getElementById('v23_practitionerPayAccInfo');
+    if (pAccEl) pAccEl.textContent = payAcc;
+
+    var pListEl = document.getElementById('v23_practitionerFeeList');
+    if (pListEl) {
+      pListEl.innerHTML = list.length ? list.slice(0, 8).map(function(x){
+        return '<div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:7px 9px; margin-top:5px; font-size:0.8rem;"><b>' + escH(x.month) + '</b> — ' + escH(x.amount) + ' روپے | حوالہ: ' + escH(x.trx) + ' <span style="float:left; color:#065f46; font-weight:700;">' + escH(x.status) + '</span></div>';
+      }).join('') : '<div style="font-size:0.78rem; color:#64748b; margin-top:4px;">ابھی کوئی رسید درج نہیں۔</div>';
+    }
+
+    var aListEl = document.getElementById('v23_adminFeeLedgerList');
+    if (aListEl) {
+      aListEl.innerHTML = list.length ? list.map(function(x){
+        return '<div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:7px 10px; margin-bottom:6px; font-size:0.8rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">' +
+          '<div><b>' + escH(x.user) + '</b> — ' + escH(x.amount) + ' روپے (' + escH(x.month) + ') | TID: ' + escH(x.trx) + ' | ' + escH(x.status) + '</div>' +
+          (x.status.indexOf('منظور') === -1 ? '<button type="button" onclick="approveFeeReceiptV23(\'' + x.id + '\')" style="padding:3px 9px; border:none; border-radius:6px; background:#065f46; color:#fff; font-family:inherit; font-size:0.75rem; cursor:pointer;">✅ منظور کریں</button>' : '') +
+        '</div>';
+      }).join('') : '<div style="font-size:0.8rem; color:#64748b;">کوئی فیس اندراج موجود نہیں۔</div>';
+    }
+  }
+
+  function injectFeeCardsV23(){
+    var sett = document.getElementById('scr_settings');
+    if (sett && !document.getElementById('v23_practitionerFeeCard')) {
+      var wrap = sett.querySelector('.wrap') || sett;
+      var c = document.createElement('div');
+      c.id = 'v23_practitionerFeeCard';
+      c.className = 'card';
+      c.style.cssText = 'border-top:3px solid #065f46; margin-top:10px;';
+      c.innerHTML =
+        '<h3 style="margin-top:0; color:#065f46;">🧾 فیس رسید جمع کروائیں (معالج)</h3>' +
+        '<div style="font-size:0.78rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:6px 9px; margin-bottom:8px;"><b>پیمنٹ اکاؤنٹ:</b> <span id="v23_practitionerPayAccInfo"></span></div>' +
+        '<div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px;">' +
+          '<input type="text" id="v23_feeAmt" placeholder="رقم (مثلاً: 2000)">' +
+          '<input type="text" id="v23_feeMonth" placeholder="ماہ (مثلاً: نومبر 2026)">' +
+        '</div>' +
+        '<input type="text" id="v23_feeTrx" placeholder="ٹرانزیکشن آئی ڈی (TID) یا نوٹ..." style="width:100%; margin-bottom:7px; box-sizing:border-box;">' +
+        '<button type="button" class="ar-unibtn active" onclick="submitFeeReceiptV23()">📤 فیس رسید ارسال کریں</button>' +
+        '<div id="v23_practitionerFeeList" style="margin-top:6px;"></div>';
+      wrap.appendChild(c);
+    }
+
+    var adm = document.getElementById('scr_admin');
+    if (adm && !document.getElementById('v23_adminFeeBox')) {
+      var awrap = adm.querySelector('.wrap') || adm;
+      var ac = document.createElement('div');
+      ac.id = 'v23_adminFeeBox';
+      ac.className = 'card';
+      ac.style.cssText = 'border-top:3px solid #7c3aed; margin-top:10px;';
+      var savedAcc = '';
+      try { savedAcc = localStorage.getItem(K_PAY_ACC) || ''; } catch(e){}
+      ac.innerHTML =
+        '<h3 style="margin-top:0; color:#5b21b6;">💳 ایڈمن فیس لیجر اور پیمنٹ اکاؤنٹس</h3>' +
+        '<div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap;">' +
+          '<input type="text" id="v23_adminPayAccInput" value="' + escH(savedAcc) + '" placeholder="ایزی پیسہ / جاز کیش / بینک نمبر درج کریں..." style="flex:1; min-width:180px;">' +
+          '<button type="button" class="ar-unibtn active" style="width:auto; padding:6px 12px;" onclick="saveAdminPayAccountsV23()">محفوظ کریں</button>' +
+        '</div>' +
+        '<div id="v23_adminFeeLedgerList"></div>';
+      awrap.appendChild(ac);
+    }
+    renderFeeListsV23();
+  }
+
+  function bootMod17(){
+    injectQuickGmailAuthBoxV23();
+    injectClassicAstroAndEclipsesCardV23();
+    injectFeeCardsV23();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootMod17);
+  } else {
+    bootMod17();
+  }
+  setTimeout(bootMod17, 700);
+  setTimeout(bootMod17, 2000);
+})();
 
   function bootAlRaqiV2() {
     document.querySelectorAll('#alRaqiV2Root img[data-ar-logo="1"]').forEach(function(im) {
