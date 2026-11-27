@@ -5244,6 +5244,1090 @@ html, body {
   };
 
 
+
+
+  // ================= BATCH 11: UNIFIED KUTUB LIBRARY FOLDERS + TABEER BOOK FIRST & LIBRARY LINK (v2.1.11) =================
+  (function() {
+    var BUILD_VER = 'v2.1.11';
+    try {
+      var prevVer = localStorage.getItem('alraqi_app_build_ver');
+      if (prevVer !== BUILD_VER) {
+        localStorage.setItem('alraqi_app_build_ver', BUILD_VER);
+        if ('caches' in window && caches.keys) {
+          caches.keys().then(function(keys) { keys.forEach(function(k) { caches.delete(k); }); }).catch(function(){});
+        }
+      }
+    } catch (e) {}
+  })();
+
+  var _activeKutubFolder = 'all';
+  var _openKutubBookKey = '';
+  var _cloudKutubListB11 = null;
+
+  function fetchCloudKutubOnce(cb) {
+    if (_cloudKutubListB11 !== null) { if (cb) cb(_cloudKutubListB11); return; }
+    _cloudKutubListB11 = [];
+    if (typeof window.alRaqiCloudPost === 'function') {
+      window.alRaqiCloudPost({ action: 'mahfoozat_list_v140' }).then(function(res) {
+        var rows = (res && Array.isArray(res.items)) ? res.items : ((res && Array.isArray(res.files)) ? res.files : []);
+        _cloudKutubListB11 = rows.filter(function(r) {
+          var nm = String(r.name || r.title || '').toLowerCase();
+          var tp = String(r.type || r.category || r.mimeType || '').toLowerCase();
+          return nm.indexOf('.pdf') !== -1 || tp.indexOf('pdf') !== -1 || tp.indexOf('book') !== -1 || tp.indexOf('kutub') !== -1;
+        });
+        if (cb) cb(_cloudKutubListB11);
+      }).catch(function() { if (cb) cb([]); });
+    } else {
+      if (cb) cb([]);
+    }
+  }
+
+  function classifyBookFolder(title, catHint) {
+    var s = String((title || '') + ' ' + (catHint || '')).toLowerCase();
+    if (/تعبیر|خواب|سیرین|کامل التعبیر|رویا|رؤیا|tabeer|dream/.test(s)) return 'tabeer';
+    if (/عامل|ساعات|نقش|نقوش|اوفاق|عملیات|تعویذ|amliyat|naqsh|saaat|aamil/.test(s)) return 'amliyat';
+    return 'wazaif';
+  }
+
+  window.openLibraryFolder = function(folderKey) {
+    _activeKutubFolder = folderKey || 'all';
+    _openKutubBookKey = '';
+    if (typeof window.openScreen === 'function') window.openScreen('folders');
+    if (typeof window.openFolder4 === 'function') window.openFolder4('kutub');
+    setTimeout(function() {
+      window.renderKutubFolder();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 60);
+  };
+
+  window.setKutubFolderTab = function(folderKey) {
+    _activeKutubFolder = folderKey || 'all';
+    _openKutubBookKey = '';
+    window.renderKutubFolder();
+  };
+
+  window.toggleKutubBookB11 = function(key) {
+    _openKutubBookKey = (_openKutubBookKey === key) ? '' : key;
+    window.renderKutubFolder();
+  };
+
+  window.openIbnSirinPageInLibrary = function(pgNum) {
+    window.loadAlRaqiPack('tabeer', function() {
+      var box = $('kutubFullDetailBox'), title = $('kutubDetailTitle'), body = $('kutubDetailBody');
+      if (!box || !body) return;
+      var pg = (typeof IBN_SIRIN_DIGITAL_PAGES !== 'undefined') ? IBN_SIRIN_DIGITAL_PAGES[String(pgNum)] : null;
+      if (title) title.textContent = 'تعبیر الرؤیا امام محمد بن سیرینؒ — صفحہ ' + pgNum;
+      body.innerHTML = '<div style="font-size:0.92rem; color:#1e293b; line-height:2; white-space:pre-line; max-height:420px; overflow-y:auto;">' +
+        ((pg && pg.text) ? pg.text : 'اس صفحے کا متن دستیاب نہیں۔') + '</div>';
+      box.style.display = 'block';
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  };
+
+  window.renderKutubFolder = function() {
+    var cat = $('kutubSummaryCatalog');
+    if (!cat) return;
+    var q = (($('kutubSearchInp') || {}).value || '').trim();
+
+    var folders = [
+      { key: 'all', label: 'سب کتب' },
+      { key: 'tabeer', label: 'تعبیر الرؤیا' },
+      { key: 'amliyat', label: 'عملیات و نقوش' },
+      { key: 'wazaif', label: 'وظائف و مجربات' }
+    ];
+
+    var builtInBooks = [
+      {
+        key: 'bk_ibn_sirin', folder: 'tabeer',
+        title: 'تعبیر الرؤیا کلاں (مکمل ڈیجیٹل کتاب)',
+        author: 'امام محمد بن سیرینؒ',
+        line: 'مکمل فہرستِ ابواب اور کتاب کے مستند صفحات براہِ راست لائبریری میں',
+        available: true, type: 'ibn_sirin'
+      },
+      {
+        key: 'bk_tabeer_encyc', folder: 'tabeer',
+        title: 'تعبیر الرؤیا انسائیکلوپیڈیا و خواب نامہ',
+        author: 'مستند کتبِ تعبیر',
+        line: 'منتخب و جامع خوابوں کی علامات اور تعبیرات',
+        available: true, type: 'tabeer_encyc'
+      },
+      {
+        key: 'bk_aamil', folder: 'amliyat',
+        title: 'عاملِ کامل',
+        author: 'کاش البرنی',
+        line: 'نقوش و اوفاق کے قوانین (عملیات فولڈر)',
+        available: false, type: 'pdf_pending'
+      },
+      {
+        key: 'bk_saaat', folder: 'amliyat',
+        title: 'الساعات',
+        author: 'کاش البرنی',
+        line: '۲۴ ساعاتِ کواکب کے قوانین (عملیات فولڈر)',
+        available: false, type: 'pdf_pending'
+      },
+      {
+        key: 'bk_mujarrab', folder: 'wazaif',
+        title: 'مجربات و قرآنی عملیات',
+        author: 'مستند کتب',
+        line: 'مجرب قرآنی وظائف، منزل شریف و تعویذات',
+        available: true, type: 'mujarrab'
+      }
+    ];
+
+    var cloudBooks = (_cloudKutubListB11 || []).map(function(cf, idx) {
+      var nm = String(cf.name || cf.title || ('کتاب ' + (idx + 1))).replace(/\.pdf$/i, '');
+      return {
+        key: 'bk_cloud_' + idx,
+        folder: classifyBookFolder(nm, cf.category || cf.folder),
+        title: nm,
+        author: 'لائبریری پی ڈی ایف (کلاؤڈ)',
+        line: 'ڈرائیو لائبریری سے براہِ راست مطالعہ',
+        available: true,
+        type: 'cloud_pdf',
+        url: cf.url || cf.webViewLink || (cf.id ? ('https://drive.google.com/file/d/' + cf.id + '/preview') : '')
+      };
+    });
+
+    var allBooks = builtInBooks.concat(cloudBooks);
+    var filt = allBooks.filter(function(b) {
+      var matchFolder = (_activeKutubFolder === 'all' || b.folder === _activeKutubFolder);
+      var matchQ = !q || (b.title + ' ' + b.author + ' ' + b.line).indexOf(q) !== -1;
+      return matchFolder && matchQ;
+    });
+
+    var tabsHtml = '<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin-bottom:10px;">' +
+      folders.map(function(f) {
+        var cnt = (f.key === 'all') ? allBooks.length : allBooks.filter(function(b){ return b.folder === f.key; }).length;
+        return '<button type="button" class="ar-unibtn' + (_activeKutubFolder === f.key ? ' active' : '') + '" onclick="setKutubFolderTab(\'' + f.key + '\')">' + f.label + ' (' + cnt + ')</button>';
+      }).join('') +
+    '</div>';
+
+    var folderLabels = { tabeer: 'تعبیر الرؤیا فولڈر', amliyat: 'عملیات و نقوش فولڈر', wazaif: 'وظائف و مجربات فولڈر' };
+
+    var listHtml = filt.map(function(b) {
+      var isOpen = (_openKutubBookKey === b.key);
+      var inner = '';
+      if (isOpen) {
+        if (b.type === 'ibn_sirin') {
+          var chapHtml = '';
+          if (typeof IBN_SIRIN_INDEX !== 'undefined' && Array.isArray(IBN_SIRIN_INDEX)) {
+            chapHtml = IBN_SIRIN_INDEX.slice(0, 40).map(function(it) {
+              return '<div style="padding:5px 0; border-bottom:1px dashed #e2e8f0; display:flex; justify-content:space-between; align-items:center; gap:6px;">' +
+                '<span style="font-size:0.86rem; color:#0b1936;">' + it.t + '</span>' +
+                '<button type="button" class="ar-unibtn" style="width:auto !important; min-height:30px !important; padding:1px 10px !important; font-size:0.76rem !important;" onclick="event.stopPropagation(); openIbnSirinPageInLibrary(\'' + it.p + '\')">صفحہ ' + it.p + '</button>' +
+              '</div>';
+            }).join('');
+          } else {
+            window.loadAlRaqiPack('tabeer', function(){ window.renderKutubFolder(); });
+            chapHtml = '<div style="color:#475569; padding:8px;">کتاب لوڈ ہو رہی ہے...</div>';
+          }
+          inner = '<div class="ar-inline-acc" onclick="event.stopPropagation()">' +
+            '<div style="margin-bottom:8px;"><button type="button" class="ar-unibtn active" onclick="openScreen(\'tabeer\')">📖 تعبیر الرؤیا (حروفِ تہجی سے مکمل کتاب دیکھیں)</button></div>' +
+            '<div style="max-height:280px; overflow-y:auto;">' + chapHtml + '</div>' +
+          '</div>';
+        } else if (b.type === 'tabeer_encyc') {
+          inner = '<div class="ar-inline-acc" onclick="event.stopPropagation()">' +
+            '<div style="font-size:0.88rem; color:#1e293b; margin-bottom:8px;">یہ مکمل انسائیکلوپیڈیا تعبیر الرؤیا کے صفحے سے حروفِ تہجی اور تلاش کے ذریعے منسلک ہے۔</div>' +
+            '<button type="button" class="ar-unibtn active" onclick="openScreen(\'tabeer\')">تعبیر الرؤیا کھولیں</button>' +
+          '</div>';
+        } else if (b.type === 'mujarrab') {
+          var rows = [];
+          if (typeof QURANIC_BOOK_TREATMENTS !== 'undefined') {
+            Object.keys(QURANIC_BOOK_TREATMENTS).forEach(function(k) {
+              var x = QURANIC_BOOK_TREATMENTS[k];
+              rows.push('<div style="padding:4px 0; border-bottom:1px dashed #e2e8f0;"><b>' + stripEmojis(x.title || k) + '</b></div>');
+            });
+          }
+          inner = '<div class="ar-inline-acc" onclick="event.stopPropagation()">' + (rows.join('') || 'فہرست لوڈ ہو رہی ہے۔') + '</div>';
+        } else if (b.type === 'cloud_pdf' && b.url) {
+          inner = '<div class="ar-inline-acc" onclick="event.stopPropagation()">' +
+            '<a href="' + b.url + '" target="_blank" rel="noopener" class="ar-unibtn active" style="text-decoration:none;">📖 پی ڈی ایف کتاب کھولیں</a>' +
+          '</div>';
+        } else {
+          inner = '<div class="ar-inline-acc" onclick="event.stopPropagation()"><div style="color:#92400e; font-weight:700;">یہ کتاب ابھی پی ڈی ایف کی صورت میں اپ لوڈ نہیں ہوئی؛ نیچے «کتاب (PDF) اپلوڈ کریں» بٹن سے شامل کریں۔</div></div>';
+        }
+      }
+      return '<div class="ar-slim-row' + (isOpen ? ' open' : '') + '" style="border-right-color:' + (b.folder === 'tabeer' ? '#b45309' : (b.folder === 'amliyat' ? '#1e3a8a' : '#065f46')) + ';" onclick="toggleKutubBookB11(\'' + b.key + '\')">' +
+        '<div class="ar-slim-title"><span>' + b.title + ' <small style="color:#64748b;">— ' + b.author + '</small></span><span>' + (isOpen ? '▲' : '▼') + '</span></div>' +
+        '<div style="font-size:0.78rem; color:#065f46; margin-top:2px;">📁 ' + (folderLabels[b.folder] || 'لائبریری') + ' | ' + b.line + '</div>' +
+        inner +
+      '</div>';
+    }).join('') || '<div style="text-align:center; color:#64748b; padding:12px;">اس فولڈر میں کوئی کتاب نہیں ملی۔</div>';
+
+    cat.innerHTML = tabsHtml + listHtml;
+
+    if (_cloudKutubListB11 === null) {
+      fetchCloudKutubOnce(function() { window.renderKutubFolder(); });
+    }
+  };
+
+  // Put Book (امام ابن سیرینؒ) FIRST at top + Add direct Library Button on Tabeer Screen & Letter View
+  function injectTabeerLibraryBar() {
+    var strip = $('tabeerAlphaStrip');
+    if (!strip || $('tabeerLibQuickBar')) return;
+    var bar = document.createElement('div');
+    bar.id = 'tabeerLibQuickBar';
+    bar.style.cssText = 'margin-bottom:10px;';
+    bar.innerHTML = '<button type="button" class="ar-unibtn active" onclick="openLibraryFolder(\'tabeer\')">📚 تعبیر کی تمام کتب (لائبریری فولڈر سے کھولیں)</button>';
+    strip.parentNode.insertBefore(bar, strip);
+  }
+
+  var _origInitTabeerB11 = window.initOfflineTabeer;
+  window.initOfflineTabeer = function() {
+    injectTabeerLibraryBar();
+    if (_origInitTabeerB11) _origInitTabeerB11();
+  };
+
+  // Override renderDedicatedLetterList so Book (امام ابن سیرینؒ) is FIRST at TOP + Library button included!
+  renderDedicatedLetterList = function() {
+    if (!_lastLetterScreenData) return;
+    var ch = _lastLetterScreenData.ch;
+    var soft = _lastLetterScreenData.soft;
+    var book = _lastLetterScreenData.book;
+    var body = $('tabeerLetterViewBody');
+    var stats = $('tabeerLetterViewStats');
+    var titleEl = $('tabeerLetterViewTitle');
+    if (titleEl) titleEl.textContent = 'حرف «' + ch + '» کے تمام خواب';
+    var total = soft.length + book.length;
+    if (stats) stats.textContent = 'کل نتائج: ' + total + ' (مستند کتاب امام ابن سیرینؒ: ' + book.length + ' | سافٹ کاپی انسائیکلوپیڈیا: ' + soft.length + ')';
+    if (!body) return;
+
+    var html = '<div style="margin-bottom:10px;">' +
+      '<button type="button" class="ar-unibtn" onclick="openLibraryFolder(\'tabeer\')">📚 تعبیر کی تمام کتب (لائبریری سے کھولیں)</button>' +
+    '</div>';
+
+    // 1. BOOK FIRST (AT THE TOP)
+    if (book.length) {
+      html += '<div class="ar-tab-sec-hdr book"><span>📚 مستند کتاب امام ابن سیرینؒ (مکمل متن)</span><span>(' + book.length + ')</span></div>';
+      html += book.map(function(b, i) {
+        var rid = 'lbook_' + i;
+        var isOpen = (_openLetterScreenRowId === rid);
+        return '<div class="ar-slim-row' + (isOpen ? ' open' : '') + '" style="margin-bottom:5px; border-right-color:#b45309;" onclick="toggleLetterScreenRow(\'' + rid + '\')">' +
+          '<div class="ar-slim-title"><span>' + b.title + ' <small style="color:#b45309;">(صفحہ ' + b.page + ')</small></span><span style="font-size:0.78rem; color:#b45309;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
+          (isOpen ? (
+            '<div style="font-size:0.92rem; color:#1e293b; line-height:1.95; white-space:pre-line; margin-top:4px; max-height:380px; overflow-y:auto;">' + b.body + '</div>' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:8px;">' +
+              '<small style="color:#78350f; font-weight:700;">ماخذ: ' + b.src + '</small>' +
+              '<button type="button" class="ar-unibtn active" style="width:auto !important; min-height:34px !important; padding:2px 12px !important; font-size:0.80rem !important;" onclick="event.stopPropagation(); appendTabeerToBox3(\'' + b.title.replace(/'/g, '') + '\', \'' + b.body.replace(/'/g, '').replace(/\n/g, ' ').slice(0, 320) + '\'); closeTabeerLetterView();">تعبیر خانے میں شامل کریں</button>' +
+            '</div>'
+          ) : '') +
+        '</div>';
+      }).join('');
+    }
+
+    // 2. SOFT COPY ENCYCLOPEDIA SECOND
+    if (soft.length) {
+      html += '<div class="ar-tab-sec-hdr"><span>📖 سافٹ کاپی انسائیکلوپیڈیا</span><span>(' + soft.length + ')</span></div>';
+      html += soft.map(function(r, i) {
+        var rid = 'lsoft_' + i;
+        var isOpen = (_openLetterScreenRowId === rid);
+        return '<div class="ar-slim-row' + (isOpen ? ' open' : '') + '" style="margin-bottom:5px;" onclick="toggleLetterScreenRow(\'' + rid + '\')">' +
+          '<div class="ar-slim-title"><span>' + r.title + '</span><span style="font-size:0.78rem; color:#1e3a8a;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
+          (isOpen ? (
+            '<div style="font-size:0.92rem; color:#1e293b; line-height:1.95; margin-top:4px;">' + r.body + '</div>' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:8px;">' +
+              '<small style="color:#065f46; font-weight:700;">ماخذ: ' + r.src + '</small>' +
+              '<button type="button" class="ar-unibtn active" style="width:auto !important; min-height:34px !important; padding:2px 12px !important; font-size:0.80rem !important;" onclick="event.stopPropagation(); appendTabeerToBox3(\'' + r.title.replace(/'/g, '') + '\', \'' + r.body.replace(/'/g, '').replace(/\n/g, ' ').slice(0, 320) + '\'); closeTabeerLetterView();">تعبیر خانے میں شامل کریں</button>' +
+            '</div>'
+          ) : '') +
+        '</div>';
+      }).join('');
+    }
+
+    if (!total) {
+      html += '<div style="text-align:center; color:#64748b; padding:14px;">اس حرف سے شروع ہونے والا کوئی باب موجود نہیں۔</div>';
+    }
+    body.innerHTML = html;
+  };
+
+  // Also override renderTabeerAccordionItems so Book is FIRST in search results too!
+  var _origRenderTabAcc = renderTabeerAccordionItems;
+  renderTabeerAccordionItems = function(softItems, bookItems, headingText, queryForOnline) {
+    var out = $('offlineTabeerResults'), stats = $('offlineTabeerStats');
+    if (!out) return;
+    var total = softItems.length + bookItems.length;
+    if (stats) {
+      stats.textContent = headingText + ' — کل نتائج: ' + total + ' (مستند کتاب امام ابن سیرینؒ: ' + bookItems.length + ' | سافٹ کاپی: ' + softItems.length + ')';
+    }
+    var html = '';
+    if (bookItems.length) {
+      html += '<div class="ar-tab-sec-hdr book"><span>📚 مستند کتاب امام ابن سیرینؒ (مکمل متن)</span><span>(' + bookItems.length + ')</span></div>';
+      html += bookItems.map(function(b, i) {
+        var rid = 'book_' + i;
+        var isOpen = (_openTabeerRowId === rid);
+        return '<div class="ar-slim-row' + (isOpen ? ' open' : '') + '" style="margin-bottom:5px; border-right-color:#b45309;" onclick="toggleTabeerItemRow(\'' + rid + '\')">' +
+          '<div class="ar-slim-title"><span>' + b.title + ' <small style="color:#b45309;">(صفحہ ' + b.page + ')</small></span><span style="font-size:0.78rem; color:#b45309;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
+          (isOpen ? (
+            '<div style="font-size:0.90rem; color:#1e293b; line-height:1.95; white-space:pre-line; margin-top:4px; max-height:360px; overflow-y:auto;">' + b.body + '</div>' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:8px;">' +
+              '<small style="color:#78350f; font-weight:700;">ماخذ: ' + b.src + '</small>' +
+              '<button type="button" class="ar-unibtn active" style="width:auto !important; min-height:34px !important; padding:2px 12px !important; font-size:0.80rem !important;" onclick="event.stopPropagation(); appendTabeerToBox3(\'' + b.title.replace(/'/g, '') + '\', \'' + b.body.replace(/'/g, '').replace(/\n/g, ' ').slice(0, 320) + '\')">تعبیر خانے میں شامل کریں</button>' +
+            '</div>'
+          ) : '') +
+        '</div>';
+      }).join('');
+    }
+    if (softItems.length) {
+      html += '<div class="ar-tab-sec-hdr"><span>📖 سافٹ کاپی انسائیکلوپیڈیا</span><span>(' + softItems.length + ')</span></div>';
+      html += softItems.map(function(r, i) {
+        var rid = 'soft_' + i;
+        var isOpen = (_openTabeerRowId === rid);
+        return '<div class="ar-slim-row' + (isOpen ? ' open' : '') + '" style="margin-bottom:5px;" onclick="toggleTabeerItemRow(\'' + rid + '\')">' +
+          '<div class="ar-slim-title"><span>' + r.title + '</span><span style="font-size:0.78rem; color:#1e3a8a;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
+          (isOpen ? (
+            '<div style="font-size:0.90rem; color:#1e293b; line-height:1.9; margin-top:4px;">' + r.body + '</div>' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:8px;">' +
+              '<small style="color:#065f46; font-weight:700;">ماخذ: ' + r.src + '</small>' +
+              '<button type="button" class="ar-unibtn active" style="width:auto !important; min-height:34px !important; padding:2px 12px !important; font-size:0.80rem !important;" onclick="event.stopPropagation(); appendTabeerToBox3(\'' + r.title.replace(/'/g, '') + '\', \'' + r.body.replace(/'/g, '').replace(/\n/g, ' ').slice(0, 320) + '\')">تعبیر خانے میں شامل کریں</button>' +
+            '</div>'
+          ) : '') +
+        '</div>';
+      }).join('');
+    }
+    if (!total) {
+      html = '<div style="text-align:center; color:#64748b; padding:12px;">اس حرف یا لفظ پر آف لائن ریکارڈ میں کوئی باب نہیں ملا۔</div>';
+    }
+    if (queryForOnline) {
+      var qUrl = 'https://www.google.com/search?q=' + encodeURIComponent('تعبیر الرؤیا امام ابن سیرین خواب میں ' + queryForOnline);
+      html += '<div style="margin-top:10px; text-align:center;">' +
+        '<a href="' + qUrl + '" target="_blank" rel="noopener" class="ar-unibtn" style="text-decoration:none;">🌐 آن لائن مستند تعبیر تلاش کریں («' + queryForOnline + '»)</a>' +
+      '</div>';
+    }
+    out.innerHTML = html;
+  };
+
+
+window.TABEER_UR_RUYA_AUTHENTIC_DB = [
+      {
+        id: 'tr_asman_girna',
+        keywords: ['آسمان', 'فلک', 'عرش', 'آسمان سے گرنا', 'آسمان پر جانا', 'آسمان کے دروازے'],
+        title: 'آسمان دیکھنا، آسمان پر چڑھنا یا آسمان سے زمین پر گرنا',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 43، 96 تا 98',
+        tabeer: '• حضرت ابراہیم کرمانیؒ فرماتے ہیں: اگر دیکھے کہ آسمان سے زمین پر آیا ہے تو دلیل ہے کہ سخت رنج اور بیماری تک پہنچے گا لیکن آخرکار صحت و شفاء پائے گا۔ اور اگر خواب میں دیکھے کہ آسمان پر سے گرا ہے تو یہ خدائے تعالیٰ کی طرف سے تنبیہ کی دلیل ہے کہ فوراً توبہ و استغفار کرے (صفحہ 96-97)۔\n• حضرت ابن سیرینؒ فرماتے ہیں: اگر کوئی اپنے آپ کو آسمان کی فضا میں اڑتا دیکھے تو نعمت اور برکت کے ساتھ سفر کرے گا اور دنیا میں عزت حاصل ہوگی۔ اور اگر دیکھے کہ آسمان کے دروازے کھلے ہیں تو اس سال دعائیں قبول ہوں گی اور خیر و برکت کی بارش ہوگی (صفحہ 96-97)۔\n• حضرت امام جعفر صادقؓ فرماتے ہیں: آسمان کو سبز دیکھنا خیر و صلاح اور امن کی دلیل ہے، اور معمول سے زیادہ روشن دیکھنا دین میں روشنی اور ہدایت ملنے کی بشارت ہے (صفحہ 97)۔',
+        remedy: 'استغفار کی کثرت کریں، حسبِ توفیق صدقہ دیں اور صبح و شام آیت الکرسی پڑھیں۔'
+      },
+      {
+        id: 'tr_iftadan_girna',
+        keywords: ['گرنا', 'افتادن', 'نیچے گرنا', 'چھت سے گرنا', 'پھسلنا', 'دیوار سے گرنا'],
+        title: 'کسی بلند جگہ، پہاڑ، چھت یا دیوار سے نیچے گرنا (افتادن)',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 125 تا 126',
+        tabeer: '• حضرت ابن سیرینؒ نے فرمایا ہے کہ اگر کوئی شخص خواب میں دیکھے کہ کسی جگہ مثلاً پہاڑ، بالاخانہ (چھت) یا دیوار سے نیچے گرا ہے تو اس امر کی دلیل ہے کہ جس آرزو کے پیچھے ہے اس میں وقتی رکاوٹ آئے گی (صفحہ 125)۔\n• حضرت کرمانیؒ نے فرمایا ہے کہ اگر دیکھے کہ پاؤں پھسلا اور گر گیا ہے لیکن اس کو کوئی چوٹ یا تکلیف نہیں ہوئی تو یہ کاموں میں آسانی اور سہولت پیدا ہونے کی دلیل ہے؛ اور اگر سخت زخم پہنچا ہے تو اسی قدر نقصان یا رنج پہنچنے کا اندیشہ ہے (صفحہ 126)۔',
+        remedy: 'سونے سے قبل باوضو ہو کر آیت الکرسی اور چاروں قل پڑھ کر ہاتھوں پر دم کر کے جسم پر پھیر لیں۔'
+      },
+      {
+        id: 'tr_qabar_khodna',
+        keywords: ['قبر', 'گور', 'قبر کھودنا', 'قبرستان', 'گورستان', 'مزار', 'دفن'],
+        title: 'قبر دیکھنا، اپنے لیے قبر کھودنا یا قبرستان جانا (گور و گورستان)',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 523 تا 524',
+        tabeer: '• حضرت دانیال علیہ السلام نے فرمایا ہے کہ اگر کوئی دیکھے کہ اس نے اپنے لیے قبر کھودی ہے تو بعض اہلِ تعبیر نے بیان کیا ہے کہ اس قبر کی جگہ پر اپنے لیے نیا مکان بنائے گا، اور بعض کے نزدیک معاش میں تنگی کی علامت ہے (صفحہ 523)۔\n• حضرت ابن سیرینؒ نے فرمایا ہے: اگر دیکھے کہ اس نے چوبارے یا چھت پر قبر کھودی ہے تو دلیل ہے کہ اس کی زندگی دراز (عمر لمبی) ہوگی۔ اور اگر دیکھے کہ قبر پر کھڑا ہے تو گناہ سے توبہ کرے (صفحہ 524)۔\n• حضرت ابراہیم کرمانیؒ نے فرمایا ہے کہ اگر دیکھے کہ اس نے اہلِ قبور کی زیارت کی ہے یا قبرستان پر بارش برستی دیکھی ہے تو اہلِ قبور پر رحمتِ الٰہی اور دیکھنے والے کے لیے نصیحت و بیداری کی علامت ہے (صفحہ 524)۔',
+        remedy: 'سورۃ الملک کی تلاوت کریں اور مرحومین کے ایصالِ ثواب کے لیے سورۃ الاخلاص ۱۱ بار پڑھیں۔'
+      },
+      {
+        id: 'tr_lakri_katna',
+        keywords: ['لکڑی', 'لکڑیاں', 'لکڑیاں کاٹنا', 'چوب', 'ہیزم', 'آرہ', 'لکڑی تراشنا', 'درخت کاٹنا', 'ایندھن'],
+        title: 'لکڑی دیکھنا، لکڑیاں کاٹنا، لکڑی تراشنا یا جلانے کی لکڑی (چوب / ہیزم / آرہ)',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 43، 107، 231، 280، 615',
+        tabeer: '• حضرت امام جعفر صادقؓ نے فرمایا ہے کہ خواب میں لکڑی تراشنا لوگوں کے کاموں کی اصلاح اور تدبیر کرنے اور فساد دور کرنے کی علامت ہے (صفحہ 280)؛ اور لکڑی چیرنے کا آرا دیکھنا تین وجہ پر ہے: اول فرزند، دوم بہن یا بھائی، سوم شریکِ کار یا ہمسر (صفحہ 43 و 107)۔\n• حضرت ابن سیرینؒ نے فرمایا ہے کہ اگر کوئی آرے سے درخت کاٹتا ہے تو جس شخص سے اس درخت کی نسبت ہے اس سے جدائی اختیار کرے گا (صفحہ 107)۔\n• حضرت کرمانیؒ فرماتے ہیں کہ جنگل یا صحرا سے جلانے کی لکڑیاں (ہیزم) جمع کرنا بڑی ہمت والے بزرگ لوگوں کی صحبت اور حشمت ملنے کی علامت ہے، البتہ خشک جلانے کی لکڑی گھر میں لانا بحث و تکرار سے بچنے کی طرف اشارہ کرتا ہے (صفحہ 615)۔',
+        remedy: 'زبان کی حفاظت کریں اور کثرت سے ”یَا لَطِیفُ یَا سَلَامُ“ کا ورد کریں۔'
+      },
+      {
+        id: 'tr_koh_pahar',
+        keywords: ['پہاڑ', 'کوہ', 'چوٹی', 'ٹیلہ', 'پشتۂ کوہ', 'پہاڑی', 'دامن کوہ'],
+        title: 'پہاڑ دیکھنا، پہاڑ پر چڑھنا، پہاڑ کھودنا یا پہاڑ سے اترنا (کوہ و پشتہ)',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 139، 163، 531 تا 533',
+        tabeer: '• حضرت دانیال علیہ السلام نے فرمایا ہے: اگر اپنے آپ کو بلند پہاڑ پر دیکھے تو کوئی بزرگ اور باوقار شخص اس کو اپنی پناہ میں لے گا، اور اگر دیکھے کہ پہاڑ پر چڑھا ہے تو عزت، بلندی اور مرتبہ پائے گا (صفحہ 531)۔\n• حضرت ابن سیرینؒ نے فرمایا ہے: اگر دیکھے کہ پہاڑ کی چوٹی پر بیٹھا ہے یا پہاڑ پر اذان دی اور نماز پڑھی ہے تو جس چیز کی تلاش میں ہے وہ مراد پوری ہوگی اور اس کا کام خیر و خوبی سے ہوگا (صفحہ 139 و 532)۔ اور اگر دیکھے کہ اس نے آسانی کے ساتھ پہاڑ کھودا ہے تو جلدی عطا اور مال پائے گا (صفحہ 532)۔\n• حضرت جعفر صادقؓ نے فرمایا ہے کہ خواب میں پہاڑ دیکھنا پانچ وجہ پر ہے: (۱) بادشاہ یا بڑا حاکم (۲) منشی کا کام (۳) فتح پانا (۴) بلندی حاصل کرنا (۵) سرداری پانا۔ اور پہاڑ سے نیچے اترنا یا گرنا مرتبے میں کمی کی علامت ہے (صفحہ 457 و 533)۔',
+        remedy: 'شکرِ الٰہی بجا لائیں اور ”رَبِّ زِدْنِي عِلْمًا“ کا ورد کریں۔'
+      },
+      {
+        id: 'tr_aab_pani',
+        keywords: ['پانی', 'آبِ زمزم', 'نہر', 'دریا', 'سمندر', 'چشمہ', 'کنواں', 'چاہ', 'پانی پینا', 'غرق', 'تیرنا'],
+        title: 'پانی دیکھنا، صاف یا گندا پانی پینا، دریا، نہر، چشمہ یا کنواں (آب و دریا و چاہ)',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 84 تا 88، 217، 223، 280، 313، 409',
+        tabeer: '• حضرت ابن سیرینؒ نے فرمایا ہے: اگر صاف اور خوشگوار پانی بہت پیا ہے تو دلیل ہے کہ اس کی عمر دراز اور خوش عیش ہوگا، اور سطح آب پر چلنا قوتِ ایمانی اور پاک اعتقاد کی دلیل ہے؛ جبکہ گدلا، کھاری یا گرم پانی پینا بیماری اور رنج کی علامت ہے (صفحہ 84)۔\n• حضرت جعفر صادقؓ نے فرمایا ہے: خواب میں پانی کا چشمہ دیکھنا سرداری، سخاوت، غموں سے نجات اور مالِ حلال کی دلیل ہے (صفحہ 223)۔\n• کنواں (چاہ) اور دریا: کنویں کا صاف اور ٹھنڈا پانی پینا خیر و منفعت اور مال ملنے کی دلیل ہے (صفحہ 217)۔ دریا میں تیر کر کنارے نکل آنا ہر مشکل اور قید و پریشانی سے خلاصی پانے کی بشارت ہے (صفحہ 281 و 409)۔',
+        remedy: 'پانی پیتے وقت بسم الله اور آخر میں الحمد لله پڑھنے کا التزام رکھیں۔'
+      },
+      {
+        id: 'tr_maar_saanp',
+        keywords: ['سانپ', 'مار', 'اژدہا', 'ناگ', 'سانپ مارنا', 'سانپ کاٹنا', 'کالا سانپ'],
+        title: 'سانپ یا اژدہا دیکھنا، سانپ سے لڑنا یا سانپ کو مارنا (مار و اژدہا)',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 108 تا 109، 543 تا 544',
+        tabeer: '• حضرت ابن سیرینؒ نے فرمایا ہے کہ خواب میں سانپ بدخواہ اور پوشیدہ دشمن ہے۔ اگر گھر میں سانپ ہے تو گھریلو دشمن ہے اور جنگل میں ہے تو بیگانہ دشمن ہے۔ اگر دیکھے کہ اس نے سانپ کو مار ڈالا ہے تو دلیل ہے کہ دشمن کو مغلوب کرے گا اور اس پر فتح پائے گا؛ اور اگر سانپ نے ڈس لیا تو دشمن سے تکلیف پہنچے گی (صفحہ 543)۔\n• حضرت اسماعیل بن اشعثؒ نے فرمایا ہے کہ اگر دیکھے کہ سانپ اس سے بھاگا ہے یا مرا ہوا سانپ دیکھا ہے تو الله تعالیٰ اس سے شر اور آفت کو دور فرما دے گا (صفحہ 543)۔\n• حضرت جعفر صادقؓ نے فرمایا ہے کہ خواب میں سانپ دیکھنا دس وجہ پر ہے: طاقت، زندگانی، سلامت، بادشاہی، سپہ سالاری، عورت، دولت، موت، لڑکا اور سیلاب (صفحہ 544)۔',
+        remedy: 'صبح و شام منزل شریف یا سورۃ الفلق و الناس اور آیت الکرسی ۳، ۳ بار پڑھ کر حصار کریں۔'
+      },
+      {
+        id: 'tr_kazdum_bichoo',
+        keywords: ['بچھو', 'کژدم', 'ڈنک'],
+        title: 'بچھو دیکھنا، بچھو کا ڈنک مارنا یا بچھو کو مارنا (کژدم)',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 498 تا 499 (اور آپ کے خواب صفحہ 45)',
+        tabeer: '• حضرت ابن سیرینؒ نے فرمایا ہے کہ خواب میں بچھو ضعیف اور چغل خور دشمن ہے جو لوگوں کو زبان سے ستاتا ہے۔ اگر دیکھے کہ اس نے بچھو کو مارا ہے تو دشمن پر فتح پائے گا، اور اگر بچھو نے کاٹا ہے تو حاسد یا دشمن کی غیبت سے رنج پہنچے گا (تعبیر الرؤیا صفحہ 498)۔\n• حضرت جعفر صادقؓ نے فرمایا ہے کہ خواب میں بچھو کا دیکھنا تین وجہ پر ہے: (۱) دشمن (۲) حاسد (۳) عیب چینی کرنے والا (صفحہ 499)۔',
+        remedy: 'صبح و شام ۳ بار ”أَعُوذُ بِكَلِمَاتِ اللّٰهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ“ پڑھیں۔'
+      },
+      {
+        id: 'tr_dandan_daant',
+        keywords: ['دانت', 'دندان', 'داڑھ', 'دانت ٹوٹنا', 'دانت گرنا', 'دانت ہلنا'],
+        title: 'دانت دیکھنا، دانت ہتھیلی میں گرنا یا دانت ٹوٹنا (دندان)',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 290 تا 291',
+        tabeer: '• حضرت دانیال علیہ السلام نے فرمایا ہے کہ خواب میں دانت اہلِ خاندان ہیں۔ اگلے دانت فرزند، بھائی، بہن یا والدین پر دلیل ہیں اور دانتوں کی سفیدی و پاکیزگی اہلِ بیت کی قوت و مرتبے کی دلیل ہے (صفحہ 290)۔\n• حضرت ابن سیرینؒ نے فرمایا ہے کہ اگر خواب میں دیکھے کہ اس کے اگلے دانت ہتھیلی پر یا گود میں گرے ہیں اور خاک آلود نہیں ہوئے تو دلیل ہے کہ اس کے ہاں فرزند یا بھائی آئے گا یا مال ہاتھ آئے گا؛ اور بعض اہلِ تعبیر نے بیان کیا ہے کہ دانتوں کا گرنا قرض ادا ہونے اور لمبی عمر پانے کی دلیل ہے (صفحہ 290-291)۔',
+        remedy: 'حسبِ استطاعت صدقہ دیں اور ”یَا حَیُّ یَا قَیُّومُ“ کا ورد کریں۔'
+      },
+      {
+        id: 'tr_zar_sona_chandi',
+        keywords: ['سونا', 'زر', 'چاندی', 'سیم', 'نقرہ', 'زیور', 'انگوٹھی', 'انگشتری', 'موتی', 'مروارید'],
+        title: 'سونا، چاندی، زیور، انگوٹھی یا موتی دیکھنا (زر، سیم، انگشتری و مروارید)',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 123، 327 تا 329، 393، 561، 598',
+        tabeer: '• حضرت ابن سیرینؒ نے فرمایا ہے کہ خواب میں عورتوں کے لیے سونا اور زیور دیکھنا نہایت نیک، خوشی، شادی اور زینت کی دلیل ہے؛ اور چاندی (نقرہ/سیم) دیکھنا حلال مال، پاکیزہ روزی اور خوشخبری کی علامت ہے (صفحہ 328 و 598)۔\n• انگوٹھی (انگشتری): حضرت دانیالؑ اور ابن سیرینؒ نے فرمایا ہے کہ چاندی کی انگوٹھی اور اس کا نگینہ دیکھنا سلطنت، ولایت، نکاح، فرزند اور مال و عزت پانے کی دلیل ہے (صفحہ 123-124)۔\n• موتی (مروارید): خواب میں موتی دیکھنا قرآنِ مجید کا علم، حکمت، مالِ حلال اور نیک اولاد کی بشارت ہے (صفحہ 561-562)۔',
+        remedy: 'شکرِ الٰہی ادا کریں اور درودِ ابراہیمی کا ورد رکھیں۔'
+      },
+      {
+        id: 'tr_naan_roti_khana',
+        keywords: ['روٹی', 'نان', 'کھانا', 'خوردن', 'طعام', 'آٹا', 'آرد', 'گندم', 'چاول', 'برنج', 'گوشت', 'شہد', 'دودھ', 'شیر'],
+        title: 'روٹی، آٹا، گندم، چاول، دودھ، شہد یا پکا ہوا کھانا دیکھنا (نان، شیر، انگبین و طعام)',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 94، 122، 151، 413، 429، 527، 589',
+        tabeer: '• حضرت دانیال علیہ السلام اور ابن سیرینؒ نے فرمایا ہے کہ خواب میں گرم، تازہ اور پاکیزہ روٹیاں دیکھنا یا کھانا کشادہ اور حلال روزی، خوش عیشی، غم سے رہائی اور مالِ حلال ملنے کی دلیل ہے (صفحہ 589)۔\n• دودھ (شیر) اور شہد (انگبین): تازہ دودھ پینا مالِ حلال، علم و حکمت اور فراخ روزی کی دلیل ہے (صفحہ 413-414)؛ اور شہد کھانا بیماریوں سے شفاء، قرآنِ مجید کی حلاوت اور بے محنت حلال رزق ملنے کی بشارت ہے (صفحہ 122 و 410)۔\n• چاول (برنج) اور پکا ہوا گوشت: پکے ہوئے چاول یا پلاؤ کھانا مراد پوری ہونے اور خیر و منفعت کی دلیل ہے (صفحہ 151-152)، اور پکا ہوا حلال گوشت کھانا آسانی سے مال اور نعمت ملنے کی علامت ہے (صفحہ 527)۔',
+        remedy: 'کھانے سے قبل اور بعد مسنون دعا پڑھیں اور مستحقین کو کھانا کھلائیں۔'
+      },
+      {
+        id: 'tr_murda_maut',
+        keywords: ['مردہ', 'موت', 'مرنا', 'مردن', 'فوت شدہ', 'جنازہ', 'کفن', 'مردہ زندہ ہونا'],
+        title: 'اپنے آپ کو مرتے دیکھنا، فوت شدہ (مردہ) کو زندہ و خوش دیکھنا یا مردے کا کچھ دینا',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 227، 507، 552 تا 558',
+        tabeer: '• حضرت ابراہیم کرمانیؒ نے فرمایا ہے کہ اگر کوئی خواب میں کسی فوت شدہ (مردے) کو زندہ، خوش حال اور سفید یا سبز پاکیزہ لباس میں دیکھے تو دلیل ہے کہ اس مرحوم کا حال حق تعالیٰ کے نزدیک نیک ہے اور دیکھنے والے کا کام بھی سنور جائے گا اور غم سے نجات پائے گا (صفحہ 553-554)۔\n• مردے کا کچھ دینا: حضرت دانیالؑ نے فرمایا ہے کہ اگر مردہ خواب میں کوئی کھانے پینے کی چیز یا نیا کپڑا دے تو ایسی جگہ سے حلال روزی، مال اور خیر ملے گی جہاں سے امید نہ تھی (صفحہ 555)۔\n• خواب میں مر کر دوبارہ زندہ ہونا: دلیل ہے کہ گناہ سے توبہ کرے گا، اس کی عمر دراز ہوگی اور تنگی کے بعد فراخی پائے گا (صفحہ 552)۔',
+        remedy: 'مرحومین کے لیے دعائے مغفرت اور ایصالِ ثواب کا اہتمام کریں۔'
+      },
+      {
+        id: 'tr_namaz_quran_kaaba',
+        keywords: ['نماز', 'قرآن', 'تلاوت', 'سورت', 'مسجد', 'اذان', 'کعبہ', 'حج', 'عمرہ', 'وضو', 'غسل', 'دعا', 'درود'],
+        title: 'خواب میں نماز پڑھنا، قرآنِ مجید کی تلاوت، اذان، مسجد، وضو یا کعبہ شریف دیکھنا',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 142، 235، 366 تا 389، 421، 450، 464، 505، 564، 600',
+        tabeer: '• نماز اور مسجد: حضرت ابن سیرینؒ اور امام جعفر صادقؓ نے فرمایا ہے کہ قبلہ رخ کامل نماز پڑھنا دین و دنیا کے کاموں کی درستی، قرض کی ادائیگی، امانت کی تکمیل، غم سے خلاصی اور دلی مراد پانے کی بشارت ہے (صفحہ 600-602)۔\n• قرآنِ مجید پڑھنا: خواب میں قرآن شریف پڑھنا، سننا یا دیکھنا غم سے نجات، بیماری سے شفاء، علم و حکمت اور تمام مرادیں پوری ہونے کی دلیل ہے (صفحہ 366 تا 389 و 464)۔\n• کعبہ شریف، حج، اذان اور وضو: کعبہ شریف یا مکہ مبارکہ دیکھنا امن و امان، حج کی سعادت اور دشمن کے شر سے حفاظت ہے (صفحہ 505 و 571)؛ اور صاف پانی سے وضو یا غسل کرنا تمام پریشانیوں، قرض اور بیماری سے خلاصی کی علامت ہے (صفحہ 450 و 610)۔',
+        remedy: 'پنجگانہ نماز، تلاوتِ قرآن اور مسنون اذکار پر استقامت رکھیں۔'
+      },
+      {
+        id: 'tr_aroosi_shadi_khana',
+        keywords: ['شادی', 'نکاح', 'تزویج', 'عروسی', 'دلہن', 'گھر', 'مکان', 'عمارت', 'دکان'],
+        title: 'خواب میں شادی (نکاح) کرنا، نیا مکان/عمارت بنانا یا دکان دیکھنا',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 203، 245، 296، 439، 444',
+        tabeer: '• شادی / نکاح (تزویج): حضرت ابن سیرینؒ نے فرمایا ہے کہ خواب میں نیک اور خوبصورت عورت سے نکاح کرنا شرف، بزرگی، مال و نعمت اور مراد پوری ہونے کی دلیل ہے (صفحہ 203-204)۔\n• گھر / عمارت اور دکان: خواب میں اپنا گھر کشادہ، نیا اور پاکیزہ دیکھنا یا نئی عمارت بنانا دنیا کی درستی، رزق کی فراخی، خیر و منفعت اور رکے ہوئے کاموں کی کشائش کی دلیل ہے (صفحہ 245-246 و 444)۔ اور آباد دکان دیکھنا معیشت کی بہتری اور عزت و بلندی کی علامت ہے (صفحہ 296)۔',
+        remedy: 'سورۃ الواقعہ اور سورۃ المزمل کی تلاوت کا اہتمام کریں۔'
+      },
+      {
+        id: 'tr_sag_gurbah_sher',
+        keywords: ['کتا', 'سگ', 'بلی', 'گربہ', 'شیر', 'ببر', 'چیتا', 'پلنگ', 'بھیڑیا', 'گرگ', 'چوہا', 'موش'],
+        title: 'کتا، بلی، شیر، چیتا، بھیڑیا یا چوہا دیکھنا (سگ، گربہ، شیر و موش)',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 146، 168، 359، 415، 488، 494، 579',
+        tabeer: '• کتا (سگ): حضرت ابن سیرینؒ نے فرمایا ہے کہ خواب میں کتا کمینہ دشمن ہے؛ اگر کتا بھونکے یا کپڑا پھاڑے تو دشمن کی طرف سے بدگوئی یا نقصان ہے، اور اگر کتا اس سے بھاگ گیا تو دشمن مغلوب اور محتاط ہوگا (صفحہ 359)۔\n• بلی (گربہ) اور چوہا (موش): خواب میں بلی کو مارنا یا نکالنا چور اور حاسد پر غالب آنے اور بیماری سے شفاء پانے کی دلیل ہے (صفحہ 488)۔\n• شیر (ببر) اور چیتا (پلنگ): شیر یا چیتے پر غالب آنا یا اس کے خوف سے محفوظ رہنا طاقتور دشمن پر فتح پانے اور عزت و مرتبہ ملنے کی علامت ہے (صفحہ 146 و 415)۔',
+        remedy: 'صبح و شام معوذتین (سورہ فلق و ناس) اور ”فَاللّٰهُ خَيْرٌ حَافِظًا“ پڑھیں۔'
+      },
+      {
+        id: 'tr_asp_sawari_safar',
+        keywords: ['گھوڑا', 'اسپ', 'اونٹ', 'اشتر', 'گائے', 'بکری', 'سواری', 'سفر', 'کشتی', 'جہاز', 'ہوا میں اڑنا', 'پرواز'],
+        title: 'گھوڑے یا اونٹ کی سواری، سفر کرنا، کشتی میں بیٹھنا یا ہوا میں اڑنا',
+        sourceRef: 'تعبیر الرؤیا کلاں (علامہ ابن سیرینؒ) — صفحات 109 تا 115، 155، 358، 366، 502',
+        tabeer: '• گھوڑا (اسپ) اور سواری: حضرت دانیالؑ اور ابن سیرینؒ نے فرمایا ہے کہ فرمانبردار گھوڑے پر سوار ہونا عزت، دولت، مرتبہ، شرف اور مراد پانے کی دلیل ہے (صفحہ 109-112 و 366)۔\n• سفر اور پرواز (اڑنا): اگر دیکھے کہ سفر کیا ہے اور وہ مقام پہلے سے بہتر ہے تو اس کا حال نیک ہوگا اور مراد پوری ہوگی (صفحہ 358)؛ اور ہوا میں آسانی سے ایک جگہ سے دوسری جگہ اڑنا بلندی کے مطابق سفرِ خیر، شرف اور بزرگی پانے کی دلیل ہے (صفحہ 155)۔\n• کشتی (ناؤ): کشتی میں بیٹھ کر سلامتی سے کنارے پہنچنا ہر قسم کے رنج، قرض اور بلا سے نجات پانے کی بشارت ہے (صفحہ 502)۔',
+        remedy: 'سفر اور سواری کی مسنون دعائیں پڑھنے کا معمول رکھیں۔'
+      }
+    ];
+window.MASTER_THREE_BOOKS_DREAMS = [
+    // ================= حرف الف (ا / آ) =================
+    {w:"الله تعالیٰ کی زیارت یا رحمت", l:"ا", c:"توحید و ایمان", t:"خواب میں الله جل شانہٗ کے نور یا رحمت کا مشاہدہ دنیا و آخرت کی سعادت، مغفرت، ایمان کی سلامتی اور خاتمہ بالخیر کی عظیم بشارت ہے۔", a:"کثرتِ استغفار، تہجد کی پابندی اور شکرِ الٰہی بجا لائیں۔", s:"تعبیر الرؤیا ابن سیرینؒ / کامل التعبیر"},
+    {w:"آیت الکرسی پڑھنا", l:"ا", c:"قرآن و اذکار", t:"خواب میں آیت الکرسی تلاوت کرنا جادو، جنات، نظرِ بد اور تمام آفات سے الٰہی حصار، حافظے کی قوت اور مرتبے کی بلندی کی علامت ہے۔", a:"فرض نمازوں کے بعد اور سوتے وقت آیت الکرسی کا ورد معمول بنائیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"آنحضرت ﷺ کی زیارتِ مبارکہ", l:"ا", c:"انبیاء و صالحین", t:"نبی کریم ﷺ کی زیارت حق اور سچ ہے؛ غم و قرض سے نجات، دین و دنیا کی فلاح اور شفاعتِ مصطفیٰ ﷺ کی روشن بشارت ہے۔", a:"روزانہ کم از کم 313 مرتبہ درودِ ابراہیمی کا ورد رکھیں اور سنتِ نبوی ﷺ کی اتباع کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"انبیاء کرام علیہم السلام کو دیکھنا", l:"ا", c:"انبیاء و صالحین", t:"انبیائے کرامؑ کو خوش شکل دیکھنا نصرتِ الٰہی، عزت، علم و حکمت اور دشمنوں پر فتح کی دلیل ہے۔", a:"صلوٰۃ و سلام اور سورۃ الانبیاء کی آیاتِ مبارکہ کا ورد کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"ابراہیم علیہ السلام کی زیارت", l:"ا", c:"انبیاء و صالحین", t:"حجِ بیت الله کی سعادت، توحید پر استقامت، سخاوت اور آزمائش میں سرخروئی کی علامت ہے۔", a:"درودِ ابراہیمی اور صدقہ و خیرات کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"اسماعیل علیہ السلام کی زیارت", l:"ا", c:"انبیاء و صالحین", t:"فصاحت و بلاغت، وعدے کی سچائی، فرمانبردار اولاد اور تعمیرِ خیر میں حصے کی بشارت ہے۔", a:"والدین کی خدمت اور ایفاءِ عہد کا اہتمام کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"ابوبکر صدیق رضی الله عنہ کو دیکھنا", l:"ا", c:"صحابہ و اولیاء", t:"سچائی، امانت، رفاقتِ صالحین اور مال و جان سے دین کی خدمت کی علامت ہے۔", a:"صدقِ مقال اور انفاق فی سبیل الله کا التزام رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"اذان دینا یا سننا", l:"ا", c:"عبادات", t:"خواب میں خوش الحانی سے اذان دینا حج کی سعادت، سچی شہرت، نیکی کی دعوت اور رزق و عزت میں اضافے کی دلیل ہے۔", a:"پانچوں نمازیں باجماعت ادا کریں اور اذان کا جواب اہتمام سے دیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"اقامت کہنا", l:"ا", c:"عبادات", t:"رکے ہوئے کاموں کے پورے ہونے، وعدے کی تکمیل اور مشکلات کے حل ہونے کی بشارت ہے۔", a:"نماز کی پابندی اور کارِ خیر میں جلدی کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"امامت کروانا", l:"ا", c:"عبادات", t:"قوم یا خاندان میں سرداری، عزت، ذمہ داری اور لوگوں کی خیر خواہی و رہنمائی کی علامت ہے۔", a:"عدل و انصاف اور استغفار کو لازم پکڑیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"استغفار کرنا", l:"ا", c:"عبادات", t:"گناہوں کی معافی، تنگدستی سے فراخی، اولاد و مال میں برکت اور بلاؤں کے ٹلنے کی دلیل ہے۔", a:"روزانہ استغفار کی ایک تسبیح پابندی سے پڑھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"آسمان دیکھنا یا آسمان پر چڑھنا", l:"ا", c:"کائنات و فطرت", t:"کھلا اور روشن آسمان دیکھنا یا اس کی طرف بلند ہونا اعلیٰ منصب، روحانی ترقی اور دعاؤں کی قبولیت کی علامت ہے۔", a:"یا علیُّ یا عظیمُ کا ورد رکھیں اور عاجزی اختیار کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"آفتاب (سورج) طلوع ہوتے دیکھنا", l:"ا", c:"کائنات و فطرت", t:"روشن سورج کا نکلنا بادشاہ یا بڑے افسر سے نفع، کاروبار کی چمک، شفا اور گھر میں خوشحالی کی دلیل ہے۔", a:"نمازِ فجر اور اشراق کی پابندی کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"آگ (روشن اور بے ضرر)", l:"ا", c:"عناصر و واقعات", t:"ایسی آگ جس سے دھواں اور جلن نہ ہو، اندھیرے میں رہنمائی، علم و حکمت اور حاکمِ وقت سے قربت کی نشانی ہے۔", a:"حسبنا الله ونعم الوکیل کا ورد رکھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"آگ میں جلنا یا کالا دھواں دیکھنا", l:"ا", c:"عناصر و واقعات", t:"خواب میں سیاہ دھواں یا جلانے والی آگ فتنہ، غصہ، حسد، بخار یا مال میں نقصان کی تنبیہ ہے۔", a:"فوراً حسبِ توفیق صدقہ دیں اور یا سلامُ 111 بار پڑھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"آبِ زمزم پینا", l:"ا", c:"مشروبات و برکات", t:"بیماریوں سے شفا، علمِ نافع، حج و عمرہ کی سعادت اور دلی مراد پوری ہونے کی مبارک علامت ہے۔", a:"قبلہ رخ کھڑے ہو کر بسم الله کے ساتھ پانی پئیں اور شفا کی دعا کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"آنکھ میں روشنی یا سرمہ لگانا", l:"ا", c:"جسم و صحت", t:"بصیرت، دین کی پختگی، مال و اولاد کی ٹھنڈک اور سنتِ نبوی ﷺ سے محبت کی دلیل ہے۔", a:"سوتے وقت طاق عدد سرمہ لگانے کی سنت ادا کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"آنکھ میں تکلیف یا بینائی کم ہونا", l:"ا", c:"جسم و صحت", t:"دینی غفلت، اولاد کی طرف سے فکر یا کسی قریبی معاملے میں الجھن کی طرف اشارہ ہے۔", a:"سورۃ الملک کی آیت فارجع البصر اور یا نورُ کا ورد کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"آنسو بہانا (خوفِ خدا سے رونا)", l:"ا", c:"جسم و صحت", t:"خواب میں بغیر چیخ و پکار کے آنسو بہنا غم کے زائل ہونے، مسرت اور رحمتِ الٰہی کے نزول کی علامت ہے۔", a:"خلوت میں دعا اور شکرانے کے دو نفل ادا کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"آئینہ دیکھنا", l:"ا", c:"اشیاء و علامات", t:"صاف آئینے میں اپنا روشن چہرہ دیکھنا عزت و وقار، غیر شادی شدہ کے لیے نکاح اور حاملہ کے لیے صالح اولاد کی بشارت ہے۔", a:"آئینہ دیکھنے کی مسنون دعا اللّٰھم انت حسنت خلقی فحسن خلقی پڑھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"انار کھانا (میٹھا)", l:"ا", c:"پھل و میوہ جات", t:"میٹھا انار حلال اور جمع شدہ مال، خوشنما مکان، صالح زوجہ اور قلبی مسرت کی دلیل ہے۔", a:"شکرِ نعمت اور حلال رزق کی دعا کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"انگور کھانا", l:"ا", c:"پھل و میوہ جات", t:"تازہ سفید یا سیاہ انگور موسم پر دیکھنا فراوانیِ رزق، صحت اور دوستوں سے خیر و محبت کی بشارت ہے۔", a:"یا رزاقُ یا فتاحُ کا ورد رکھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"انجیر کھانا", l:"ا", c:"پھل و میوہ جات", t:"بغیر محنت کے بابرکت رزق، صحت، اولاد اور نیک نامی کی علامت ہے۔", a:"سورۃ التین کی تلاوت معمول بنائیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"آم کھانا (پکا ہوا میٹھا)", l:"ا", c:"پھل و میوہ جات", t:"خوشخبری، مال و دولت میں برکت، اولاد کی خوشی اور رکے ہوئے کاموں کے بننے کی علامت ہے۔", a:"صدقہ و شکرانہ ادا کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"امرود کھانا", l:"ا", c:"پھل و میوہ جات", t:"طبیعت میں فرحت، بیماری سے افاقہ اور حلال روزی ملنے کی نشانی ہے۔", a:"یا شافی یا کافی کا ورد کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"اخروٹ دیکھنا یا کھانا", l:"ا", c:"پھل و میوہ جات", t:"محنت کے بعد ملنے والا مضبوط اور پائیدار مال، جسمانی قوت اور لمبی عمر کی علامت ہے۔", a:"حلال کسب اور صبر کا دامن تھامے رکھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"انڈا دیکھنا یا کھانا", l:"ا", c:"خوراک و نعمت", t:"نیک اولاد، نئے کاروبار کا آغاز، چھپا ہوا مال اور گھر میں برکت کی دلیل ہے۔", a:"اولاد کی صلاحیت اور برکت کی دعا کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"اونٹ پر سوار ہونا", l:"ا", c:"حیوانات و سواری", t:"حج یا لمبے بابرکت سفر، استقامت، صبر اور دشمن پر غلبے کی علامت ہے۔", a:"سفر کی مسنون دعا اور صدقہ دیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"اونٹ کا حملہ کرنا یا کاٹنا", l:"ا", c:"حیوانات و سواری", t:"کسی طاقتور حاسد یا دشمن کی طرف سے رنج یا بیماری کا اندیشہ۔", a:"سورۃ الفلق و الناس اور آیت الکرسی پڑھ کر دم کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"انگوٹھی پہننا (چاندی یا نگینے والی)", l:"ا", c:"لباس و زیورات", t:"سلطنت، عہدہ، نکاح، اولاد اور کاروبار میں مہرِ تصدیق و کامیابی کی علامت ہے۔", a:"سنت کے مطابق چاندی کی انگوٹھی اور ذکرِ الٰہی کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"استرا یا قینچی دیکھنا", l:"ا", c:"اشیاء و اوزار", t:"فیصلہ کن معاملہ، الجھنوں کی صفائی یا اولاد و خدمت گار سے متعلق خبر کی علامت ہے۔", a:"ہر کام سے پہلے استخارہ اور بسم الله کا اہتمام کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"الماری (بھری ہوئی دیکھنا)", l:"ا", c:"مکان و اشیاء", t:"مال و اسباب کی حفاظت، رازوں کی پردہ پوشی اور گھریلو خوشحالی کی نشانی ہے۔", a:"سورۃ القریش پڑھ کر مال و اسباب پر دم کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"امتحان دینا اور کامیاب ہونا", l:"ا", c:"احوال و واقعات", t:"زندگی کی کسی آزمائش سے باعزت نکلنے اور مراد پوری ہونے کی دلیل ہے۔", a:"ربِّ زِدْنِی عِلْماً اور شکرانے کے نفل پڑھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"اژدہا (بڑا سانپ) دیکھنا", l:"ا", c:"حیوانات و حشرات", t:"طاقتور اور مکار دشمن، شدید حسد یا سحر و آسیب کے خطرے کی علامت؛ اسے مارنا دشمن پر فتح ہے۔", a:"منزل، سورۃ البقرہ اور صبح و شام کے مسنون اذکار کی پابندی کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"الو (پرندہ) دیکھنا", l:"ا", c:"پرندے", t:"چور، حاسد، تنہائی پسند بدخواہ یا نحوست و ویرانی پھیلانے والے شخص کی طرف اشارہ ہے۔", a:"گھر میں سورۃ البقرہ کی تلاوت اور چاروں قل کا حصار کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"اینٹ (پکی یا کچی) دیکھنا", l:"ا", c:"مکان و تعمیر", t:"جمع شدہ مال، مکان کی تعمیر اور مستقبل کی مضبوط بنیاد رکھنے کی علامت ہے۔", a:"حلال کمائی اور صدقے کا اہتمام کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"ابر (رحمت کے بادل)", l:"ا", c:"کائنات و فطرت", t:"سفید یا برستے بادل علم، حکمت، رحمتِ الٰہی اور قحط و تنگی کے خاتمے کی بشارت ہیں۔", a:"بارش کے وقت کی مسنون دعا اللّٰھم صیباً نافعاً پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف ب =================
+    {w:"بیت الله شریف (خانہ کعبہ) دیکھنا", l:"ب", c:"مقاماتِ مقدسہ", t:"خانہ کعبہ کی زیارت امن و امان، حج و عمرہ کی سعادت، ہدایت اور دنیا و آخرت کی سرخروئی کی عظیم بشارت ہے۔", a:"تلبیہ، درود شریف اور دعائے مقبولیت کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"بارش (ہلکی اور خوشگوار)", l:"ب", c:"کائنات و فطرت", t:"رحمتِ الٰہی، رزق میں فراوانی، بیماری سے شفا اور پریشانیوں کے دھل جانے کی علامت ہے۔", a:"یا رحمٰنُ یا رحیمُ کا ورد اور شکرِ الٰہی کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ / کامل التعبیر"},
+    {w:"بارش (طوفانی یا نقصان دہ)", l:"ب", c:"کائنات و فطرت", t:"آزمائش، وبائی بیماری یا علاقے میں خوف و پریشانی کی تنبیہ ہے۔", a:"استغفار اور اللّٰھم حوالینا ولا علینا کی دعا پڑھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"باغ (سرسبز و شاداب)", l:"ب", c:"کائنات و فطرت", t:"ایمان کی بہار، جنت کی بشارت، نیک بیوی، صالح اولاد اور حلال و پاکیزہ رزق کی علامت ہے۔", a:"کثرت سے سبحان الله والحمد لله پڑھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"بادام کھانا یا دیکھنا", l:"ب", c:"پھل و میوہ جات", t:"بیماری سے شفا، چھپی ہوئی نعمت و مال کا ملنا اور ذہنی سکون کی دلیل ہے۔", a:"یا شافی یا رزاقُ کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"بادشاہ یا حاکم کو خوش دیکھنا", l:"ب", c:"اشخاص و مراتب", t:"عزت و منصب میں ترقی، مقدمے میں کامیابی اور الله تعالیٰ کی رضا کی علامت ہے۔", a:"ملک القدوس السلام کا ورد اور عدل کی دعا کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"بادل (سفید اور روشن)", l:"ب", c:"کائنات و فطرت", t:"علم و حکمت، رحمت اور سفرِ خیر کی بشارت؛ سیاہ خوفناک بادل غم اور الجھن کی نشانی ہے۔", a:"معوذتین اور استغفار کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"بازار میں خرید و فروخت", l:"ب", c:"کاروبار و معاش", t:"بارونق بازار میں نفع بخش تجارت دیکھنا دنیاوی و دینی منافع اور روزگار کی کشادگی کی دلیل ہے۔", a:"بازار کی مسنون دعا لا الہ الا الله وحدہ لا شریک لہ پڑھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"باز (شکاری پرندہ) ہاتھ پر بیٹھنا", l:"ب", c:"پرندے", t:"عزت، حکومت، رعب و دبدبہ، بہادر بیٹا اور بلند ہمتی کی علامت ہے۔", a:"یا عزیزُ یا قویُّ کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"بال (سر کے سیاہ اور سنورے ہوئے)", l:"ب", c:"جسم و صحت", t:"مال و دولت میں اضافہ، لمبی عمر، صحت اور وقار کی علامت ہے۔", a:"بال سنوارتے وقت بسم الله اور شکرِ الٰہی کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"بال گرنا یا الجھنا", l:"ب", c:"جسم و صحت", t:"قرض کی فکر، مالی پریشانی یا ذہنی دباؤ کی علامت؛ حج کے زمانے میں سر منڈوانا قرض کی ادائیگی اور امن ہے۔", a:"اللّٰھم انی اعوذ بک من الھم والحزن کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"بچھو دیکھنا یا مارنا", l:"ب", c:"حیوانات و حشرات", t:"بچھو چغل خور اور زبان سے تکلیف دینے والا کمزور دشمن ہے؛ اسے مارنا دشمن کے شر کے خاتمے کی دلیل ہے۔", a:"اعوذ بکلمات الله التامات من شر ما خلق 7 بار صبح و شام پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"بلی دیکھنا", l:"ب", c:"حیوانات و حشرات", t:"خادم، چور یا گھر کا بھیدی؛ سیاہ خوفناک بلی حسد، نظرِ بد یا جناتی اثر کی علامت ہو سکتی ہے۔", a:"سورۃ الفلق اور سورۃ الناس پڑھ کر اپنے اوپر دم کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"بندر دیکھنا", l:"ب", c:"حیوانات و حشرات", t:"مکار، فریب کار اور نعمت کی ناشکری کرنے والا دشمن؛ بندر سے بچ نکلنا فریب سے حفاظت ہے۔", a:"کثرت سے تعوذ اور استغفار پڑھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"بھیڑیا دیکھنا", l:"ب", c:"حیوانات و حشرات", t:"ظالم دشمن، جھوٹی تہمت یا چوری کا اندیشہ؛ بھیڑیے کو بھگانا ظلم سے نجات ہے۔", a:"فَاللّٰهُ خَيْرٌ حَافِظًا کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"بکری یا دنبہ دیکھنا", l:"ب", c:"حیوانات و سواری", t:"حلال مال، برکت، شریف و فرمانبردار زوجہ اور غنیمت کی علامت ہے۔", a:"حلال رزق اور برکت کی دعا کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"بیل یا گائے دیکھنا", l:"ب", c:"حیوانات و سواری", t:"فربہ گائے خوشحالی اور شادابی کے سال، جبکہ کمزور گائے معاشی تنگی کے سال کی نشانی ہے (سورۃ یوسف کے مطابق)۔", a:"سورۃ یوسف کی تلاوت اور صدقہ کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"بچہ (خوبصورت مسکراتا ہوا)", l:"ب", c:"اشخاص و مراتب", t:"رحمت کے فرشتے، خوشخبری، غم سے نجات اور نئی امید کی بشارت ہے۔", a:"الحمد لله علی کل حال پڑھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"برف (موسم کے مطابق سفید برف)", l:"ب", c:"کائنات و فطرت", t:"بیماریوں اور وباؤں کا خاتمہ، ارزانی اور دل کی ٹھنڈک؛ بے موسم شدید برف رکاوٹ اور سفر کی بندش ہے۔", a:"یا باسطُ یا فتاحُ کا ورد رکھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"بجلی چمکنا", l:"ب", c:"کائنات و فطرت", t:"خوف اور امید کے ساتھ ہدایت، مسافر کی واپسی یا اچانک خبر ملنے کی علامت ہے۔", a:"سبحان الذی یسبح الرعد بحمدہ والملائکۃ من خیفتہ پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"بستر (صاف اور نیا بچھونا)", l:"ب", c:"مکان و اشیاء", t:"نیک شریکِ حیات، راحت، امن اور سفر سے واپسی کی علامت ہے۔", a:"سونے سے پہلے بستر جھاڑنے اور مسنون دعا کی پابندی کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"برتن (صاف مٹی یا دھات کے)", l:"ب", c:"مکان و اشیاء", t:"گھر کے خادم، رزق کے اسباب اور گھریلو انتظام کی درستی کی نشانی ہے۔", a:"کھانے پینے کے برتن ڈھانپ کر رکھنے کی سنت پر عمل کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"بیماری سے شفا پانا", l:"ب", c:"جسم و صحت", t:"توبہ کی قبولیت، قرض سے نجات اور روحانی و جسمانی تندرستی کی علامت ہے۔", a:"سورۃ الفاتحہ 7 بار پڑھ کر دم کریں اور صدقہ دیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"بیت الخلاء میں قضائے حاجت کرنا", l:"ب", c:"احوال و واقعات", t:"غم، قرض، بوجھ اور بیماری کے نکل جانے اور طبیعت کے ہلکا ہونے کی دلیل ہے۔", a:"پاکیزگی کا اہتمام اور دعائے استغفار کریں۔", s:"کامل التعبیر کلاں"},
+
+    // ================= حرف پ =================
+    {w:"پانی (صاف، میٹھا اور ٹھنڈا پینا)", l:"پ", c:"مشروبات و برکات", t:"پاکیزہ زندگی، علمِ نافع، حلال رزق، صحت اور فتنوں سے امن کی بہترین بشارت ہے۔", a:"پانی تین سانس میں پئیں اور الحمد لله کہیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"پانی (گدلا، بدبودار یا کھارا)", l:"پ", c:"مشروبات و برکات", t:"بیماری، غم، حرام مال کی آمیزش یا سحر و بندش کی طرف تنبیہ ہے۔", a:"صدقہ دیں اور سورۃ الفاتحہ و آیاتِ شفا پڑھ کر صاف پانی پئیں۔", s:"کامل التعبیر کلاں"},
+    {w:"پہاڑ پر چڑھنا", l:"پ", c:"کائنات و فطرت", t:"بلند ارادہ، مشکلات پر قابو پانا، عزت و سرداری اور مقصد میں کامیابی کی علامت ہے۔", a:"یا عالیُ یا متعالِ کا ورد رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"پہاڑ سے گرنا", l:"پ", c:"کائنات و فطرت", t:"مرتبے میں کمی، غفلت یا کسی کام میں بے احتیاطی سے نقصان کا اندیشہ۔", a:"استغفار اور صدقہ دے کر الله سے ثباتِ قدم مانگیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"پل (پختہ پل عبور کرنا)", l:"پ", c:"کائنات و فطرت", t:"صراطِ مستقیم پر استقامت، مشکل مرحلے سے باحفاظت گزرنا اور نجات پانا۔", a:"ربنا اتمم لنا نورنا واغفر لنا کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"پرندے (خوبصورت اور چہچہاتے ہوئے)", l:"پ", c:"پرندے", t:"نیک اعمال، فرشتوں کی رحمت، خوشخبری اور بلند پرواز عزائم کی علامت ہے۔", a:"پرندوں کو دانہ پانی ڈالیں اور ذکرِ الٰہی کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"پھول (تازہ گلاب یا خوشبودار پھول)", l:"پ", c:"کائنات و فطرت", t:"مسرت، صالح اولاد، سچی محبت، نیک نامی اور اچھی خبر ملنے کی دلیل ہے۔", a:"درود شریف کی کثرت رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"پگڑی (دستار یا عمامہ باندھنا)", l:"پ", c:"لباس و زیورات", t:"سرداری، علم و فضیلت، عزت و وقار اور دینی وجاہت کی علامت ہے۔", a:"سنتِ عمامہ و ٹوپی اور تواضع اختیار کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"پیر (پاؤں مضبوط دیکھنا)", l:"پ", c:"جسم و صحت", t:"کاروبار اور دین میں مضبوطی، سعیِ حلال اور استقامت کی علامت ہے۔", a:"مسجد کی طرف کثرتِ قدم کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"پیالہ (دودھ یا شربت سے بھرا)", l:"پ", c:"مشروبات و برکات", t:"فطرتِ اسلام، حلال روزی، خوشگوار ازدواجی زندگی اور برکت کی علامت ہے۔", a:"اللّٰھم بارک لنا فیہ وزدنا منہ پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"پیاز یا لہسن کھانا", l:"پ", c:"خوراک و نعمت", t:"کچا پیاز یا لہسن کھانا تلخ کلامی، غم یا مشکوک مال کی تنبیہ ہے؛ پکا ہوا کھانا توبہ اور اصلاح ہے۔", a:"زبان کی حفاظت اور حلال طیب رزق کا اہتمام کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"پستہ کھانا", l:"پ", c:"پھل و میوہ جات", t:"آسانی سے ملنے والا مال، سخی انسان سے نفع اور خوش مزاجی کی دلیل ہے۔", a:"شکرِ الٰہی اور انفاق کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"پالکی یا ڈولی دیکھنا", l:"پ", c:"اشیاء و سواری", t:"عزت و مرتبہ، شادی بیاہ کی تقریب یا آرام دہ سفر کی علامت ہے۔", a:"خیر و برکت کی دعا کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"پرواز کرنا (ہوا میں اڑنا)", l:"پ", c:"احوال و واقعات", t:"اعتدال کے ساتھ فضا میں اڑنا سفرِ خیر، حج اور روحانی و دنیوی ترقی کی علامت ہے۔", a:"سبحان الذی سخر لنا ھذا کا ورد رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف ت =================
+    {w:"تلاوتِ قرآن مجید کرنا", l:"ت", c:"قرآن و اذکار", t:"دل کا نور، ہدایت، بیماری و جادو سے شفا، قرض کی ادائیگی اور درجات کی بلندی کی روشن علامت ہے۔", a:"روزانہ تلاوتِ قرآن کا ناغہ نہ کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"توبہ کرنا", l:"ت", c:"عبادات", t:"گناہوں کی بخشش، قید یا پریشانی سے رہائی اور الله تعالیٰ کی رحمت کی طرف رجوع کی بشارت ہے۔", a:"سید الاستغفار صبح و شام پڑھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"تسبیح پڑھنا یا تسبیح کے دانے دیکھنا", l:"ت", c:"عبادات", t:"نیک اعمال، صالح رفقاء، غم و خوف سے نجات اور ذکرِ الٰہی کی توفیق کی علامت ہے۔", a:"تسبیحِ فاطمی (33 سبحان الله، 33 الحمد لله، 34 الله اکبر) کا التزام رکھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"تاج سر پر رکھنا", l:"ت", c:"لباس و زیورات", t:"علمِ قرآن، بادشاہت و منصب، عزت اور غیر شادی شدہ کے لیے بابرکت نکاح کی علامت ہے۔", a:"شکرِ نعمت اور تواضع اختیار کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"تخت پر بیٹھنا", l:"ت", c:"مکان و اشیاء", t:"بلند مرتبہ، کھوئی ہوئی عزت کی بحالی، کاروبار میں استحکام اور راحت کی دلیل ہے۔", a:"یا مالک الملک کا ورد کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"تلوار ہاتھ میں لینا", l:"ت", c:"اشیاء و اوزار", t:"حق کی قوت، دشمن پر حجت و غلبہ، بہادر بیٹا اور زبان کی تاثیر کی علامت ہے۔", a:"حق گوئی اور عدل کا دامن تھامیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"تیر چلانا اور نشانے پر لگنا", l:"ت", c:"اشیاء و اوزار", t:"قبولیتِ دعا، بھیجے گئے پیغام کی کامیابی اور مقصد کے حصول کی علامت ہے۔", a:"سچے دل سے دعا مانگیں۔", s:"کامل التعبیر کلاں"},
+    {w:"ترازو (میزان) دیکھنا", l:"ت", c:"اشیاء و اوزار", t:"عدل و انصاف، سچا قاضی یا عالم اور لین دین کی درستی کی علامت ہے۔", a:"ناپ تول اور حقوق العباد میں پورا انصاف کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"تالا کھولنا", l:"ت", c:"اشیاء و علامات", t:"بند کاموں کا کھلنا، مشکل کا حل، شادی اور کشادگیِ رزق کی زبردست بشارت ہے۔", a:"یا فتاحُ یا علیمُ 100 بار پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"تالا بند دیکھنا", l:"ت", c:"اشیاء و علامات", t:"وقتی رکاوٹ، راز کی حفاظت یا کسی کام میں تاخیر و بندش کی علامت۔", a:"سورۃ الفتح کی ابتدائی آیات اور یا فتاحُ کا ورد کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"تارے (چمکتے ستارے دیکھنا)", l:"ت", c:"کائنات و فطرت", t:"علماء و صحابہ کرامؓ کی اتباع، ہدایت، سفر میں رہنمائی اور شریف لوگوں کی صحبت کی دلیل ہے۔", a:"علمائے حق کی صحبت اور سنت کی پیروی کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"تربوز کھانا", l:"ت", c:"پھل و میوہ جات", t:"سرخ اور میٹھا تربوز بیماری سے شفا، غم کے خاتمے اور فراغتِ بال کی علامت ہے؛ زرد تربوز کمزوری کی نشانی ہے۔", a:"یا شافی یا سلامُ کا ورد رکھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"توت (شہتوت) کھانا", l:"ت", c:"پھل و میوہ جات", t:"پاکیزہ کمائی، کاروبار میں منافع، صحت اور دینداری میں اضافے کی دلیل ہے۔", a:"شکرِ الٰہی بجا لائیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"تیل (زیتون یا خوشبودار تیل لگانا)", l:"ت", c:"اشیاء و برکات", t:"زیتون کا تیل نور، برکت، شفا اور سنت کی علامت ہے؛ سر میں تیل لگانا زینت اور فرحت ہے۔", a:"زیتون کا استعمال اور سورۃ النور کی آیتِ نور پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"تکیہ دیکھنا یا ٹیک لگانا", l:"ت", c:"مکان و اشیاء", t:"بھروسہ مند دوست، معاون و مددگار اور راحتِ قلب کی علامت ہے۔", a:"توکل علی الله رکھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"تندور (روٹیاں پکتا ہوا دیکھنا)", l:"ت", c:"مکان و اشیاء", t:"گھر کی برکت، معاشی خوشحالی اور روزی کے اسباب کی گرمی و روانی کی دلیل ہے۔", a:"مہمان نوازی اور مسکینوں کو کھانا کھلائیں۔", s:"کامل التعبیر کلاں"},
+    {w:"تیرنا (صاف پانی میں کامیابی سے تیرنا)", l:"ت", c:"احوال و واقعات", t:"علم کے سمندر میں غوطہ زنی، مشکلات کو پار کرنا اور مقصد میں کامیابی کی علامت ہے۔", a:"ربِّ اشرح لی صدری ویسرلی امری کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"تیتری یا تیتر دیکھنا", l:"ت", c:"پرندے", t:"خوش اخلاق شریکِ حیات، انس و محبت اور حلال رزق کی علامت ہے۔", a:"گھر میں نرمی اور خوش اخلاقی رکھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"تاجر (سوداگر) دیکھنا", l:"ت", c:"کاروبار و معاش", t:"کاروباری منافع، امانت داری اور معاشی استحکام کی علامت ہے۔", a:"سچائی اور امانت کے ساتھ تجارت کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف ٹ =================
+    {w:"ٹوپی پہننا", l:"ٹ", c:"لباس و زیورات", t:"سنت کی اتباع، عزت و وقار، سرداری اور سر پر بزرگوں کے سائے کی علامت ہے۔", a:"سنت کے مطابق سر ڈھانپ کر نماز ادا کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"ٹڈی دل دیکھنا", l:"ٹ", c:"حیوانات و حشرات", t:"شہد کی مکھی یا ٹڈی کو بلا نقصان دیکھنا رزق ہے، لیکن فصل اجاڑتی ٹڈی دل آزمائش، مہنگائی یا لشکر کی تنبیہ ہے۔", a:"استغفار اور صدقہ کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ٹوکرا (پھلوں یا اناج سے بھرا)", l:"ٹ", c:"اشیاء و برکات", t:"گھر میں خیر و برکت، تحفہ اور وافر روزی آنے کی بشارت ہے۔", a:"یا رزاقُ یا وھابُ کا ورد کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"ٹانگ یا پنڈلی مضبوط دیکھنا", l:"ٹ", c:"جسم و صحت", t:"معاش میں پختگی، عمر کی درازی اور سفر و سعی میں کامیابی کی علامت ہے۔", a:"صحت پر الله کا شکر ادا کریں۔", s:"کامل التعبیر کلاں"},
+
+    // ================= حرف ث =================
+    {w:"ثمر (میٹھے پھل دیکھنا)", l:"ث", c:"پھل و میوہ جات", t:"اعمالِ صالحہ کا میٹھا نتیجہ، حلال روزی اور اولاد و علم کا نفع ملنے کی دلیل ہے۔", a:"شکر اور صدقہ جاریہ کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ثنا و حمدِ الٰہی کرنا", l:"ث", c:"عبادات", t:"نعمتوں کی زیادتی، قلبی اطمینان اور الله کے ہاں مقبولیت کی علامت ہے۔", a:"کثرت سے الحمد لله رب العالمین پڑھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"ثریا (ستاروں کا جھرمٹ) دیکھنا", l:"ث", c:"کائنات و فطرت", t:"بلند مرتبہ، علمی و روحانی رفعت اور خاندان کے اتحاد کی علامت ہے۔", a:"تہجد اور دعائے ہدایت کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف ج =================
+    {w:"جنت دیکھنا یا جنت میں داخل ہونا", l:"ج", c:"توحید و ایمان", t:"ایمان کی سلامتی، الله کی رضا، غموں سے نجات اور دنیا و آخرت کی ابدی خوشخبری ہے۔", a:"اللّٰھم انی اسئلک الجنۃ الفردوس کثرت سے پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"جبرائیل علیہ السلام کی زیارت", l:"ج", c:"انبیاء و صالحین", t:"روحانی بشارت، نصرتِ الٰہی، علم و حکمت اور دشمنوں سے امن کی عظیم علامت ہے۔", a:"طہارت اور اذکارِ مسنونہ کی پابندی کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"جمعہ کی نماز پڑھنا", l:"ج", c:"عبادات", t:"پرامن اجتماع، حج کی سعادت، بند کاموں کی کشادگی اور خیر و برکت کے جمع ہونے کی دلیل ہے۔", a:"جمعہ کے دن سورۃ الکہف اور کثرتِ درود کا اہتمام کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"جنازہ دیکھنا یا نمازِ جنازہ پڑھنا", l:"ج", c:"احوال و واقعات", t:"آخرت کی یاد، حقوق العباد کی ادائیگی اور کسی مرحوم کے لیے دعائے مغفرت کی تحریک ہے۔", a:"مرحومین کے لیے ایصالِ ثواب اور استغفار کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"جہنم سے پناہ مانگنا یا پلٹ آنا", l:"ج", c:"توحید و ایمان", t:"گناہوں سے سچی توبہ، تنبیہ سے بیداری اور ہلاکت سے نجات کی علامت ہے۔", a:"اللّٰھم اجرنی من النار صبح و شام 7 بار پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"جوتا (نیا اور آرام دہ پہننا)", l:"ج", c:"لباس و زیورات", t:"نیک شریکِ حیات، بابرکت سفر، روزگار میں آسانی اور حفاظتِ قدم کی علامت ہے۔", a:"نیا لباس یا جوتا پہنتے وقت مسنون دعا پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"جوتا تنگ ہونا یا ٹوٹ جانا", l:"ج", c:"لباس و زیورات", t:"سفر میں رکاوٹ، گھریلو ناچاقی یا کاروباری الجھن کی طرف اشارہ ہے۔", a:"درگزر، صدقہ اور یا لطیفُ کا ورد کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"جامن کھانا", l:"ج", c:"پھل و میوہ جات", t:"موسم پر میٹھا جامن کھانا صحت، شفا اور حلال رزق کی علامت ہے۔", a:"یا شافی کا ورد کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"جال یا پھندا دیکھنا", l:"ج", c:"اشیاء و علامات", t:"شکاری جال سے نکل آنا مکر و فریب اور سحر و سازش سے نجات کی دلیل ہے۔", a:"ویمکرون ویمکر الله والله خیر الماکرین کا ورد کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"جہاز (بحری یا ہوائی جہاز کا محفوظ سفر)", l:"ج", c:"اشیاء و سواری", t:"نوح علیہ السلام کی کشتی کی نسبت سے طوفانِ غم سے نجات، بلند سفر اور کامیابی کی علامت ہے۔", a:"بسم الله مجریھا ومرساھا پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"جواہرات اور ہیرے موتی دیکھنا", l:"ج", c:"لباس و زیورات", t:"علومِ قرآن و حدیث، صالح اولاد اور پاکیزہ مال و عزت کی دلیل ہے۔", a:"علمِ دین کی قدر اور شکر کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف چ =================
+    {w:"چاند (مکمل چودھویں کا چاند دیکھنا)", l:"چ", c:"کائنات و فطرت", t:"عالمِ باعمل، عادل وزیر، خوبصورت اور صالح اولاد، نکاح اور کاروبار کی چمک کی علامت ہے۔", a:"چاند دیکھنے کی مسنون دعا اور درود شریف پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"چاندی دیکھنا یا پانا", l:"چ", c:"لباس و زیورات", t:"حلال اور پاکیزہ مال، نیک سیرت عورت اور قلبی صفائی کی دلیل ہے۔", a:"زکوٰۃ و صدقات کی پابندی کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"چابی (کنجی) ہاتھ میں ملنا", l:"چ", c:"اشیاء و علامات", t:"دعا کی قبولیت، بند دروازوں کا کھلنا، علم و خزانے کا حصول اور فتح کی بشارت ہے۔", a:"یا فتاحُ یا رزاقُ کا ورد رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"چادر (سفید یا پاک چادر اوڑھنا)", l:"چ", c:"لباس و زیورات", t:"ستر پوشی، عفت و پاکدامنی، امن اور ازدواجی سکون کی علامت ہے۔", a:"اللّٰھم استر عوراتنا وآمن روعاتنا پڑھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"چراغ یا شمع روشن دیکھنا", l:"چ", c:"مکان و اشیاء", t:"گھر میں ہدایت، صالح اور عالم بیٹا، بیماری سے شفا اور تاریکیِ غم کا خاتمہ۔", a:"سورۃ النور کی تلاوت کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"چڑیا دیکھنا یا پکڑنا", l:"چ", c:"پرندے", t:"ننھا بچہ، خوشخبری، حلال روزی اور گھر میں رونق کی علامت ہے۔", a:"بچوں اور کمزوروں پر شفقت کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"چشمہ (صاف پانی کا ابلتا چشمہ)", l:"چ", c:"کائنات و فطرت", t:"مسلسل جاری رہنے والا رزق، صدقہ جاریہ، علم اور غم سے نجات کی بشارت ہے۔", a:"پانی پلانے کا صدقہ کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"چوہا دیکھنا", l:"چ", c:"حیوانات و حشرات", t:"گھر میں نقصان پہنچانے والا چور، حاسد یا برکت چرانے والی غفلت؛ چوہے کو نکالنا حفاظت ہے۔", a:"سورۃ البقرہ اور بسم الله سے گھر کے دروازے بند کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"چاول (پکے ہوئے سفید چاول کھانا)", l:"چ", c:"خوراک و نعمت", t:"محنت کے بعد ملنے والا حلال مال، تقریبِ خیر اور برکت کی علامت ہے۔", a:"کھانے پر بسم الله اور الحمد لله کا التزام رکھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"چاقو یا چھری دیکھنا", l:"چ", c:"اشیاء و اوزار", t:"مددگار، دلیل و حجت یا اولاد؛ اگر ہاتھ کٹ جائے تو تعجب خیز واقعہ یا جلد بازی کی تنبیہ۔", a:"صبر اور حکمت سے کام لیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف ح =================
+    {w:"حج یا عمرہ ادا کرنا", l:"ح", c:"عبادات", t:"حجِ مقبول کی سعادت، قرض سے نجات، ایمان کی تازگی، طویل عمر اور تمام مقاصد میں کامیابی۔", a:"تلبیہ اور حجِ مبرور کی دعا کثرت سے مانگیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"حجرِ اسود کو بوسہ دینا", l:"ح", c:"مقاماتِ مقدسہ", t:"بیعتِ حق، سنت کی پیروی، مغفرت اور اولیاء و صالحین کی صحبت کی بشارت ہے۔", a:"سنتِ نبوی ﷺ پر مضبوطی سے عمل کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"حوضِ کوثر سے پانی پینا", l:"ح", c:"مشروبات و برکات", t:"سنتِ مصطفیٰ ﷺ پر استقامت، بے نیازی اور آخرت کی ابدی سیرابی کی عظیم بشارت۔", a:"سورۃ الکوثر اور درود شریف کا ورد رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"حلوا کھانا", l:"ح", c:"خوراک و نعمت", t:"ایمان کی حلاوت، شیریں کلامی، حلال منافع، قیدی کی رہائی اور مریض کی شفا۔", a:"میٹھی زبان اور صدقہ اختیار کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"حنا (مہندی لگانا)", l:"ح", c:"لباس و زیورات", t:"سنت کے مطابق مہندی خوشی، نکاح، زینت اور پردہ پوشی کی علامت ہے۔", a:"سنت کی نیت سے زینت و پاکیزگی اختیار کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"حمام میں نہانا (معتدل پانی سے)", l:"ح", c:"جسم و صحت", t:"گناہوں اور غموں سے پاکیزگی، بیماری سے شفا اور قرض کی ادائیگی؛ گرم کھولتا پانی غم کی نشانی ہے۔", a:"طہارت اور وضو کی پابندی کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف خ =================
+    {w:"خانہ کعبہ کا طواف کرنا", l:"خ", c:"مقاماتِ مقدسہ", t:"الله تعالیٰ کے حکم کی تعمیل، امانت کی ادائیگی، درجات کی بلندی اور بلاؤں سے امن کی بشارت ہے۔", a:"طواف اور مقبول حج کی دعا مانگیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"کھجور کھانا یا دیکھنا", l:"خ", c:"پھل و میوہ جات", t:"خالص ایمان، تلاوتِ قرآن، فوری ملنے والا حلال رزق اور صحت و برکت کی علامت ہے۔", a:"صبح نہار منہ کھجور کھانے کی سنت اپنائیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"خربوزہ (میٹھا) کھانا", l:"خ", c:"پھل و میوہ جات", t:"میٹھا خربوزہ غم سے نجات اور کاموں میں آسانی ہے؛ کچا یا زرد خربوزہ کمزوری کی علامت ہے۔", a:"یا سلامُ یا شافی کا ورد کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"خرگوش دیکھنا", l:"خ", c:"حیوانات و سواری", t:"حلال روزی، نرم مزاج شریکِ حیات اور اولاد کی خوشی کی علامت ہے۔", a:"شکرِ الٰہی ادا کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"خیمہ نصب دیکھنا", l:"خ", c:"مکان و اشیاء", t:"سفرِ خیر، سرداری، حفاظت اور کاروبار یا ملازمت میں نیا سائبان ملنے کی دلیل ہے۔", a:"یا حفیظُ یا نصیرُ کا ورد رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"خوشبو (عطر یا مشک لگانا)", l:"خ", c:"اشیاء و برکات", t:"نیک نامی، حسنِ اخلاق، علم کی اشاعت اور لوگوں میں مقبولیت کی علامت ہے۔", a:"سنتِ عطر اور درود شریف اپنائیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"خون نکلنا یا کپڑوں پر لگنا", l:"خ", c:"جسم و صحت", t:"پھوڑے سے گندا خون نکلنا بیماری و غم سے نجات ہے؛ کپڑوں پر ناحق خون لگنا مشکوک مال یا تہمت کی تنبیہ ہے۔", a:"استغفار، صدقہ اور حلال کمائی کا اہتمام کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"خط یا خوشخبری کا مکتوب ملنا", l:"خ", c:"احوال و واقعات", t:"غائب شخص کی خبر، رکے ہوئے کام کی منظوری اور مسرت کی علامت ہے۔", a:"الحمد لله الذی بنعمتہ تتم الصالحات پڑھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+
+    // ================= حرف د =================
+    {w:"درود شریف پڑھنا", l:"د", c:"قرآن و اذکار", t:"تمام غموں کی کفایت، گناہوں کی بخشش، قرض کی ادائیگی اور شفاعتِ نبوی ﷺ کی بشارت ہے۔", a:"درودِ ابراہیمی کو اپنا مستقل وظیفہ بنائیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"دعا مانگنا (آہ و زاری کے ساتھ)", l:"د", c:"عبادات", t:"حاجت روائی، بندشوں کے ٹوٹنے، اولاد کی نعمت اور رحمتِ الٰہی کے نزول کی یقینی علامت ہے۔", a:"تہجد کے وقت دعا کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"دودھ پینا (تازہ اور میٹھا)", l:"د", c:"مشروبات و برکات", t:"فطرتِ سلیمہ، علمِ لدنی، فراوانیِ رزق اور جسمانی و روحانی قوت کی بہترین علامت ہے۔", a:"دودھ پیتے وقت اللّٰھم بارک لنا فیہ وزدنا منہ پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"دہی یا مکھن کھانا", l:"د", c:"خوراک و نعمت", t:"سہولت سے ملنے والا بابرکت مال، سفر میں نفع اور صحت کی دلیل ہے۔", a:"یا رزاقُ کا ورد کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"درخت (سرسبز اور پھلدار)", l:"د", c:"کائنات و فطرت", t:"کلمہ طیبہ، سخی و باوقار انسان، خاندان کی شاخوں میں برکت اور پائیدار رزق کی علامت ہے۔", a:"شجرکاری یا صدقہ جاریہ میں حصہ لیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"دروازہ کھلنا", l:"د", c:"مکان و اشیاء", t:"مشکلات کا خاتمہ، روزگار کے نئے راستے اور قبولیتِ دعا کی علامت ہے۔", a:"یا فتاحُ 70 بار روزانہ پڑھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"دریا (پرامن اور صاف بہتا ہوا)", l:"د", c:"کائنات و فطرت", t:"عادل بادشاہ، وسیع رزق، علم کی فراوانی اور سفرِ تجارت میں نفع کی علامت ہے۔", a:"شکرِ الٰہی اور صدقہ ادا کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"دانت (سفید اور چمکدار دیکھنا)", l:"د", c:"جسم و صحت", t:"خاندان اور رشتہ داروں میں محبت، صحت اور مالی خوشحالی کی علامت ہے۔", a:"مسواک کی سنت اور صلہ رحمی اختیار کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"دانت ٹوٹ کر ہتھیلی یا گود میں گرنا", l:"د", c:"جسم و صحت", t:"گود یا ہاتھ میں گرنا لمبی عمر یا خاندان میں نئے فرد کے اضافے کی علامت ہے؛ زمین پر گم ہونا کسی عزیز کی جدائی یا مالی نقصان کی تنبیہ ہے۔", a:"فوراً صدقہ دیں اور یا حفیظُ کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"داڑھی (سنت کے مطابق باوقار دیکھنا)", l:"د", c:"جسم و صحت", t:"مرد کے لیے زینت، وقار، دینداری، مال اور قبیلے میں عزت کی علامت ہے۔", a:"سنتِ رسول ﷺ کی تعظیم کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"دسترخوان (نعمتوں سے سجا ہوا)", l:"د", c:"خوراک و نعمت", t:"سورۃ المائدہ کی بشارت کے مطابق رزق کی وسعت، مہمان نوازی اور دشمنوں پر غلبے کی علامت ہے۔", a:"اللّٰھم ارزقنا رزقاً حسناً پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"دلہن یا دولہا دیکھنا", l:"د", c:"احوال و واقعات", t:"نیک نامی، خوشحالی، نئی ذمہ داری اور گھر میں مسرت کے آغاز کی علامت ہے (بشرطیکہ گانا بجانا نہ ہو)۔", a:"بارک الله لک کی دعا اور شکرانہ ادا کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"دیوار (مضبوط تعمیر کرنا)", l:"د", c:"مکان و تعمیر", t:"دین و دنیا کی حفاظت، مضبوط سہارا اور دشمن کے شر سے حصار کی علامت ہے۔", a:"آیت الکرسی کا حصار رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف ڈ =================
+    {w:"ڈول سے کنویں کا پانی نکالنا", l:"ڈ", c:"مشروبات و برکات", t:"کسبِ حلال کی محنت، کاروبار سے منافع، علم کا حصول اور مراد پوری ہونے کی دلیل ہے۔", a:"محنت کے ساتھ یا رزاقُ کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ڈاکیا یا قاصد دیکھنا", l:"ڈ", c:"اشخاص و مراتب", t:"جلد ملنے والی خبر، پیغامِ خیر یا سفر کی اطلاع کی علامت ہے۔", a:"خیر الخبر کی دعا اللّٰھم انی اسئلک خیرھا پڑھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"ڈھال ہاتھ میں لینا", l:"ڈ", c:"اشیاء و اوزار", t:"آفت، حسد اور دشمن کے وار سے حفاظت، روزے کی برکت اور باوفا دوست کی علامت ہے۔", a:"فرض اور نفلی روزوں کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف ذ =================
+    {w:"ذکرِ الٰہی کی محفل دیکھنا", l:"ذ", c:"عبادات", t:"فرشتوں کا نزول، رحمت و سکینت، مغفرت اور دل کی زندگی کی علامت ہے۔", a:"الا بذکر الله تطمئن القلوب کا ورد رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ذبح کرنا (حلال جانور سنت کے مطابق)", l:"ذ", c:"عبادات", t:"فدیہ و نجات، پریشانی کا کٹنا، قرض کی ادائیگی اور قربانی کی قبولیت کی بشارت ہے۔", a:"حسبِ استطاعت صدقہ یا قربانی کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ذخیرہ (حلال اناج جمع دیکھنا)", l:"ذ", c:"کاروبار و معاش", t:"مستقبل کی کفالت، گھریلو امن اور تنگی سے حفاظت کی علامت ہے۔", a:"سورۃ القریش کا ورد رکھیں۔", s:"کامل التعبیر کلاں"},
+
+    // ================= حرف ر =================
+    {w:"روٹی (تازہ، سفید اور گرم روٹی کھانا)", l:"ر", c:"خوراک و نعمت", t:"خوشگوار زندگی، حلال اور بے مشقت رزق، علمِ دین اور عائلی سکون کی بہترین علامت ہے۔", a:"رزق کی قدر کریں اور مسکین کو کھانا کھلائیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"روٹی (سوکھی، جلی ہوئی یا پھپھوندی لگی)", l:"ر", c:"خوراک و نعمت", t:"معاشی تنگی، ناشکری یا محنت میں مشقت کی طرف اشارہ ہے۔", a:"استغفار اور سورۃ الواقعہ بعد نمازِ مغرب پڑھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"روزہ رکھنا یا افطار کرنا", l:"ر", c:"عبادات", t:"گناہوں سے ڈھال، صحت، قرض سے خلاصی اور افطار کرنا غم کے بعد فرحت و مسرت کی بشارت ہے۔", a:"ایامِ بیض کے روزوں کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"رکوع اور سجدہ کرنا", l:"ر", c:"عبادات", t:"الله تعالیٰ کا قرب، دشمن پر فتح، عاجزی سے بلندی اور مرادوں کی تکمیل کی علامت ہے۔", a:"سجدے میں کثرت سے دعا مانگیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"راستہ (سیدھا اور روشن راستہ دیکھنا)", l:"ر", c:"کائنات و فطرت", t:"صراطِ مستقیم، شریعت کی پیروی اور الجھنوں سے نکل کر کامیابی کی طرف گامزن ہونا۔", a:"اہدنا الصراط المستقیم کو تدبر سے پڑھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"رسی مضبوطی سے تھامنا", l:"ر", c:"توحید و ایمان", t:"حبل الله (قرآن و سنت) سے وابستگی، عہد کی پختگی اور ہلاکت سے نجات کی علامت ہے۔", a:"قرآن و سنت کو مضبوطی سے تھامے رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ریشم کا لباس (عورت کے لیے یا سبز ریشم)", l:"ر", c:"لباس و زیورات", t:"خواتین کے لیے زینت و خوشحالی، اور صالحین کے لیے جنتی لباس و راحت کی علامت ہے۔", a:"شریعت کے مطابق لباس کا اہتمام کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"ریچھ دیکھنا", l:"ر", c:"حیوانات و حشرات", t:"احمق اور دھوکے باز دشمن؛ اس سے محفوظ رہنا دشمن کی چال کے ناکام ہونے کی دلیل ہے۔", a:"یا حفیظُ کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ریل گاڑی کا سفر", l:"ر", c:"اشیاء و سواری", t:"نظم و ضبط کے ساتھ اجتماعی سفر، روزگار کی تلاش اور منزل تک جلد رسائی کی علامت ہے۔", a:"سفر کی مسنون دعا پڑھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+
+    // ================= حرف ز =================
+    {w:"زکوٰۃ یا صدقہ دینا", l:"ز", c:"عبادات", t:"مال کا پاک ہونا اور بڑھنا، بلاؤں کا ٹلنا، بیماری سے شفا اور دشمن کے شر سے حفاظت۔", a:"حقیقت میں بھی صدقہ نکالیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"زیتون کا پھل یا درخت دیکھنا", l:"ز", c:"پھل و میوہ جات", t:"مبارک درخت، نورِ ایمان، حلال مال، صحت اور علم و حکمت کی علامت ہے۔", a:"زیتون کا استعمال اور شکرِ الٰہی کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"زعفران دیکھنا", l:"ز", c:"اشیاء و برکات", t:"نیک نامی، تعریف و توصیف اور پاکیزہ مال کی علامت ہے۔", a:"درود شریف اور ذکرِ خیر جاری رکھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"زمرد (سبز نگینہ) دیکھنا", l:"ز", c:"لباس و زیورات", t:"شجاعت، حلال مال، صالح اولاد، شہادت کا درجہ اور دین داری کی علامت ہے۔", a:"یا غنیُّ یا مغنی کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"زمین (سرسبز اور کشادہ زمین دیکھنا)", l:"ز", c:"کائنات و فطرت", t:"دنیا کی کشادگی، بابرکت روزگار، نیک زوجہ اور لمبے سفرِ خیر کی علامت ہے۔", a:"سورۃ الملک کی تلاوت معمول بنائیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"زلزلہ دیکھنا", l:"ز", c:"کائنات و فطرت", t:"علاقے میں خوف، حاکم کی سختی یا غفلت سے بیدار ہونے کی الٰہی تنبیہ۔", a:"فوراً توبہ و استغفار اور صدقہ کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"زخم لگنا یا مرہم پٹی کرنا", l:"ز", c:"جسم و صحت", t:"مرہم پٹی ہونا غم کے مداوے اور اصلاحِ حال کی دلیل ہے؛ بغیر درد خون نکلنا مال ملنے کی علامت ہے۔", a:"یا شافی یا سلامُ کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"زنجیر یا قید سے کھل جانا", l:"ز", c:"احوال و واقعات", t:"بندش، جادو، قرض اور گناہ کی قید سے آزادی و خلاصی کی بشارت ہے۔", a:"سورۃ الفتح اور یا فتاحُ کا ورد رکھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"زبان (فصیح اور تر و تازہ دیکھنا)", l:"ز", c:"جسم و صحت", t:"علم، دلیل، سچی گواہی اور دشمن پر حجت کی کامیابی کی علامت ہے۔", a:"رب اشرح لی صدری ویسرلی امری واحلل عقدۃ من لسانی پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف س =================
+    {w:"سجدہ کرنا (الله کے حضور)", l:"س", c:"عبادات", t:"مقصد میں یقینی فتح، توبہ کی قبولیت، درجات کی بلندی اور شیطان کی ذلت کی علامت ہے۔", a:"سجدۂ شکر ادا کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"سلام کرنا یا سلام کا جواب پانا", l:"س", c:"احوال و واقعات", t:"خوف سے امن، صلح و آشتی، کاروباری معاہدے کی کامیابی اور سلامتی کی بشارت ہے۔", a:"سلام کو عام کرنے کی سنت اپنائیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"سیب کھانا (سرخ اور میٹھا)", l:"س", c:"پھل و میوہ جات", t:"اولاد کی خوشی، تجارت و ملازمت میں ہمت کے بقدر منافع اور صحت و فرحت کی علامت ہے۔", a:"یا رزاقُ کا ورد اور شکرِ الٰہی کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"سفر کرنا (آسان اور روشن سفر)", l:"س", c:"احوال و واقعات", t:"ایک حالت سے بہتر حالت کی طرف منتقلی، اخلاق کی اصلاح اور رزق کی کشادگی کی دلیل ہے۔", a:"سفر اور رجوع الی الله کی دعا پڑھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"سمندر (پرامن اور نیلگوں دیکھنا)", l:"س", c:"کائنات و فطرت", t:"عظیم سلطنت، وسیع علم، بڑا کاروبار اور سخی حاکم سے نفع ملنے کی علامت ہے۔", a:"رب زدنی علماً و رزقاً واسعاً پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"سونا (زیور برائے خواتین)", l:"س", c:"لباس و زیورات", t:"عورت کے لیے خوشی، نکاح، اولاد اور زینت ہے؛ مرد کے لیے کچا سونا پگھلانا فکر یا تنبیہ ہے۔", a:"زکوٰۃ کی ادائیگی اور استغفار کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"سرمہ لگانا", l:"س", c:"لباس و زیورات", t:"دین کی بصیرت، آنکھوں کی شفا اور سنت کی برکت پانے کی علامت ہے۔", a:"اثمد سرمہ سنت کی نیت سے لگائیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"سیڑھی (زینہ) پر اوپر چڑھنا", l:"س", c:"مکان و اشیاء", t:"درجہ بدرجہ دینی و دنیاوی ترقی، امتحان میں کامیابی اور عہدے کی بلندی کی علامت ہے۔", a:"یا رافعُ کا ورد رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"سانپ دیکھنا یا سانپ کو مارنا", l:"س", c:"حیوانات و حشرات", t:"سانپ چھپا ہوا دشمن، حاسد یا آسیب ہے؛ کالا سانپ سخت دشمن ہے، اور سانپ کو مار دینا دشمن اور جادو پر کامل فتح ہے۔", a:"صبح و شام منزل، آیت الکرسی اور چاروں قل پڑھ کر دم کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"سفید لباس پہننا", l:"س", c:"لباس و زیورات", t:"پاکیزگی، تقویٰ، حج و عمرہ کی سعادت، عزت اور دل کے سکون کی بہترین علامت ہے۔", a:"سفید اور پاک لباس پہننے کی سنت اپنائیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"سبز لباس پہننا", l:"س", c:"لباس و زیورات", t:"اہلِ جنت کا لباس، شہداء و صالحین کا مرتبہ، عبادت کی لذت اور برکت کی علامت ہے۔", a:"اعمالِ صالحہ پر استقامت رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف ش =================
+    {w:"شہد کھانا یا دیکھنا", l:"ش", c:"خوراک و نعمت", t:"تلاوتِ قرآن کی مٹھاس، حلال و پاکیزہ مال، بیماری سے شفا (فِيهِ شِفَاءٌ لِّلنَّاسِ) اور محبت کی علامت ہے۔", a:"شہد پر سورۃ الفاتحہ پڑھ کر استعمال کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"شربت (میٹھا اور خوشبودار پینا)", l:"ش", c:"مشروبات و برکات", t:"فرحت و مسرت، شفا، محبت اور جائز مراد پوری ہونے کی دلیل ہے۔", a:"شکرِ الٰہی ادا کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"شیر دیکھنا یا شیر پر قابو پانا", l:"ش", c:"حیوانات و سواری", t:"طاقتور حاکم یا دلیر دشمن؛ شیر پر سوار ہونا یا اسے زیر کرنا بڑی فتح، رعب اور اقتدار کی علامت ہے۔", a:"یا قویُّ یا متینُ کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"شہادت پانا (راہِ خدا میں)", l:"ش", c:"توحید و ایمان", t:"الله کے ہاں زندہ جاوید مرتبہ، عزت، مغفرت اور دنیا میں سرخروئی کی علامت ہے۔", a:"سچے دل سے شہادت اور خاتمہ بالخیر کی دعا کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"شمع یا قندیل روشن کرنا", l:"ش", c:"مکان و اشیاء", t:"علم و ہدایت کا پھیلنا، گھر میں خوشی، نکاح اور صالح فرزند کی پیدائش۔", a:"یا نورُ کا ورد رکھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"شیشہ یا آئینہ دیکھنا", l:"ش", c:"مکان و اشیاء", t:"صفائیِ قلب اور حقائق کا کھلنا؛ شیشہ ٹوٹنا کسی نازک تعلق میں احتیاط کی تنبیہ ہے۔", a:"گھر والوں کے ساتھ نرمی اور حکمت برتیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"شاخ (ہری بھری ٹہنی ہاتھ میں ہونا)", l:"ش", c:"کائنات و فطرت", t:"نیک اولاد، نئی شاخِ کاروبار اور امید کے بر آنے کی دلیل ہے۔", a:"رب ھب لی من الصالحین پڑھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+
+    // ================= حرف ص =================
+    {w:"صحابہ کرام رضوان الله علیہم کو دیکھنا", l:"ص", c:"صحابہ و اولیاء", t:"سنت پر استقامت، نصرتِ الٰہی، ایمان کی قوت اور برکت کی علامت ہے۔", a:"صحابہ کرامؓ سے محبت اور ان کے نقشِ قدم کی پیروی کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"صدقہ و خیرات کرنا", l:"ص", c:"عبادات", t:"آنے والی مصیبت کا ٹل جانا، رزق میں فراوانی اور شفا کی بشارت۔", a:"بیداری میں بھی فوراً کچھ صدقہ دیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"صبر کرنا (آزمائش میں)", l:"ص", c:"عبادات", t:"عنقریب ملنے والی فتح، عزت اور بشارتِ الٰہی (وَبَشِّرِ الصَّابِرِينَ) کی یقینی علامت ہے۔", a:"ربنا افرغ علینا صبراً کا ورد کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"صابن سے کپڑے یا ہاتھ دھونا", l:"ص", c:"اشیاء و علامات", t:"توبہ سے گناہوں کی صفائی، قرض کی ادائیگی اور غم و بیماری کے زائل ہونے کی دلیل ہے۔", a:"اللّٰھم طھر قلبی کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"صندوق (بھرا ہوا دیکھنا)", l:"ص", c:"مکان و اشیاء", t:"مکان، خزانہ، راز کی حفاظت اور گھریلو استحکام کی علامت ہے۔", a:"امانت داری اور شکر کا التزام کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"صبحِ صادق (طلوعِ فجر دیکھنا)", l:"ص", c:"کائنات و فطرت", t:"تاریکی اور پریشانی کی رات کا خاتمہ، امید کی کرن اور وعدے کی سچائی کی علامت ہے۔", a:"نمازِ فجر اور صبح کے اذکار کی پابندی کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف ض =================
+    {w:"ضیافت (دعوتِ طعام کرنا یا کھانا)", l:"ض", c:"خوراک و نعمت", t:"خیر و برکت پر اجتماع، بچھڑے ہوؤں کا ملنا اور سخاوت و عزت میں اضافے کی دلیل ہے۔", a:"مہمان کا اکرام اور صلہ رحمی کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ضمانت دینا یا کفیل بننا", l:"ض", c:"احوال و واقعات", t:"ذمہ داری کا بوجھ اٹھانا، کسی مظلوم کی مدد اور کارِ خیر میں استقامت کی علامت ہے۔", a:"اللّٰھم اعنی علی ذکرک وشکرک پڑھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"ضعیف (بزرگ نورانی شخصیت دیکھنا)", l:"ض", c:"اشخاص و مراتب", t:"نورانی بزرگ دیکھنا خوش نصیبی، دانائی، برکت اور نصیحتِ خیر کی علامت ہے۔", a:"بزرگوں کا ادب اور ان کی دعا لیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف ط =================
+    {w:"طوافِ کعبہ کرنا", l:"ط", c:"عبادات", t:"ولایت و تقویٰ، امانت کی تکمیل اور الله کی حفاظت میں آنے کی علامت ہے۔", a:"کثرت سے تلبیہ اور استغفار پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"طوطا دیکھنا یا بولتا سننا", l:"ط", c:"پرندے", t:"فصیح اللسان بچہ، عالم و فلسفی شخص یا خوش کلام دوست کی علامت ہے۔", a:"علمِ نافع کی دعا کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"طبلہ یا ڈھول کی آواز", l:"ط", c:"اشیاء و علامات", t:"کھوکھلی شہرت یا جھوٹی افواہ؛ لہٰذا لغویات سے بچ کر ذکرِ الٰہی اختیار کریں۔", a:"استغفار اور ذکرِ خفی کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"طبیب (حکیم یا ڈاکٹر) کو دیکھنا", l:"ط", c:"اشخاص و مراتب", t:"عالمِ دین، مصلح و ناصح، بیماری سے شفا اور بگڑے معاملے کی اصلاح کی علامت ہے۔", a:"سنتِ نبوی ﷺ اور طبِ نبوی کو اپنائیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"طشت یا لگن دیکھنا", l:"ط", c:"مکان و اشیاء", t:"خادمہ، گھریلو سہولت اور صفائی و انتظام کی علامت ہے۔", a:"گھر میں پاکیزگی رکھیں۔", s:"کامل التعبیر کلاں"},
+
+    // ================= حرف ظ =================
+    {w:"ظفر و کامیابی پانا", l:"ظ", c:"احوال و واقعات", t:"مقصد میں فتح، دشمن کے منصوبے کی ناکامی اور نصرتِ الٰہی کی بشارت ہے۔", a:"نصر من الله وفتح قریب کا ورد رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ظلمت (اندھیرے سے روشنی میں نکلنا)", l:"ظ", c:"کائنات و فطرت", t:"کفر و غفلت سے ہدایت، تنگدستی سے امیری اور غم سے نجات کی روشن علامت ہے۔", a:"یا نورُ یا ہادی کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ظہر کی نماز ادا کرنا", l:"ظ", c:"عبادات", t:"کاروبار اور روزگار کے عین وقت میں الله کی فرمانبرداری، برکت اور راز کے ظاہر و کامیاب ہونے کی دلیل ہے۔", a:"نمازِ ظہر اول وقت میں ادا کریں۔", s:"کامل التعبیر کلاں"},
+
+    // ================= حرف ع =================
+    {w:"علماء و مشائخ کی زیارت", l:"ع", c:"اشخاص و مراتب", t:"دین کی سمجھ، ہدایت، سنت کا نور اور غم و الجھن کے حل کی علامت ہے۔", a:"علمائے ربانیین کی تعظیم اور علمِ دین سیکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"عمر بن خطاب رضی الله عنہ کو دیکھنا", l:"ع", c:"صحابہ و اولیاء", t:"عدل و انصاف، حق و باطل میں فرق، دینی غیرت اور شیطان کے فرار کی علامت ہے۔", a:"حق گوئی اور عدل کا التزام رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"عثمان غنی رضی الله عنہ کو دیکھنا", l:"ع", c:"صحابہ و اولیاء", t:"حیا، سخاوت، قرآن سے محبت اور مال میں بے پناہ برکت کی علامت ہے۔", a:"تلاوتِ قرآن اور سخاوت اپنائیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"علی المرتضیٰ رضی الله عنہ کو دیکھنا", l:"ع", c:"صحابہ و اولیاء", t:"علم و حکمت کا باب، شجاعت، زہد اور مشکلات و اعداء پر غلبے کی علامت ہے۔", a:"یا حی یا قیوم برحمتک استغیث کا ورد رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"عمرہ ادا کرنا", l:"ع", c:"عبادات", t:"عمر میں برکت، عمل کی اصلاح، بیماری سے شفا اور رزق کی کشادگی کی بشارت ہے۔", a:"مقبول عمرے کی دعا اور درود شریف پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"عید کا دن یا عید کی نماز دیکھنا", l:"ع", c:"عبادات", t:"گمشدہ خوشی کی واپسی، قرض اور غم سے خلاصی اور توبہ کی قبولیت کی علامت ہے۔", a:"تکبیرات اور شکرِ الٰہی پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"عطر لگانا یا سونگھنا", l:"ع", c:"اشیاء و برکات", t:"نیک شہرت، اچھی خبر، سنت کی محبت اور دل کی فرحت کی علامت ہے۔", a:"درود شریف کی کثرت کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"عمارت (نئی اور پختہ تعمیر دیکھنا)", l:"ع", c:"مکان و تعمیر", t:"دنیا و دین کی آبادی، شادی، کاروبار کی توسیع اور صحت کی علامت ہے۔", a:"سورۃ البقرہ اپنے مکان میں تلاوت کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"عصا (لاٹھی) ہاتھ میں لینا", l:"ع", c:"اشیاء و اوزار", t:"معتبر اور باوفا مددگار، سفر میں سہارا اور دشمن پر غلبے کی علامت ہے (عصائے موسیٰؑ کی نسبت سے)۔", a:"توکل علی الله اور سنتِ عصا کو یاد رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"عقاب دیکھنا", l:"ع", c:"پرندے", t:"بلند پرواز ہمت، طویل عمر، عزت و اقتدار اور دور دراز سفر میں کامیابی کی علامت ہے۔", a:"یا عزیزُ یا جبارُ کا ورد رکھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"عینک لگانا (نظر صاف ہونا)", l:"ع", c:"اشیاء و علامات", t:"معاملات میں گہری بصیرت، حقیقت کا ادراک اور درست فیصلے کی علامت ہے۔", a:"رب ارنی الاشیاء کما ھی کی دعا کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+
+    // ================= حرف غ =================
+    {w:"غسل کرنا (پاک اور صاف پانی سے)", l:"غ", c:"عبادات", t:"گناہوں سے کامل طہارت، سحر و نظرِ بد کے اثر کا دھلنا، قرض کی ادائیگی اور شفا کی علامت ہے۔", a:"وضو اور طہارت پر مداومت رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"غار میں پناہ لینا", l:"غ", c:"کائنات و فطرت", t:"غارِ ثور اور اصحابِ کہف کی نسبت سے دشمنوں سے حفاظت، راز کی پردہ پوشی اور الله کی خاص نصرت کی علامت ہے۔", a:"سورۃ الکہف کی ابتدائی دس آیات کا ورد رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"غصہ ضبط کرنا", l:"غ", c:"احوال و واقعات", t:"تقویٰ، احسان کا درجہ اور دشمن پر اخلاقی فتح کی علامت ہے۔", a:"اعوذ بالله من الشیطان الرجیم پڑھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"غلیل یا نشانہ بازی دیکھنا", l:"غ", c:"اشیاء و اوزار", t:"زبان اور قول کی تاثیر؛ لہٰذا کسی پر بے جا تنقید سے پرہیز کریں۔", a:"زبان کی حفاظت اور ذکرِ الٰہی کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"غلام یا خادم کو خوش دیکھنا", l:"غ", c:"اشخاص و مراتب", t:"کام کاج میں سہولت، معاونت ملنا اور روزمرہ بوجھ کے ہلکا ہونے کی علامت ہے۔", a:"ماتحتوں کے ساتھ حسنِ سلوک کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف ف =================
+    {w:"فرشتوں کی زیارت (نورانی صورت میں)", l:"ف", c:"توحید و ایمان", t:"عزت، فتح، بشارت، شفا اور خاتمہ بالخیر کی عظیم الشان علامت ہے۔", a:"طہارت، سچائی اور درود و اذکار کی پابندی کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"فجر کی نماز پڑھنا", l:"ف", c:"عبادات", t:"الله تعالیٰ کے ذمۂ امان میں آنا، رزق میں برکت اور چہرے کے نور کی علامت ہے۔", a:"نمازِ فجر باجماعت کبھی قضا نہ کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"فولاد یا لوہا ہاتھ میں نرم ہونا", l:"ف", c:"اشیاء و اوزار", t:"حضرت داؤد علیہ السلام کے معجزے کی نسبت سے مشکل ترین کاموں کا آسان ہونا، قوت اور رزق کی علامت ہے۔", a:"یا قویُّ یا متینُ کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"فوارہ چلتے دیکھنا", l:"ف", c:"مکان و اشیاء", t:"گھر میں خوشحالی، مسرت اور مسلسل جاری رہنے والی برکت کی علامت ہے۔", a:"شکرِ الٰہی ادا کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"فیل (ہاتھی) پر سوار ہونا", l:"ف", c:"حیوانات و سواری", t:"بڑا منصب، رعب و دبدبہ اور بڑے کاروبار پر دسترس کی علامت ہے۔", a:"سورۃ الفیل اور شکرِ نعمت کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف ق =================
+    {w:"قرآن مجید دیکھنا یا سینے سے لگانا", l:"ق", c:"قرآن و اذکار", t:"علم و حکمت، میراثِ نبوت، دل کا چین اور تمام ظاہری و باطنی بیماریوں سے شفا کی علامت ہے۔", a:"روزانہ تلاوتِ قرآن اور اس کے احکام پر عمل کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"قلم ہاتھ میں پکڑنا یا لکھنا", l:"ق", c:"اشیاء و علامات", t:"علم و دانش، عہدہ، رزق کی تحریر اور نئی ذمہ داری ملنے کی دلیل ہے۔", a:"سورۃ القلم اور رب زدنی علماً پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"قرض ادا کرنا", l:"ق", c:"کاروبار و معاش", t:"صلہ رحمی، فرض کی ادائیگی، غم سے نجات اور مسکین کی مدد کرنے کی علامت ہے۔", a:"اللّٰھم اکفنی بحلالک عن حرامک واغننی بفضلک عمن سواک پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"قبر کھودنا یا قبرستان جانا", l:"ق", c:"احوال و واقعات", t:"قبرستان میں جا کر عبرت پکڑنا غفلت سے بیداری اور سنت کی یاد ہے؛ اپنے لیے قبر بنانا نیا مکان تعمیر کرنے کی علامت بھی ہوتا ہے۔", a:"کثرت سے استغفار اور آخرت کی تیاری کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"قلعہ (مضبوط حصار میں داخل ہونا)", l:"ق", c:"مکان و تعمیر", t:"توبہ، تقویٰ اور ذکرِ الٰہی کے ذریعے شیطان اور دشمنوں سے کامل حفاظت پانا۔", a:"حصنِ حصین کے صبح و شام کے اذکار پڑھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"قینچی دیکھنا", l:"ق", c:"اشیاء و اوزار", t:"شراکت داری، کپڑے و مال میں اضافہ یا اختلافی معاملے کا فیصلہ کرنے والا منصف۔", a:"انصاف اور استخارہ کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"قمیص (سفید اور لمبی پہننا)", l:"ق", c:"لباس و زیورات", t:"دین داری، تقویٰ، پردہ پوشی اور حضرت یوسفؑ کے قمیص کی نسبت سے بینائی و خوشی لوٹنے کی علامت ہے۔", a:"لباسِ تقویٰ اور سنت کو لازم پکڑیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف ک =================
+    {w:"کعبہ شریف کے اندر داخل ہونا", l:"ک", c:"مقاماتِ مقدسہ", t:"خوف سے امن (وَمَن دَخَلَهُ كَانَ آمِنًا)، حاکم یا بزرگ کا قرب اور والدین کی رضا پانے کی بشارت ہے۔", a:"والدین کی خدمت اور حج کی دعا کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"کتاب (دینی یا علمی کتاب پڑھنا)", l:"ک", c:"اشیاء و علامات", t:"ہدایت، دانائی، سچی خبر اور نیک صحبت ملنے کی علامت ہے۔", a:"مطالعۂ قرآن و سنت کو معمول بنائیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"کشتی میں سوار ہو کر ساحل پر پہنچنا", l:"ک", c:"اشیاء و سواری", t:"ہلاکت، قرض، بیماری اور فتنے کے طوفان سے یقینی نجات پانے کی بشارت۔", a:"سورۃ ہود کی آیتِ کشتی اور شکرِ الٰہی پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"کنواں (میٹھے پانی سے بھرا دیکھنا)", l:"ک", c:"کائنات و فطرت", t:"گھر کی برکت، حلال معاش، علم کا خزانہ اور خوش خلق شریکِ حیات کی علامت ہے۔", a:"یا رزاقُ یا وھابُ کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"کبوتر (سفید کبوتر دیکھنا یا پکڑنا)", l:"ک", c:"پرندے", t:"امن کا پیغام، دور سے آنے والی خوشخبری، باوفا زوجہ اور صالح اولاد کی علامت ہے۔", a:"گھر میں امن و درگزر کا ماحول رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"کوا دیکھنا", l:"ک", c:"پرندے", t:"حریص، فاسق یا جدائی ڈالنے والا شخص؛ کوے کا اڑ کر دور چلے جانا نحوست کے ٹلنے کی علامت ہے۔", a:"معوذتین اور استغفار کا ورد کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"کتا دیکھنا یا کتے کا بھونکنا", l:"ک", c:"حیوانات و حشرات", t:"کم ظرف دشمن؛ شکاری یا راکھا کتا حفاظت کی علامت ہے، جبکہ کاٹنے والا سیاہ کتا حاسد یا آسیب کی تنبیہ ہے۔", a:"آیت الکرسی اور اعوذ بکلمات الله التامات پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"کیلا کھانا", l:"ک", c:"پھل و میوہ جات", t:"طَلْحٍ مَّنضُودٍ کی نسبت سے جنت کا پھل، مالدار کے لیے مال کی زیادتی اور دیندار کے لیے عبادت کی حلاوت ہے۔", a:"شکرِ نعمت ادا کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"کنگھی کرنا (بال یا داڑھی میں)", l:"ک", c:"اشیاء و علامات", t:"الجھے ہوئے کاموں کا سلجھنا، قرض کی ادائیگی، غم کا دور ہونا اور زکوٰۃ سے مال کا پاک ہونا۔", a:"یا باسطُ یا مفرج الکروب پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"کرسی پر بیٹھنا", l:"ک", c:"مکان و اشیاء", t:"عزت کا مقام، ملازمت میں ترقی اور آخرت میں بلند درجہ پانے کی علامت ہے۔", a:"آیت الکرسی کا ورد رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف گ =================
+    {w:"گھوڑا (اصیل گھوڑے پر سوار ہونا)", l:"گ", c:"حیوانات و سواری", t:"عزت، دولت، جہاد و سعی میں کامیابی، بلند مرتبہ اور مراد کے حصول کی علامت ہے۔", a:"یا عزیزُ یا معزُّ کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"گائے کا دودھ دوہنا", l:"گ", c:"حیوانات و سواری", t:"حلال محنت سے فراواں رزق، خوشحالی کا سال اور برکت کا حصول۔", a:"بسم الله اور شکر کے ساتھ کسبِ حلال کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"گندم (گیہوں کا ڈھیر یا بالیاں دیکھنا)", l:"گ", c:"خوراک و نعمت", t:"محنت سے کمایا ہوا بابرکت مال، سال بھر کی کفالت اور صدقے میں کئی گنا اضافہ۔", a:"سورۃ البقرہ آیت 261 کو یاد رکھیں اور صدقہ دیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"گلاب کا پھول سونگھنا یا ملنا", l:"گ", c:"کائنات و فطرت", t:"فرزند، محبوب کی ملاقات، خوشخبری اور اچھی یادگار کی علامت ہے۔", a:"درودِ پاک کثرت سے پڑھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"گلاب جامن یا مٹھائی کھانا", l:"گ", c:"خوراک و نعمت", t:"خوشخبری، رشتے یا امتحان میں کامیابی اور دل کی خوشی کی علامت ہے۔", a:"الحمد لله پڑھیں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"گھڑی دیکھنا (درست وقت بتاتی ہوئی)", l:"گ", c:"اشیاء و علامات", t:"نظمِ اوقات، وعدے کی پابندی اور کام کے مقررہ وقت پر پورا ہونے کی علامت ہے۔", a:"نمازوں کو ان کے مقررہ وقت پر ادا کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+    {w:"گھر (نیا، کشادہ اور روشن گھر دیکھنا)", l:"گ", c:"مکان و تعمیر", t:"تنگدستی کے بعد فراخی، صحت، صالح زوجہ اور آخرت کے اچھے ٹھکانے کی بشارت ہے۔", a:"گھر میں داخل ہوتے وقت بسم الله اور سلام کہیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف ل =================
+    {w:"لباس (نیا، پاک اور باوقار پہننا)", l:"ل", c:"لباس و زیورات", t:"دین و دنیا کی زینت، ستر پوشی، عزت اور روزگار میں بہتری کی علامت ہے۔", a:"الحمد لله الذی کسانی ھذا پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"لوٹا یا ابریق دیکھنا", l:"ل", c:"مکان و اشیاء", t:"توبہ کرنے والا خادم، وضو و طہارت کا اہتمام اور نیک اعمال میں مددگار۔", a:"ہر وقت باوضو رہنے کی کوشش کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"لیموں (زرد یا سبز دیکھنا)", l:"ل", c:"پھل و میوہ جات", t:"سبز اور خوشبودار لیموں مومنِ قاریِ قرآن اور رزق کی علامت ہے؛ کھٹا زرد لیموں معمولی ملامت یا حلالتِ طبع کی نشانی ہے۔", a:"یا سلامُ کا ورد رکھیں۔", s:"کامل التعبیر کلاں"},
+    {w:"لشکرِ اسلام کو فتح یاب دیکھنا", l:"ل", c:"احوال و واقعات", t:"حق کا بول بالا، فرشتوں کی مدد اور اہلِ ایمان کی سرخروئی کی علامت ہے۔", a:"نصر من الله وفتح قریب پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف م =================
+    {w:"مسجد میں جانا یا مسجد تعمیر کرنا", l:"م", c:"مقاماتِ مقدسہ", t:"ایمان کی تکمیل، علماء و صالحین کی صحبت، صدقہ جاریہ اور جنت میں محل بننے کی بشارت ہے۔", a:"مسجد کی آبادی اور باجماعت نماز کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"مدینہ منورہ یا روضۂ رسول ﷺ کی زیارت", l:"م", c:"مقاماتِ مقدسہ", t:"رحمت، سکینت، مغفرت، شفاعتِ نبوی ﷺ اور دنیا و آخرت کی فلاح کی عظیم بشارت ہے۔", a:"کثرتِ درود و سلام کا نذرانہ پیش کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"مکہ مکرمہ دیکھنا", l:"م", c:"مقاماتِ مقدسہ", t:"امن، حج کی سعادت، ہدایت اور رزق و عزت کے مرکز سے جڑنے کی علامت ہے۔", a:"ربنا تقبل منا انک انت السمیع العلیم پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"مچھلی (تازہ اور بڑی مچھلی دیکھنا یا کھانا)", l:"م", c:"خوراک و نعمت", t:"بے حساب حلال رزق، مالِ غنیمت، مراد کا بر آنا اور نکاح کی بشارت ہے۔", a:"یا رزاقُ کا ورد اور شکرِ الٰہی کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"مرغ (اذان دیتا ہوا سفید مرغ)", l:"م", c:"پرندے", t:"مؤذن، قاریِ قرآن، بیدار مغز خادم اور سحر خیزی و برکت کی علامت ہے۔", a:"تہجد اور فجر کے وقت بیداری کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"مور دیکھنا", l:"م", c:"پرندے", t:"خوبصورتی، مال و جاہ اور خوشحال خاندان سے تعلق یا نفع ملنے کی علامت ہے۔", a:"تواضع اور شکرِ الٰہی اختیار کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"موتی (لؤلؤ و مرجان دیکھنا)", l:"م", c:"لباس و زیورات", t:"قرآن مجید کی آیات، علم و حکمت اور خوبصورت نیک اولاد کی علامت ہے۔", a:"حفظ و تلاوتِ قرآن کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"مسواک کرنا", l:"م", c:"عبادات", t:"سنتِ نبوی ﷺ کا احیاء، رضاے الٰہی، منہ اور مال کی پاکیزگی اور رشتہ داروں سے حسنِ سلوک۔", a:"ہر وضو کے ساتھ مسواک کی سنت زندہ رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"میت کو خوشحال اور سفید لباس میں دیکھنا", l:"م", c:"احوال و واقعات", t:"مرحوم کی بخشش، بلند مقام اور زندہ شخص کے لیے نیک انجام کی بشارت ہے۔", a:"مرحومین کے لیے ایصالِ ثواب اور دعائے مغفرت کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"موت (خواب میں مر کر دوبارہ زندہ ہونا)", l:"م", c:"احوال و واقعات", t:"گناہ سے توبہ، غفلت سے بیداری، لمبی عمر اور تنگدستی کے بعد نئی خوشحال زندگی ملنے کی علامت ہے۔", a:"استغفار اور صدقے کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"مہمان کا گھر آنا", l:"م", c:"احوال و واقعات", t:"اپنے رزق کے ساتھ آنے والی رحمت، خوشخبری اور فرزند کی پیدائش کی بشارت (حضرت ابراہیمؑ کے مہمانوں کی نسبت سے)۔", a:"مہمان کا اکرام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف ن =================
+    {w:"نماز کامل خشوع سے ادا کرنا", l:"ن", c:"عبادات", t:"دین و دنیا کی درستی، امانت کی ادائیگی، بے حیائی سے حفاظت اور مرادوں کی تکمیل۔", a:"پانچوں نمازوں کی تکبیرِ اولیٰ کے ساتھ پابندی کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"نور (چہرے یا گھر میں روشنی دیکھنا)", l:"ن", c:"توحید و ایمان", t:"ہدایتِ الٰہی، صالح عمل، علم کا فیض اور غم و ظلمت کے خاتمے کی دلیل ہے۔", a:"اللّٰھم اجعل فی قلبی نوراً کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"نہر (میٹھے پانی کی بہتی نہر)", l:"ن", c:"کائنات و فطرت", t:"مستقل آمدنی، خوشگوار معاش اور جنت کی نہروں کی بشارت۔", a:"شکرِ الٰہی اور انفاق فی سبیل الله کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"نکاح ہونا", l:"ن", c:"احوال و واقعات", t:"الله تعالیٰ کی خاص عنایت، نئی ذمہ داری، منصب، عزت اور قرض کی ادائیگی میں مدد۔", a:"ربنا ھب لنا من ازواجنا وذریاتنا قرۃ اعین پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ناشپاتی کھانا", l:"ن", c:"پھل و میوہ جات", t:"حلال مال کا حصول، صحت یابی اور غائب فرد کی واپسی کی علامت ہے۔", a:"یا رزاقُ یا شافی کا ورد کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"ناریل کھانا", l:"ن", c:"پھل و میوہ جات", t:"سفرِ تجارت سے نفع، پختہ رائے اور حلال روزی ملنے کی علامت ہے۔", a:"شکرِ نعمت ادا کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"نمک (سفید نمک دیکھنا)", l:"ن", c:"خوراک و نعمت", t:"نقد مال، زہد و قناعت، صلح اور بیماریوں سے شفا کی علامت ہے۔", a:"کھانے کے آغاز و اختتام پر چٹکی نمک کی سنت یاد رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ناخن تراشنا", l:"ن", c:"جسم و صحت", t:"سنتِ فطرت کی ادائیگی، دشمن پر غلبہ، قرض سے خلاصی اور رزق میں برکت۔", a:"جمعہ کے دن ناخن تراشنے کا اہتمام کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+
+    // ================= حرف و =================
+    {w:"وضو کرنا (مکمل اور صاف پانی سے)", l:"و", c:"عبادات", t:"الله کی امان، حاجت کا پورا ہونا، غصے اور شیطانی اثر کا خاتمہ اور گناہوں کی معافی۔", a:"وضو کے بعد کلمۂ شہادت اور اللّٰھم اجعلنی من التوابین پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"والدین کو مسکراتے ہوئے دیکھنا", l:"و", c:"اشخاص و مراتب", t:"رب کی رضا، دعا کی قبولیت، رزق و عمر میں برکت اور دنیا و آخرت کی کامیابی۔", a:"رب ارحمھما کما ربیانی صغیراً کثرت سے پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"وعظ و نصیحت سننا یا کرنا", l:"و", c:"عبادات", t:"دل کی نرمی، توبہ کی توفیق اور خیر کی طرف رہنمائی ملنے کی علامت ہے۔", a:"نیک مجالس میں شرکت کریں۔", s:"کامل التعبیر کلاں"},
+    {w:"ورق یا کاغذ (صاف سفید دیکھنا)", l:"و", c:"اشیاء و علامات", t:"نئی تحریر، معاہدہ، علم کا حصول اور شک و شبہ سے صفائی کی علامت ہے۔", a:"ہر تحریر بسم الله سے شروع کریں۔", s:"آپ کے خواب اور ان کی تعبیر"},
+
+    // ================= حرف ہ =================
+    {w:"ہاتھ (مضبوط، صاف اور کھلے دیکھنا)", l:"ہ", c:"جسم و صحت", t:"سخاوت، بھائی اور شریکِ کار کی قوت، ہنر میں برکت اور کامیابی کی علامت ہے۔", a:"ہاتھ سے صدقہ اور کسبِ حلال کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ہدہد (پرندہ) دیکھنا", l:"ہ", c:"پرندے", t:"حضرت سلیمان علیہ السلام کے قاصد کی نسبت سے سچی اور اہم خبر، بصیرت اور پانی و رزق کے مقام کی رہنمائی۔", a:"سورۃ النمل کی تلاوت اور شکرِ الٰہی کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ہرن دیکھنا یا پکڑنا", l:"ہ", c:"حیوانات و سواری", t:"حلال مالِ غنیمت، خوش جمال و نیک سیرت رشتہ اور خوشخبری ملنے کی علامت ہے۔", a:"یا وھابُ کا ورد کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ہوا (ٹھنڈی اور خوشگوار نسیم چلنا)", l:"ہ", c:"کائنات و فطرت", t:"رحمت کی بشارت، غم کے بادل چھٹنا اور حضرت سلیمانؑ و یوسفؑ کی نسبت سے خوشخبری کی آمد۔", a:"اللّٰھم انی اسئلک خیرھا پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ہدیہ (تحفہ دینا یا لینا)", l:"ہ", c:"احوال و واقعات", t:"دلوں کی الفت، صلح، منگنی و نکاح اور باہمی خیر و برکت کی علامت ہے۔", a:"تھادوا تحابوا کی سنت پر عمل کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"ہانڈی (پکتی ہوئی دیکھنا)", l:"ہ", c:"مکان و اشیاء", t:"گھر کے سربراہ کی محنت، معاشی انتظام اور دسترخوان کی رونق کی علامت ہے۔", a:"کھانا بناتے وقت ذکر اور درود پڑھیں۔", s:"کامل التعبیر کلاں"},
+
+    // ================= حرف ی =================
+    {w:"یاقوت (سرخ یا زرد نگینہ دیکھنا)", l:"ی", c:"لباس و زیورات", t:"فرحت و مسرت، مال کی فراوانی، خوبصورت اولاد اور عزت و وجاہت کی علامت ہے۔", a:"سورۃ الرحمٰن کی تلاوت معمول بنائیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"یوسف علیہ السلام کی زیارت", l:"ی", c:"انبیاء و صالحین", t:"حاسدوں اور قید و ابتلا کے بعد عظیم سلطنت، عزت، حسنِ اخلاق اور بچھڑے عزیزوں کے وصال کی بشارت ہے۔", a:"سورۃ یوسف کی تلاوت اور صبرِ جمیل اختیار کریں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"یعقوب علیہ السلام کی زیارت", l:"ی", c:"انبیاء و صالحین", t:"غم و فراق کے خاتمے، گمشدہ فرد کی واپسی اور حسنِ ظن بالله کی تکمیل کی علامت ہے۔", a:"انما اشکو بثی وحزنی الی الله کا ورد رکھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"یونس علیہ السلام کی زیارت", l:"ی", c:"انبیاء و صالحین", t:"تنگ ترین حالات اور اندھیروں سے فوری نجات کی یقینی بشارت۔", a:"لا الہ الا انت سبحانک انی کنت من الظالمین کثرت سے پڑھیں۔", s:"تعبیر الرؤیا ابن سیرینؒ"},
+    {w:"یتیم کے سر پر شفقت سے ہاتھ رکھنا", l:"ی", c:"عبادات", t:"دل کی نرمی، حاجت روائی اور جنت میں نبی کریم ﷺ کی رفاقت کی بشارت۔", a:"یتیم اور مسکین کی کفالت و دلجوئی کریں۔", s:"آپ کے خواب اور ان کی تعبیر"}
+  ];
+
+
+
+  // ================= BATCH 12: ALL 3 TABEER BOOKS SOFT-COPY RESTORED + ALL 10 REAL DRIVE PDF BOOKS IN LIBRARY (v2.1.12) =================
+  (function() {
+    var BUILD_VER = 'v2.1.12';
+    try {
+      var prevVer = localStorage.getItem('alraqi_app_build_ver');
+      if (prevVer !== BUILD_VER) {
+        localStorage.setItem('alraqi_app_build_ver', BUILD_VER);
+        if ('caches' in window && caches.keys) {
+          caches.keys().then(function(keys) { keys.forEach(function(k) { caches.delete(k); }); }).catch(function(){});
+        }
+      }
+    } catch (e) {}
+  })();
+
+  // Upgrade getAllSoftCopyDreams to include MASTER_THREE_BOOKS_DREAMS + TABEER_UR_RUYA_AUTHENTIC_DB + all other soft-copy books!
+  var _origGetSoftB12 = getAllSoftCopyDreams;
+  getAllSoftCopyDreams = function() {
+    var list = [];
+    var seen = {};
+    function pushItem(title, body, src, letter, advice) {
+      var t = String(title || '').trim();
+      var b = String(body || '').trim();
+      if (!t || !b) return;
+      var key = normUrduTabeer(t).slice(0, 42);
+      if (seen[key]) return;
+      seen[key] = true;
+      var fullBody = advice ? (b + '\n\nروحانی ہدایت / عمل: ' + String(advice).trim()) : b;
+      list.push({
+        title: t,
+        body: fullBody,
+        src: src || 'تعبیر الرؤیا کتب (سافٹ کاپی)',
+        letter: normUrduTabeer(letter || firstUrduLetter(t)).charAt(0)
+      });
+    }
+    if (Array.isArray(window.MASTER_THREE_BOOKS_DREAMS)) {
+      window.MASTER_THREE_BOOKS_DREAMS.forEach(function(d) {
+        pushItem(d.w || d.word || d.title, d.t || d.tabeer, d.s || d.source || 'تعبیر الرؤیا / کامل التعبیر / آپ کے خواب اور ان کی تعبیر', d.l || d.letter, d.a || d.remedy);
+      });
+    }
+    if (Array.isArray(window.TABEER_UR_RUYA_AUTHENTIC_DB)) {
+      window.TABEER_UR_RUYA_AUTHENTIC_DB.forEach(function(d) {
+        pushItem(d.title || (Array.isArray(d.keywords) ? d.keywords[0] : ''), d.tabeer, d.sourceRef || 'تعبیر الرؤیا کلاں (مستند ابواب)', firstUrduLetter(d.title || ''), d.remedy);
+      });
+    }
+    if (typeof _origGetSoftB12 === 'function') {
+      _origGetSoftB12().forEach(function(d) {
+        pushItem(d.title, d.body, d.src, d.letter, '');
+      });
+    }
+    return list;
+  };
+
+  // Upgrade Central Kutub Library with ALL 10 real uploaded Google Drive PDF books organized in folders!
+  window.renderKutubFolder = function() {
+    var cat = $('kutubSummaryCatalog');
+    if (!cat) return;
+    var q = (($('kutubSearchInp') || {}).value || '').trim();
+
+    var folders = [
+      { key: 'all', label: 'سب کتب' },
+      { key: 'tabeer', label: 'تعبیر الرؤیا' },
+      { key: 'amliyat', label: 'عملیات و نقوش' },
+      { key: 'wazaif', label: 'وظائف و قرآن' }
+    ];
+
+    var builtInBooks = [
+      // --- تعبیر الرؤیا فولڈر ---
+      {
+        key: 'bk_ibn_sirin', folder: 'tabeer',
+        title: 'تعبیر الرؤیا کلاں (پی ڈی ایف + مکمل ڈیجیٹل کتاب)',
+        author: 'امام محمد بن سیرینؒ',
+        line: 'مکمل پی ڈی ایف اور ڈیجیٹل صفحات — حروفِ تہجی سے منسلک',
+        available: true, type: 'ibn_sirin',
+        pdfUrl: 'https://drive.google.com/file/d/1KPoGn9w9WUcVE4bKiM3DtJSqLQygtvb5/preview'
+      },
+      {
+        key: 'bk_aapke_khwab', folder: 'tabeer',
+        title: 'آپ کے خواب اور ان کی تعبیر (کتاب و سنت کی روشنی میں)',
+        author: 'مستند کتابِ تعبیر (پی ڈی ایف + سافٹ کاپی)',
+        line: 'مکمل پی ڈی ایف کتاب — اس کے تمام ابواب تعبیر الرؤیا میں شامل ہیں',
+        available: true, type: 'drive_pdf',
+        pdfUrl: 'https://drive.google.com/file/d/1k3hCao1SmvTppdJ_e6sr6iX0D0OsGcdr/preview'
+      },
+      {
+        key: 'bk_tabeer_pdf2', folder: 'tabeer',
+        title: 'تعبیر الرؤیا و کامل التعبیر (مکمل پی ڈی ایف + سافٹ کاپی)',
+        author: 'مستند کتبِ تعبیر',
+        line: 'مکمل پی ڈی ایف کتاب — اس کے ابواب بھی تعبیر الرؤیا میں شامل ہیں',
+        available: true, type: 'drive_pdf',
+        pdfUrl: 'https://drive.google.com/file/d/1RFcto9OWzSzbzdbg9Z-GTEtqr02Ic_UK/preview'
+      },
+      // --- عملیات و نقوش فولڈر ---
+      {
+        key: 'bk_fuyuzaat', folder: 'amliyat',
+        title: 'فیوضاتِ درخواستی مع مجرباتِ درخواستی',
+        author: 'حضرت مولانا شفیق الرحمٰن درخواستیؒ',
+        line: 'مجرب عملیات، اوراد اور روحانی تعویذات (پی ڈی ایف)',
+        available: true, type: 'drive_pdf',
+        pdfUrl: 'https://drive.google.com/file/d/1qQxTtT7dhjd67rF8HujohyHK2EYqzAQ2/preview'
+      },
+      {
+        key: 'bk_akaaber', folder: 'amliyat',
+        title: 'اکابر کے مجرب عملیات',
+        author: 'کتب خانہ حسینیہ دیوبند',
+        line: 'دفعِ بلیات، آسیب و امراض کے مجرب عملیات (پی ڈی ایف)',
+        available: true, type: 'drive_pdf',
+        pdfUrl: 'https://drive.google.com/file/d/1AMapY-M1yTs1C8v1TOuLWk1WA-Yyf5UJ/preview'
+      },
+      {
+        key: 'bk_aamil', folder: 'amliyat',
+        title: 'عاملِ کامل',
+        author: 'کاش البرنی',
+        line: 'نقوش و اوفاق کے قوانین (پی ڈی ایف اپ لوڈ منتظر)',
+        available: false, type: 'pdf_pending'
+      },
+      {
+        key: 'bk_saaat', folder: 'amliyat',
+        title: 'الساعات',
+        author: 'کاش البرنی',
+        line: '۲۴ ساعاتِ کواکب کے قوانین (پی ڈی ایف اپ لوڈ منتظر)',
+        available: false, type: 'pdf_pending'
+      },
+      // --- وظائف و قرآن فولڈر ---
+      {
+        key: 'bk_quran16', folder: 'wazaif',
+        title: 'قرآنِ مجید (۱۶ سطری تاج کمپنی)',
+        author: 'مکمل مصحفِ پاک (پی ڈی ایف)',
+        line: 'سورت وار لنک شدہ ۱۶ سطری قرآنِ کریم',
+        available: true, type: 'drive_pdf',
+        pdfUrl: 'https://drive.google.com/file/d/1t5g0IsUnlYFlp2rQmA8r_coJ5QHG5-Jm/preview'
+      },
+      {
+        key: 'bk_manzil_pdf', folder: 'wazaif',
+        title: 'منزل شریف (پی ڈی ایف)',
+        author: '۳۳ قرآنی آیات برائے حفاظت و شفاء',
+        line: 'مکمل منزل شریف پی ڈی ایف کتاب',
+        available: true, type: 'drive_pdf',
+        pdfUrl: 'https://drive.google.com/file/d/1ak0KeJ89sAjgEcIeRLspFwQjE3HVY0B7/preview'
+      },
+      {
+        key: 'bk_ruqyah_pdf', folder: 'wazaif',
+        title: 'الرقیۃ الشرعیۃ الکاملۃ',
+        author: 'مکمل شرعی دم و آیاتِ شفاء (پی ڈی ایف)',
+        line: 'جادو، نظرِ بد اور آسیب کا مسنون علاج',
+        available: true, type: 'drive_pdf',
+        pdfUrl: 'https://drive.google.com/file/d/1KeUbJ0BieHZ1Vt-CBCEDIoWr5TTrfufJ/preview'
+      },
+      {
+        key: 'bk_ilaj_duain', folder: 'wazaif',
+        title: 'علاج کی مسنون دعائیں',
+        author: 'روحانی و جسمانی شفاء کی دعائیں (پی ڈی ایف)',
+        line: 'قرآن و حدیث سے ماخوذ علاج کی دعائیں',
+        available: true, type: 'drive_pdf',
+        pdfUrl: 'https://drive.google.com/file/d/1VJe4Y3jy7WWsg1nfGxVN_UF6W_5WbSVZ/preview'
+      },
+      {
+        key: 'bk_mujarrab', folder: 'wazaif',
+        title: 'مجربات و قرآنی عملیات (انڈیکس)',
+        author: 'مستند کتب',
+        line: 'ایپ میں شامل تمام مجرب قرآنی وظائف کی فہرست',
+        available: true, type: 'mujarrab'
+      }
+    ];
+
+    var cloudBooks = (_cloudKutubListB11 || []).map(function(cf, idx) {
+      var nm = String(cf.name || cf.title || ('کتاب ' + (idx + 1))).replace(/\.pdf$/i, '');
+      return {
+        key: 'bk_cloud_' + idx,
+        folder: classifyBookFolder(nm, cf.category || cf.folder),
+        title: nm,
+        author: 'کلاؤڈ پی ڈی ایف',
+        line: 'ڈرائیو لائبریری سے براہِ راست مطالعہ',
+        available: true,
+        type: 'drive_pdf',
+        pdfUrl: cf.url || cf.webViewLink || (cf.id ? ('https://drive.google.com/file/d/' + cf.id + '/preview') : '')
+      };
+    });
+
+    var allBooks = builtInBooks.concat(cloudBooks);
+    var filt = allBooks.filter(function(b) {
+      var matchFolder = (_activeKutubFolder === 'all' || b.folder === _activeKutubFolder);
+      var matchQ = !q || (b.title + ' ' + b.author + ' ' + b.line).indexOf(q) !== -1;
+      return matchFolder && matchQ;
+    });
+
+    var tabsHtml = '<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin-bottom:10px;">' +
+      folders.map(function(f) {
+        var cnt = (f.key === 'all') ? allBooks.length : allBooks.filter(function(b){ return b.folder === f.key; }).length;
+        return '<button type="button" class="ar-unibtn' + (_activeKutubFolder === f.key ? ' active' : '') + '" onclick="setKutubFolderTab(\'' + f.key + '\')">' + f.label + ' (' + cnt + ')</button>';
+      }).join('') +
+    '</div>';
+
+    var folderLabels = { tabeer: 'تعبیر الرؤیا فولڈر', amliyat: 'عملیات و نقوش فولڈر', wazaif: 'وظائف و قرآن فولڈر' };
+
+    var listHtml = filt.map(function(b) {
+      var isOpen = (_openKutubBookKey === b.key);
+      var inner = '';
+      if (isOpen) {
+        if (b.type === 'ibn_sirin') {
+          inner = '<div class="ar-inline-acc" onclick="event.stopPropagation()">' +
+            '<div class="ar-eq-grid-2" style="margin-bottom:8px;">' +
+              '<a href="' + b.pdfUrl + '" target="_blank" rel="noopener" class="ar-unibtn active" style="text-decoration:none;">📖 اصل کتاب (PDF) کھولیں</a>' +
+              '<button type="button" class="ar-unibtn" onclick="openScreen(\'tabeer\')">🔤 حروفِ تہجی سے دیکھیں</button>' +
+            '</div>' +
+          '</div>';
+        } else if (b.type === 'drive_pdf' && b.pdfUrl) {
+          inner = '<div class="ar-inline-acc" onclick="event.stopPropagation()">' +
+            '<div class="ar-eq-grid-2">' +
+              '<a href="' + b.pdfUrl + '" target="_blank" rel="noopener" class="ar-unibtn active" style="text-decoration:none;">📖 پی ڈی ایف کتاب کھولیں</a>' +
+              (b.folder === 'tabeer' ? '<button type="button" class="ar-unibtn" onclick="openScreen(\'tabeer\')">🔤 تعبیر الرؤیا میں جائیں</button>' : '<button type="button" class="ar-unibtn" onclick="openFolder4(\'wazaif\')">📖 وظائف فولڈر</button>') +
+            '</div>' +
+          '</div>';
+        } else if (b.type === 'mujarrab') {
+          var rows = [];
+          if (typeof QURANIC_BOOK_TREATMENTS !== 'undefined') {
+            Object.keys(QURANIC_BOOK_TREATMENTS).forEach(function(k) {
+              var x = QURANIC_BOOK_TREATMENTS[k];
+              rows.push('<div style="padding:4px 0; border-bottom:1px dashed #e2e8f0;"><b>' + stripEmojis(x.title || k) + '</b></div>');
+            });
+          }
+          inner = '<div class="ar-inline-acc" onclick="event.stopPropagation()">' + (rows.join('') || 'فہرست لوڈ ہو رہی ہے۔') + '</div>';
+        } else {
+          inner = '<div class="ar-inline-acc" onclick="event.stopPropagation()"><div style="color:#92400e; font-weight:700;">یہ کتاب ابھی پی ڈی ایف کی صورت میں اپ لوڈ نہیں ہوئی؛ نیچے «کتاب (PDF) اپلوڈ کریں» بٹن سے شامل کریں۔</div></div>';
+        }
+      }
+      return '<div class="ar-slim-row' + (isOpen ? ' open' : '') + '" style="border-right-color:' + (b.folder === 'tabeer' ? '#b45309' : (b.folder === 'amliyat' ? '#1e3a8a' : '#065f46')) + ';" onclick="toggleKutubBookB11(\'' + b.key + '\')">' +
+        '<div class="ar-slim-title"><span>' + b.title + ' <small style="color:#64748b;">— ' + b.author + '</small></span><span>' + (isOpen ? '▲' : '▼') + '</span></div>' +
+        '<div style="font-size:0.78rem; color:#065f46; margin-top:2px;">📁 ' + (folderLabels[b.folder] || 'لائبریری') + ' | ' + b.line + '</div>' +
+        inner +
+      '</div>';
+    }).join('') || '<div style="text-align:center; color:#64748b; padding:12px;">اس فولڈر میں کوئی کتاب نہیں ملی۔</div>';
+
+    cat.innerHTML = tabsHtml + listHtml;
+
+    if (_cloudKutubListB11 === null) {
+      fetchCloudKutubOnce(function() { window.renderKutubFolder(); });
+    }
+  };
+
+
   function bootAlRaqiV2() {
     document.querySelectorAll('#alRaqiV2Root img[data-ar-logo="1"]').forEach(function(im) {
       im.src = _ALRAQI_LOGO_SINGLE;
