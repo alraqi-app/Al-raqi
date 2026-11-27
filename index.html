@@ -7326,7 +7326,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
   // ================= MODULE 12: REFRESH-STAY + ADMIN 3 PRACTITIONERS + SAVE ADMIN PIN + HOME HEADER SHARE ICON (v2.1.15) =================
   (function() {
-    var BUILD_VER = 'v2.1.23';
+    var BUILD_VER = 'v2.1.25';
     try {
       var prevVer = localStorage.getItem('alraqi_app_build_ver');
       if (prevVer !== BUILD_VER) {
@@ -7372,7 +7372,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       sp.id = 'arBuildVerBadge';
       sp.style.cssText = 'opacity:0.78; font-size:0.74rem; margin-right:6px;';
       sp.setAttribute('dir', 'ltr');
-      sp.textContent = '• v2.1.23';
+      sp.textContent = '• v2.1.25';
       pill.appendChild(sp);
     }
 
@@ -8856,7 +8856,177 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     renderFeeListsV23();
   }
 
+
+  // ---- 4. ROYAL HIGH-CONTRAST VISUAL POLISH FOR #scr_saaat (v2.1.24) ----
+  function injectSaaatRoyalStylesV24(){
+    if (document.getElementById('arSaaatRoyalPolishV24')) return;
+    var st = document.createElement('style');
+    st.id = 'arSaaatRoyalPolishV24';
+    st.textContent = [
+      '#scr_saaat .wrap { gap: 14px !important; }',
+      '#scr_saaat .card { border-radius: 16px !important; box-shadow: 0 6px 20px rgba(11,25,54,0.08) !important; border: 1.5px solid #dbeafe !important; padding: 14px 15px !important; }',
+      '#scr_saaat .card:first-of-type { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important; background: #ffffff !important; border-top: 3px solid #1e3a8a !important; }',
+      '#scr_saaat #offCitySel, #scr_saaat #offSaatDate { width: 100% !important; min-height: 44px !important; font-size: 0.96rem !important; font-weight: 700 !important; border: 1.5px solid #cbd5e1 !important; border-radius: 10px !important; padding: 6px 10px !important; background: #f8fafc !important; color: #0f172a !important; }',
+      '#scr_saaat .card:nth-of-type(2) { background: linear-gradient(135deg, #09152e 0%, #152c61 55%, #1e3a8a 100%) !important; border: 2px solid #d4af37 !important; box-shadow: 0 10px 28px rgba(11,25,54,0.28) !important; padding: 16px 18px !important; text-align: center !important; }',
+      '#scr_saaat .card:nth-of-type(2) > div:first-child { color: #93c5fd !important; font-size: 0.9rem !important; font-weight: 700 !important; letter-spacing: 0.3px; }',
+      '#scr_saaat #offLiveSaatTitle { color: #fde047 !important; font-size: 1.65rem !important; font-weight: 800 !important; margin: 6px 0 !important; line-height: 1.5 !important; text-shadow: 0 2px 10px rgba(0,0,0,0.45) !important; border: none !important; padding: 0 !important; }',
+      '#scr_saaat #offLiveSaatSub { color: #f8fafc !important; font-size: 0.98rem !important; font-weight: 600 !important; background: rgba(255,255,255,0.12); display: inline-block; padding: 4px 14px; border-radius: 999px; border: 1px solid rgba(253,224,71,0.45); margin-top: 4px; }',
+      '#scr_saaat .card:nth-of-type(3) { border-top: 4px solid #d97706 !important; }',
+      '#scr_saaat .card:nth-of-type(3) > h3 { color: #92400e !important; font-size: 1.18rem !important; border-bottom: 2px solid #fde68a !important; padding-bottom: 8px !important; margin-bottom: 10px !important; }',
+      '#scr_saaat .card:nth-of-type(4) { border-top: 4px solid #1e3a8a !important; }',
+      '#scr_saaat .card:nth-of-type(4) > h3 { color: #1e3a8a !important; font-size: 1.18rem !important; border-bottom: 2px solid #bfdbfe !important; padding-bottom: 8px !important; margin-bottom: 10px !important; }',
+      '#scr_saaat .saat-table { width: 100% !important; border-collapse: separate !important; border-spacing: 0 !important; border-radius: 12px !important; overflow: hidden !important; border: 1px solid #cbd5e1 !important; }',
+      '#scr_saaat .card:nth-of-type(3) .saat-table thead th { background: linear-gradient(135deg, #92400e, #b45309) !important; color: #ffffff !important; font-size: 0.92rem !important; padding: 10px 6px !important; font-weight: 700 !important; }',
+      '#scr_saaat .card:nth-of-type(4) .saat-table thead th { background: linear-gradient(135deg, #0b1936, #1e3a8a) !important; color: #fde047 !important; font-size: 0.92rem !important; padding: 10px 6px !important; font-weight: 700 !important; }',
+      '#scr_saaat .saat-table tbody tr:nth-child(even) { background: #f8fafc; }',
+      '#scr_saaat .saat-table tbody tr:nth-child(odd) { background: #ffffff; }',
+      '#scr_saaat .saat-table tbody td { padding: 9px 6px !important; font-size: 0.94rem !important; border-bottom: 1px solid #e2e8f0 !important; vertical-align: middle !important; text-align: center !important; }',
+      '#scr_saaat .saat-table tbody td:first-child { font-weight: 800; color: #1e3a8a; width: 34px; }',
+      '#scr_saaat .saat-table tbody td:nth-child(2) { font-weight: 800; font-size: 1.02rem !important; color: #0f172a; }',
+      '#scr_saaat .saat-table tbody td:last-child { direction: ltr !important; font-family: system-ui, -apple-system, sans-serif !important; font-weight: 700 !important; font-size: 0.82rem !important; color: #1e293b !important; white-space: nowrap !important; }',
+      '.ar-saat-badge-v24 { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 0.84rem; font-weight: 700; line-height: 1.5; white-space: nowrap; }',
+      '.ar-saat-good { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }',
+      '.ar-saat-gold { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }',
+      '.ar-saat-bad { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }',
+      '.ar-saat-mix { background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; }',
+      '#arSaaatPracticalCardV23, #v23_classicAstroCard { font-size: 0.96rem !important; line-height: 2.05 !important; }',
+      '#arSaaatPracticalCardV23 h3, #v23_classicAstroCard h3 { font-size: 1.15rem !important; }',
+      '#arSaaatPracticalCardV23 button[id^="arSaaatPlBtn_"] { flex: 1 1 22% !important; min-height: 38px !important; font-size: 0.88rem !important; border-radius: 10px !important; box-shadow: 0 2px 6px rgba(15,23,42,0.06); }',
+      '#arSaaatPracticalBodyV23 > div, #v23_classicAstroCard > div > div { font-size: 0.93rem !important; line-height: 2.05 !important; }'
+    ].join('\n');
+    document.head.appendChild(st);
+  }
+
+  function enhanceSaatTableRowsV24(){
+    ['offDaySaatBody', 'offNightSaatBody'].forEach(function(id){
+      var tb = document.getElementById(id);
+      if (!tb) return;
+      tb.querySelectorAll('tr').forEach(function(tr){
+        var tds = tr.querySelectorAll('td');
+        if (tds.length < 4) return;
+        var qCell = tds[2];
+        if (qCell.querySelector('.ar-saat-badge-v24')) return;
+        var txt = (qCell.textContent || '').trim();
+        var cls = 'ar-saat-mix';
+        if (txt.indexOf('نحس') !== -1) cls = 'ar-saat-bad';
+        else if (txt.indexOf('شاہی') !== -1) cls = 'ar-saat-gold';
+        else if (txt.indexOf('سعد') !== -1) cls = 'ar-saat-good';
+        qCell.innerHTML = '<span class="ar-saat-badge-v24 ' + cls + '">' + escH(txt) + '</span>';
+      });
+    });
+  }
+
+  function hookSaatPolishV24(){
+    injectSaaatRoyalStylesV24();
+    enhanceSaatTableRowsV24();
+    if (!window._arSaatRenderWrappedV24 && typeof window.renderOfflineSaat === 'function') {
+      window._arSaatRenderWrappedV24 = true;
+      var orig = window.renderOfflineSaat;
+      window.renderOfflineSaat = function(){
+        var res = orig.apply(this, arguments);
+        setTimeout(enhanceSaatTableRowsV24, 20);
+        return res;
+      };
+    }
+  }
+
+
+  // ---- 5. QURAN & ARABIC FONT ENFORCEMENT + ADJUSTABLE SIZE CONTROL (A- / A+) (v2.1.25) ----
+  var K_AR_SIZE = 'al_raqi_arabic_font_scale_v25';
+
+  window.getArabicFontScaleV25 = function(){
+    try {
+      var v = parseInt(localStorage.getItem(K_AR_SIZE) || '115', 10);
+      if (isNaN(v) || v < 85 || v > 180) return 115;
+      return v;
+    } catch(e){ return 115; }
+  };
+
+  window.applyArabicFontScaleV25 = function(pct){
+    var clamped = Math.max(85, Math.min(180, parseInt(pct, 10) || 115));
+    try { localStorage.setItem(K_AR_SIZE, String(clamped)); } catch(e){}
+    var rem = (clamped / 100 * 1.35).toFixed(2);
+    var st = document.getElementById('arQuranArabicFontStyleV25');
+    if (!st) {
+      st = document.createElement('style');
+      st.id = 'arQuranArabicFontStyleV25';
+      document.head.appendChild(st);
+    }
+    st.textContent = [
+      ':root { --ar-quran-scale: ' + clamped + '%; --ar-quran-size: ' + rem + 'rem; }',
+      '.ar-arabic-text, .quran-ayah, .quran-text, .mushaf-ayah, .ar-mushaf-line, #mushafTextBody, #mushafReaderArea, #wazaifManzilList .ar-arabic-text, #activeGeneratedNaqshBox td, [data-ar-quran="1"] {',
+      '  font-family: "Amiri", "Scheherazade New", "Traditional Arabic", serif !important;',
+      '  font-weight: 700 !important;',
+      '  line-height: 2.25 !important;',
+      '  letter-spacing: 0 !important;',
+      '}',
+      '.quran-ayah, .quran-text, .mushaf-ayah, .ar-mushaf-line, #mushafTextBody p, #mushafReaderArea .ar-ayah-txt, #wazaifManzilList .ar-arabic-text, [data-ar-quran="1"] {',
+      '  font-size: ' + rem + 'rem !important;',
+      '}',
+      '#scr_folders .ar-arabic-text, #scr_report .ar-arabic-text {',
+      '  font-size: ' + rem + 'rem !important;',
+      '}'
+    ].join('\n');
+
+    document.querySelectorAll('.v25-ar-font-pct').forEach(function(el){
+      el.textContent = clamped + '%';
+    });
+    document.querySelectorAll('.v25-ar-font-slider').forEach(function(sl){
+      sl.value = String(clamped);
+    });
+  };
+
+  window.stepArabicFontScaleV25 = function(delta){
+    window.applyArabicFontScaleV25(window.getArabicFontScaleV25() + delta);
+  };
+
+  function buildFontBarHtmlV25(){
+    var cur = window.getArabicFontScaleV25();
+    return '<div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; background:linear-gradient(135deg,#f8fafc,#eff6ff); border:1.5px solid #93c5fd; border-radius:12px; padding:8px 12px; margin-bottom:10px;">' +
+      '<div style="font-weight:800; color:#1e3a8a; font-size:0.88rem;">📖 قرآن و عربی فونٹ سائز (<span class="v25-ar-font-pct">' + cur + '%</span>)</div>' +
+      '<div style="display:flex; align-items:center; gap:6px; flex:1; min-width:170px; max-width:260px;">' +
+        '<button type="button" onclick="stepArabicFontScaleV25(-10)" style="padding:4px 10px; border-radius:8px; border:1px solid #1e3a8a; background:#fff; color:#1e3a8a; font-weight:800; font-size:0.88rem; cursor:pointer;">A-</button>' +
+        '<input type="range" class="v25-ar-font-slider" min="85" max="180" step="5" value="' + cur + '" oninput="applyArabicFontScaleV25(this.value)" style="flex:1; accent-color:#1e3a8a; cursor:pointer;">' +
+        '<button type="button" onclick="stepArabicFontScaleV25(10)" style="padding:4px 10px; border-radius:8px; border:1px solid #1e3a8a; background:#1e3a8a; color:#fff; font-weight:800; font-size:0.88rem; cursor:pointer;">A+</button>' +
+        '<button type="button" onclick="applyArabicFontScaleV25(115)" style="padding:4px 8px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; color:#475569; font-family:inherit; font-size:0.75rem; cursor:pointer;">نارمل</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function injectArabicFontControlsV25(){
+    window.applyArabicFontScaleV25(window.getArabicFontScaleV25());
+
+    // 1. Inside Maktaba / Quran / Wazaif screen (#scr_folders)
+    var fScr = document.getElementById('scr_folders');
+    if (fScr && !document.getElementById('v25_maktabaFontBar')) {
+      var fw = fScr.querySelector('.wrap') || fScr;
+      var div = document.createElement('div');
+      div.id = 'v25_maktabaFontBar';
+      div.className = 'no-print';
+      div.innerHTML = buildFontBarHtmlV25();
+      if (fw.firstChild) fw.insertBefore(div, fw.firstChild);
+      else fw.appendChild(div);
+    }
+
+    // 2. Inside Settings screen (#scr_settings)
+    var sScr = document.getElementById('scr_settings');
+    if (sScr && !document.getElementById('v25_settingsFontBar')) {
+      var sw = sScr.querySelector('.wrap') || sScr;
+      var sdiv = document.createElement('div');
+      sdiv.id = 'v25_settingsFontBar';
+      sdiv.className = 'card';
+      sdiv.style.cssText = 'border-top:3px solid #1e3a8a; margin-top:10px;';
+      sdiv.innerHTML = '<h3 style="margin-top:0; color:#1e3a8a;">🔤 قرآن اور عربی عبارات کا فونٹ سائز</h3>' +
+        buildFontBarHtmlV25() +
+        '<div data-ar-quran="1" style="text-align:center; padding:8px; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; color:#0f172a;">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ — وَنُنَزِّلُ مِنَ الْقُرْآنِ مَا هُوَ شِفَاءٌ وَرَحْمَةٌ لِّلْمُؤْمِنِيْنَ</div>';
+      if (sw.firstChild) sw.insertBefore(sdiv, sw.firstChild);
+      else sw.appendChild(sdiv);
+    }
+  }
+
   function bootMod17(){
+    injectArabicFontControlsV25();
+    hookSaatPolishV24();
     injectQuickGmailAuthBoxV23();
     injectClassicAstroAndEclipsesCardV23();
     injectFeeCardsV23();
