@@ -5086,6 +5086,164 @@ html, body {
   };
 
 
+
+
+  // ================= BATCH 10: DEDICATED LETTER SCREEN FOR TABEER + AUTO CACHE-BUSTER (v2.1.10) =================
+  (function() {
+    var BUILD_VER = 'v2.1.10';
+    try {
+      var prevVer = localStorage.getItem('alraqi_app_build_ver');
+      if (prevVer !== BUILD_VER) {
+        localStorage.setItem('alraqi_app_build_ver', BUILD_VER);
+        if ('caches' in window && caches.keys) {
+          caches.keys().then(function(keys) {
+            keys.forEach(function(k) { caches.delete(k); });
+          }).catch(function(){});
+        }
+        if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
+          navigator.serviceWorker.getRegistrations().then(function(regs) {
+            regs.forEach(function(r) { try { r.update(); } catch (e) {} });
+          }).catch(function(){});
+        }
+      }
+    } catch (e) {}
+  })();
+
+  function ensureTabeerLetterViewOverlay() {
+    var scr = $('scr_tabeer');
+    if (!scr) return null;
+    var wrap = scr.querySelector('.wrap');
+    if (!wrap) return null;
+    var panel = $('tabeerDedicatedLetterView');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'tabeerDedicatedLetterView';
+      panel.style.display = 'none';
+      panel.innerHTML =
+        '<div class="card" style="border-top:4px solid #1e3a8a; background:#ffffff;">' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; padding-bottom:10px; border-bottom:1.5px dashed #cbd5e1; margin-bottom:10px;">' +
+            '<div id="tabeerLetterViewTitle" style="font-size:1.12rem; font-weight:800; color:#0b1936;"></div>' +
+            '<button type="button" class="ar-unibtn active" style="width:auto !important; min-height:38px !important; padding:4px 14px !important; font-size:0.86rem !important;" onclick="closeTabeerLetterView()">← حروفِ تہجی پر واپس جائیں</button>' +
+          '</div>' +
+          '<div id="tabeerLetterViewStats" style="font-size:0.84rem; color:#065f46; font-weight:700; margin-bottom:8px;"></div>' +
+          '<div id="tabeerLetterViewBody"></div>' +
+          '<div style="margin-top:12px;">' +
+            '<button type="button" class="ar-unibtn" onclick="closeTabeerLetterView()">← حروفِ تہجی پر واپس جائیں</button>' +
+          '</div>' +
+        '</div>';
+      wrap.insertBefore(panel, wrap.firstChild);
+    }
+    return panel;
+  }
+
+  window.closeTabeerLetterView = function() {
+    var scr = $('scr_tabeer');
+    if (!scr) return;
+    var wrap = scr.querySelector('.wrap');
+    var panel = $('tabeerDedicatedLetterView');
+    if (panel) panel.style.display = 'none';
+    if (wrap) {
+      Array.prototype.forEach.call(wrap.children, function(ch) {
+        if (ch.id !== 'tabeerDedicatedLetterView') ch.style.display = '';
+      });
+    }
+    _activeTabeerLetter = '';
+    var strip = $('tabeerAlphaStrip');
+    if (strip) strip.querySelectorAll('.ar-alpha-btn').forEach(function(b){ b.classList.remove('active'); });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  var _lastLetterScreenData = null;
+  var _openLetterScreenRowId = '';
+
+  function renderDedicatedLetterList() {
+    if (!_lastLetterScreenData) return;
+    var ch = _lastLetterScreenData.ch;
+    var soft = _lastLetterScreenData.soft;
+    var book = _lastLetterScreenData.book;
+    var body = $('tabeerLetterViewBody');
+    var stats = $('tabeerLetterViewStats');
+    var titleEl = $('tabeerLetterViewTitle');
+    if (titleEl) titleEl.textContent = 'حرف «' + ch + '» کے تمام خواب';
+    var total = soft.length + book.length;
+    if (stats) stats.textContent = 'کل نتائج: ' + total + ' (سافٹ کاپی انسائیکلوپیڈیا: ' + soft.length + ' | مستند کتاب امام ابن سیرینؒ: ' + book.length + ')';
+    if (!body) return;
+
+    var html = '';
+    if (soft.length) {
+      html += '<div class="ar-tab-sec-hdr"><span>📖 سافٹ کاپی انسائیکلوپیڈیا</span><span>(' + soft.length + ')</span></div>';
+      html += soft.map(function(r, i) {
+        var rid = 'lsoft_' + i;
+        var isOpen = (_openLetterScreenRowId === rid);
+        return '<div class="ar-slim-row' + (isOpen ? ' open' : '') + '" style="margin-bottom:5px;" onclick="toggleLetterScreenRow(\'' + rid + '\')">' +
+          '<div class="ar-slim-title"><span>' + r.title + '</span><span style="font-size:0.78rem; color:#1e3a8a;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
+          (isOpen ? (
+            '<div style="font-size:0.92rem; color:#1e293b; line-height:1.95; margin-top:4px;">' + r.body + '</div>' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:8px;">' +
+              '<small style="color:#065f46; font-weight:700;">ماخذ: ' + r.src + '</small>' +
+              '<button type="button" class="ar-unibtn active" style="width:auto !important; min-height:34px !important; padding:2px 12px !important; font-size:0.80rem !important;" onclick="event.stopPropagation(); appendTabeerToBox3(\'' + r.title.replace(/'/g, '') + '\', \'' + r.body.replace(/'/g, '').replace(/\n/g, ' ').slice(0, 320) + '\'); closeTabeerLetterView();">تعبیر خانے میں شامل کریں</button>' +
+            '</div>'
+          ) : '') +
+        '</div>';
+      }).join('');
+    }
+    if (book.length) {
+      html += '<div class="ar-tab-sec-hdr book"><span>📚 مستند کتاب امام ابن سیرینؒ (مکمل متن)</span><span>(' + book.length + ')</span></div>';
+      html += book.map(function(b, i) {
+        var rid = 'lbook_' + i;
+        var isOpen = (_openLetterScreenRowId === rid);
+        return '<div class="ar-slim-row' + (isOpen ? ' open' : '') + '" style="margin-bottom:5px; border-right-color:#b45309;" onclick="toggleLetterScreenRow(\'' + rid + '\')">' +
+          '<div class="ar-slim-title"><span>' + b.title + ' <small style="color:#b45309;">(صفحہ ' + b.page + ')</small></span><span style="font-size:0.78rem; color:#b45309;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
+          (isOpen ? (
+            '<div style="font-size:0.92rem; color:#1e293b; line-height:1.95; white-space:pre-line; margin-top:4px; max-height:380px; overflow-y:auto;">' + b.body + '</div>' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:8px;">' +
+              '<small style="color:#78350f; font-weight:700;">ماخذ: ' + b.src + '</small>' +
+              '<button type="button" class="ar-unibtn active" style="width:auto !important; min-height:34px !important; padding:2px 12px !important; font-size:0.80rem !important;" onclick="event.stopPropagation(); appendTabeerToBox3(\'' + b.title.replace(/'/g, '') + '\', \'' + b.body.replace(/'/g, '').replace(/\n/g, ' ').slice(0, 320) + '\'); closeTabeerLetterView();">تعبیر خانے میں شامل کریں</button>' +
+            '</div>'
+          ) : '') +
+        '</div>';
+      }).join('');
+    }
+    if (!total) {
+      html = '<div style="text-align:center; color:#64748b; padding:14px;">اس حرف سے شروع ہونے والا کوئی باب موجود نہیں۔</div>';
+    }
+    body.innerHTML = html;
+  }
+
+  window.toggleLetterScreenRow = function(rid) {
+    _openLetterScreenRowId = (_openLetterScreenRowId === rid) ? '' : rid;
+    renderDedicatedLetterList();
+  };
+
+  window.filterTabeerLetter = function(ch) {
+    _activeTabeerLetter = normUrduTabeer(ch).charAt(0);
+    _openLetterScreenRowId = '';
+    if ($('offlineDreamSearch')) $('offlineDreamSearch').value = '';
+    var scr = $('scr_tabeer');
+    var wrap = scr ? scr.querySelector('.wrap') : null;
+    var panel = ensureTabeerLetterViewOverlay();
+    if (panel && wrap) {
+      Array.prototype.forEach.call(wrap.children, function(child) {
+        if (child.id !== 'tabeerDedicatedLetterView') child.style.display = 'none';
+      });
+      panel.style.display = 'block';
+      if ($('tabeerLetterViewTitle')) $('tabeerLetterViewTitle').textContent = 'حرف «' + ch + '» کے خواب لوڈ ہو رہے ہیں...';
+      if ($('tabeerLetterViewBody')) $('tabeerLetterViewBody').innerHTML = '<div style="text-align:center; padding:16px; color:#475569;">براہِ کرم انتظار فرمائیں...</div>';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.loadAlRaqiPack('tabeer', function() {
+      var soft = getAllSoftCopyDreams().filter(function(d) {
+        return d.letter === _activeTabeerLetter || firstUrduLetter(d.title) === _activeTabeerLetter;
+      });
+      var book = getIbnSirinBookEntries().filter(function(b) {
+        return b.letter === _activeTabeerLetter || firstUrduLetter(b.title) === _activeTabeerLetter;
+      });
+      _lastLetterScreenData = { ch: ch, soft: soft, book: book };
+      renderDedicatedLetterList();
+    });
+  };
+
+
   function bootAlRaqiV2() {
     document.querySelectorAll('#alRaqiV2Root img[data-ar-logo="1"]').forEach(function(im) {
       im.src = _ALRAQI_LOGO_SINGLE;
