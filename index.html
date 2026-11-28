@@ -5242,111 +5242,237 @@ html, body, #alRaqiV2Root,
     var raw = (($('patientRawDreamTextInput') || {}).value || '').trim();
     if (!raw) { window.showToast('پہلے خواب درج کریں'); return; }
     window.loadAlRaqiPack('tabeer', function() {
-      var extraStop = {'میں':1,'نے':1,'خواب':1,'دیکھا':1,'دیکھی':1,'دیکھے':1,'کہ':1,'تھا':1,'تھی':1,'تھے':1,'ہے':1,'ہیں':1,'ہوں':1,'کو':1,'کا':1,'کی':1,'کے':1,'سے':1,'پر':1,'اور':1,'یا':1,'ایک':1,'مجھے':1,'میرا':1,'میری':1,'میرے':1,'رہا':1,'رہی':1,'رہے':1,'گیا':1,'گئی':1,'گئے':1,'ہو':1,'کر':1,'بہت':1,'کوئی':1,'اس':1,'ان':1,'اپنے':1,'اپنی':1,'اپنا':1,'پھر':1,'بعد':1,'اندر':1,'باہر':1,'ساتھ':1,'والا':1,'والی':1};
+      var stopMap = {
+        'میں':1,'نے':1,'خواب':1,'دیکھا':1,'دیکھی':1,'دیکھے':1,'دیکھنا':1,'دیکھیں':1,'دیکھ':1,'دیکھتے':1,'دیکھتا':1,'دیکھتی':1,
+        'کہ':1,'تھا':1,'تھی':1,'تھے':1,'ہے':1,'ہیں':1,'ہوں':1,'ہوتا':1,'ہوتی':1,'ہوتے':1,'ہونا':1,'ہوئی':1,'ہوئے':1,'ہو':1,
+        'کو':1,'کا':1,'کی':1,'کے':1,'سے':1,'پر':1,'اور':1,'یا':1,'ایک':1,'دو':1,'تین':1,'چار':1,'پانچ':1,'سب':1,'کچھ':1,'سارا':1,
+        'مجھے':1,'میرا':1,'میری':1,'میرے':1,'اپنا':1,'اپنی':1,'اپنے':1,'تم':1,'ہم':1,'وہ':1,'یہ':1,'اس':1,'ان':1,'جس':1,'جن':1,
+        'رہا':1,'رہی':1,'رہے':1,'گیا':1,'گئی':1,'گئے':1,'جانا':1,'جائے':1,'جائیں':1,'جاتا':1,'جاتی':1,'جاتے':1,'کر':1,'کرنا':1,'کریں':1,'کرتا':1,'کرتی':1,'کیا':1,
+        'اگر':1,'کوئی':1,'جب':1,'جبکہ':1,'تب':1,'پھر':1,'بعد':1,'پہلے':1,'وہاں':1,'یہاں':1,'کہیں':1,'جہاں':1,'ادھر':1,'ادھر':1,
+        'اندر':1,'باہر':1,'ساتھ':1,'والا':1,'والی':1,'والے':1,'بہت':1,'زیادہ':1,'کم':1,'فائدہ':1,'نقصان':1,'مطلب':1,'تعبیر':1,'بتائیں':1,'بتانا':1,'تو':1,'بھی':1,'ہی':1,'نہ':1,'نہیں':1,'لیکن':1,'مگر':1,'تاکہ':1,'کیوں':1,'کیسے':1,'کون':1,'پاس':1,'طرف':1,'لیے':1,'لئے':1,'آیا':1,'آئی':1,'آئے':1,'آنا':1,'لیا':1,'دیا':1,'لگا':1,'رکھا':1
+      };
+      stopMap['ویسے'] = 1; stopMap['جاننے'] = 1; stopMap['جانتا'] = 1; stopMap['جانتی'] = 1; stopMap['دور'] = 1; stopMap['پڑھا'] = 1; stopMap['پڑھنا'] = 1; stopMap['پڑھ'] = 1; stopMap['پڑھتے'] = 1; stopMap['پڑھتا'] = 1;
+      var valid2Letter = {'آگ':1,'غم':1,'پل':1,'بت':1,'جن':1,'دم':1,'سر':1,'دل':1,'لب':1,'خط':1,'حق':1,'حج':1,'سانپ':1,'خون':1};
+      var stemSyn = {
+        'عورتوں':['عورت'], 'عورتیں':['عورت'], 'خواتین':['عورت'],
+        'نہائے':['غسل'], 'نہانا':['غسل'], 'نہاتے':['غسل'], 'نہاتا':['غسل'], 'نہاتی':['غسل'],
+        'سویا':['نیند_خواب'], 'سوئی':['نیند_خواب'], 'سوتے':['نیند_خواب'], 'سوتا':['نیند_خواب'], 'نیند':['نیند_خواب'],
+        'درود':['درود_شریف'], 'صلوات':['درود_شریف']
+      };
+      var essentialClassical = [
+        { key: 'درود_شریف', title: 'خواب میں درود شریف پڑھنا یا پڑھانا', body: 'خواب میں درود شریف پڑھنا یا دوسروں کو پڑھانا نہایت مبارک بشارت ہے۔ علامہ ابن سیرینؒ اور امام نابلسیؒ کے مطابق یہ غم و پریشانی سے نجات، قرض کی ادائیگی، رزق و برکت، دعا کی قبولیت، دین میں استقامت اور نبی کریم ﷺ سے قلبی تعلق و شفاعت کی امید کی علامت ہے۔', src: 'تعبیر الرؤیا کلاں (ابن سیرینؒ و نابلسیؒ)' },
+        { key: 'نیند_خواب', title: 'خواب میں خود کو سویا ہوا دیکھنا (نیند)', body: 'خواب میں خود کو سویا ہوا دیکھنا عموماً ذہنی سکون، امن و امان یا کسی دینی/دنیاوی معاملے میں غفلت کی طرف اشارہ کرتا ہے؛ تاہم اگر سوتے ہوئے ذکرِ الٰہی یا درود شریف جاری ہو تو یہ قلبی بیداری، باطنی نور اور خیر پر ثابت قدمی کی عمدہ علامت ہے۔', src: 'تعبیر الرؤیا (امام ابن سیرینؒ)' },
+        { key: 'اجنبی_عورت', title: 'خواب میں نامعلوم / اجنبی عورتیں دیکھنا (فاصلے پر)', body: 'تعبیر کے قواعد کے مطابق نامعلوم عورتیں عموماً آنے والے دنیاوی حالات، سالوں یا نعمتوں کی علامت ہوتی ہیں۔ اگر وہ دور ہوں اور کسی گناہ یا فتنہ کا معاملہ نہ ہو تو یہ دنیاوی اسباب میں احتیاط، پاکدامنی اور وقار کے ساتھ معاملات طے ہونے کی طرف اشارہ ہے۔', src: 'تعبیر الرؤیا کلاں (امام ابن سیرینؒ)' }
+      ];
+
       var nRaw = normUrduTabeer(raw);
-      var tokens = nRaw.replace(/[^\u0600-\u06FF\s]/g, ' ').split(/\s+/).filter(function(w) {
-        return w.length >= 2 && !extraStop[w] && !(typeof DREAM_STOP_WORDS !== 'undefined' && DREAM_STOP_WORDS[w]);
+      var rawWords = nRaw.replace(/[^\u0600-\u06FF\s]/g, ' ').split(/\s+/).filter(function(w) {
+        if (!w || stopMap[w]) return false;
+        if (typeof DREAM_STOP_WORDS !== 'undefined' && DREAM_STOP_WORDS[w]) return false;
+        if (w.length < 3 && !valid2Letter[w]) return false;
+        return true;
       });
       var uniqueTokens = [];
-      tokens.forEach(function(t) { if (uniqueTokens.indexOf(t) === -1) uniqueTokens.push(t); });
+      rawWords.forEach(function(t) {
+        if (uniqueTokens.indexOf(t) === -1) uniqueTokens.push(t);
+        if (stemSyn[t]) {
+          stemSyn[t].forEach(function(sy){ if (uniqueTokens.indexOf(sy) === -1) uniqueTokens.push(sy); });
+        } else if (t.length >= 5 && (t.slice(-2) === 'وں' || t.slice(-2) === 'یں')) {
+          var baseW = t.slice(0, -2);
+          if (uniqueTokens.indexOf(baseW) === -1) uniqueTokens.push(baseW);
+        }
+      });
 
-      var matched = [];
-      var seenTitle = {};
-      function addMatch(title, body, src) {
-        var k = normUrduTabeer(title).slice(0, 35);
-        if (seenTitle[k]) return;
-        seenTitle[k] = true;
-        matched.push({ title: title, body: body, src: src });
+      function titleWordsClean(title) {
+        var nt = normUrduTabeer(title).replace(/[^\u0600-\u06FF\s]/g, ' ');
+        return nt.split(/\s+/).filter(function(w) { return w.length >= 2 && !stopMap[w]; });
       }
 
+      function tokenMatchesTitle(tok, titleWords) {
+        for (var i = 0; i < titleWords.length; i++) {
+          var tw = titleWords[i];
+          if (tw === tok) return 3; // exact word match
+          if (tok.length >= 4 && tw.length >= 4 && (tw.indexOf(tok) === 0 || tok.indexOf(tw) === 0)) return 2; // prefix stem match (e.g. قبر / قبرستان، دوست / دوستوں)
+        }
+        return 0;
+      }
+
+      var scored = [];
+      var seenTitle = {};
+      function addScored(title, body, src, score, matchedTok) {
+        var k = normUrduTabeer(title).slice(0, 35);
+        if (seenTitle[k]) {
+          if (score > seenTitle[k].score) seenTitle[k].score = score;
+          if (matchedTok && seenTitle[k].toks.indexOf(matchedTok) === -1) seenTitle[k].toks.push(matchedTok);
+          return;
+        }
+        var obj = { title: title, body: body, src: src, score: score, toks: matchedTok ? [matchedTok] : [] };
+        seenTitle[k] = obj;
+        scored.push(obj);
+      }
+
+      // 0. Essential classical symbols (Durood, Sleep vs Gold disambiguation, Unknown Women at distance)
+      essentialClassical.forEach(function(ec) {
+        if (uniqueTokens.indexOf(ec.key) !== -1) {
+          addScored(ec.title, ec.body, ec.src, 8, ec.key.replace(/_/g, ' '));
+        }
+      });
+      if (/عورت|عورتوں|عورتیں/.test(raw) && /نہیں جانتا|نہیں جانتی|دور/.test(raw)) {
+        addScored(essentialClassical[2].title, essentialClassical[2].body, essentialClassical[2].src, 9, 'اجنبی عورتیں');
+      }
+
+      // 1. Semantic rules (only if explicit pattern matches non-generic tokens)
       if (typeof SEMANTIC_DREAM_RULES !== 'undefined' && Array.isArray(SEMANTIC_DREAM_RULES)) {
         SEMANTIC_DREAM_RULES.forEach(function(rule) {
           if (rule.pattern && rule.pattern.test(raw)) {
-            addMatch(rule.word || 'خاص علامت', rule.tabeer || '', rule.source || 'تعبیر الرؤیا کلاں');
+            var rToks = titleWordsClean(rule.word || '');
+            var hit = uniqueTokens.filter(function(t){ return tokenMatchesTitle(t, rToks) > 0; });
+            if (hit.length) {
+              addScored(rule.word || 'خاص علامت', rule.tabeer || '', rule.source || 'تعبیر الرؤیا کلاں', 5 + hit.length, hit[0]);
+            }
           }
         });
       }
 
+      // 2. Soft-copy 3 classical books (strict whole-word/stem match against cleaned title words)
       var softAll = getAllSoftCopyDreams();
-      uniqueTokens.forEach(function(tok) {
-        softAll.forEach(function(d) {
-          if (matched.length >= 10) return;
-          if (normUrduTabeer(d.title).indexOf(tok) !== -1) {
-            addMatch(d.title, d.body, d.src);
-          }
+      softAll.forEach(function(d) {
+        var tws = titleWordsClean(d.title);
+        if (!tws.length) return;
+        var best = 0, hitTok = '';
+        uniqueTokens.forEach(function(tok) {
+          var sc = tokenMatchesTitle(tok, tws);
+          if (sc > best) { best = sc; hitTok = tok; }
         });
+        if (best > 0) {
+          addScored(d.title, d.body, d.src, best, hitTok);
+        }
       });
 
+      // 3. Imam Ibn Sirin digital book entries (strict whole-word/stem match)
       var bookAll = getIbnSirinBookEntries();
       var bookMatched = [];
-      uniqueTokens.forEach(function(tok) {
-        bookAll.forEach(function(b) {
-          if (bookMatched.length >= 6) return;
-          if (normUrduTabeer(b.title).indexOf(tok) !== -1) {
-            bookMatched.push(b);
-            if (matched.length < 10) {
-              addMatch(b.title, b.body.slice(0, 320) + (b.body.length > 320 ? '...' : ''), b.src);
-            }
-          }
+      bookAll.forEach(function(b) {
+        var tws = titleWordsClean(b.title);
+        if (!tws.length) return;
+        var best = 0, hitTok = '';
+        uniqueTokens.forEach(function(tok) {
+          var sc = tokenMatchesTitle(tok, tws);
+          if (sc > best) { best = sc; hitTok = tok; }
         });
+        if (best > 0) {
+          bookMatched.push(b);
+          addScored(b.title, b.body, b.src, best + 1, hitTok);
+        }
       });
 
-      var posWords = ['خیر','بشارت','رزق','عزت','شفاء','کامیابی','خوشی','بلندی','برکت','شادی','نیکی','فتح','دولت','راحت','فرحت','مراد','ترقی','سکون','مبارک'];
-      var warnWords = ['رنج','غم','دشمن','بیماری','نقصان','فتنہ','خوف','مصیبت','تنبیہ','پریشانی','رکاوٹ','حسد','اندیشہ','تکلیف','مکر'];
+      scored.sort(function(a, b) { return b.score - a.score; });
+      var matched = scored.slice(0, 6);
+      bookMatched = bookMatched.slice(0, 6);
+
+      // Multi-aspect thematic analysis of the matched symbols
+      var posWords = ['خیر','بشارت','رزق','عزت','شفاء','کامیابی','خوشی','بلندی','برکت','شادی','نیکی','فتح','دولت','راحت','فرحت','مراد','ترقی','سکون','مبارک','توبہ','لمبی عمر','مغفرت'];
+      var warnWords = ['رنج','غم','دشمن','بیماری','نقصان','فتنہ','خوف','مصیبت','تنبیہ','پریشانی','رکاوٹ','حسد','اندیشہ','تکلیف','مکر','غفلت','آزمائش'];
       var posScore = 0, warnScore = 0;
+      var posNotes = [], warnNotes = [];
+
       matched.forEach(function(m) {
         var bt = m.body || '';
-        posWords.forEach(function(pw) { if (bt.indexOf(pw) !== -1) posScore++; });
-        warnWords.forEach(function(ww) { if (bt.indexOf(ww) !== -1) warnScore++; });
+        var pH = 0, wH = 0;
+        posWords.forEach(function(pw) { if (bt.indexOf(pw) !== -1) pH++; });
+        warnWords.forEach(function(ww) { if (bt.indexOf(ww) !== -1) wH++; });
+        posScore += pH; warnScore += wH;
+        if (pH >= wH) posNotes.push(m.title);
+        if (wH > 0) warnNotes.push(m.title);
       });
 
-      var verdict = '', advice = '';
+      var matchedKeywords = [];
+      matched.forEach(function(m){ (m.toks || []).forEach(function(t){ if (matchedKeywords.indexOf(t) === -1) matchedKeywords.push(t); }); });
+
+      // Contextual modifiers from the dream itself (e.g. alive people, grave/earth, friends, travel)
+      var ctxNotes = [];
+      if (/زندہ/.test(raw) && /قبر|قبرستان/.test(raw)) {
+        ctxNotes.push('قبرستان میں زندہ افراد یا دوستوں کا ہونا عموماً عبرت، غفلت سے بیداری، کسی پرانے معاملے کی اصلاح یا آخرت کی یاد دہانی کی طرف اشارہ کرتا ہے۔');
+      }
+      if (/مٹی|زمین|خاک/.test(raw)) {
+        ctxNotes.push('مٹی یا زمین کا ذکر روزی، دنیاوی محنت، جائیداد یا کسی ٹھوس مقصد کی طرف اشارہ کرتا ہے۔');
+      }
+      if (/نہر|غسل|نہائے|نہانا/.test(raw)) {
+        ctxNotes.push('نہر میں نہانا (غسل کرنا) گناہوں، پریشانیوں اور بوجھ سے پاکیزگی، تازگی اور نئی شروعات کی عمدہ علامت ہے۔');
+      }
+      if (/درود/.test(raw)) {
+        ctxNotes.push('خواب کے آخر میں درود شریف پڑھنا یا پڑھانا پورے خواب پر خیر و برکت کی مہر لگا دیتا ہے اور فکرمندی کے خاتمے و روحانی ترقی کی واضح بشارت ہے۔');
+      }
+      if (/دوست|دوستوں|رفیق|ساتھی/.test(raw)) {
+        ctxNotes.push('دوستوں یا ساتھیوں کی موجودگی مشترکہ معاملات، باہمی مشورے، دوستی یا کسی اجتماعی سفر/کام کی علامت ہے۔');
+      }
+
+      var verdict = '', summaryBody = '', guidance = '';
       if (!matched.length) {
-        verdict = 'مذکورہ خواب کی مخصوص علامت آف لائن ابواب میں براہِ راست نہیں ملی۔';
-        advice = 'نیچے آن لائن تلاش کے بٹن سے مستند حوالہ دیکھ لیں، یا خواب کا بنیادی لفظ (مثلاً پانی، سانپ، پہاڑ) الگ لکھ کر تلاش کریں۔';
-      } else if (posScore > warnScore + 1) {
-        verdict = 'خیر و بشارت کا خواب (مثبت اشارہ)';
-        advice = 'مجموعی طور پر اس خواب میں اللہ تعالیٰ کے فضل، آسانی، عزت یا کسی نیک مقصد میں کامیابی کی بشارت نمایاں ہے۔ اللہ کا شکر ادا کریں اور نیک اعمال جاری رکھیں۔';
-      } else if (warnScore > posScore + 1) {
-        verdict = 'تنبیہ اور احتیاط کا اشارہ';
-        advice = 'اس خواب میں بعض علامات فکرمندی، رکاوٹ یا احتیاط کی طرف اشارہ کرتی ہیں۔ گھبرانے کے بجائے استغفار، حسبِ توفیق صدقہ اور صبح و شام کے حفاظتی اذکار (معوذتین و آیت الکرسی) کا اہتمام کریں۔';
+        verdict = 'مذکورہ خواب کی مخصوص علامت آف لائن ابواب میں براہِ راست نہیں ملی';
+        summaryBody = 'اس خواب کے بنیادی الفاظ (' + (uniqueTokens.slice(0, 5).join('، ') || '—') + ') پر براہِ راست کوئی باب نہیں ملا۔ آپ خواب کا کوئی ایک بنیادی اسم (مثلاً قبرستان، مٹی، سفر) نیچے سرچ بار یا حروفِ تہجی میں الگ سے دیکھ سکتے ہیں۔';
+        guidance = 'اللہ تعالیٰ سے خیر کی دعا کریں اور صبح و شام کے مسنون اذکار جاری رکھیں۔';
       } else {
-        verdict = 'معتدل اور ملا جلا اشارہ (آزمائش کے بعد آسانی)';
-        advice = 'اس خواب میں امید اور احتیاط دونوں پہلو پائے جاتے ہیں۔ صبر، دعا، استغفار اور صدقہ کے ذریعے ان شاءاللہ معاملات خیر و برکت کی طرف پلٹ جائیں گے۔';
+        var symNames = matched.map(function(m){ return '«' + m.title + '»'; }).join('، ');
+        if (posScore > warnScore + 1) {
+          verdict = 'خیر، بشارت اور اصلاح کا خواب (مثبت اشارہ)';
+          summaryBody = 'آپ کے خواب میں بنیادی طور پر ' + symNames + ' کی علامات نمایاں ہیں۔ تمام پہلوؤں کو ملا کر دیکھا جائے تو اس خواب میں اللہ تعالیٰ کی رحمت، کسی رکے ہوئے معاملے میں آسانی، ذہنی بیداری اور خیر و برکت کا اشارہ پایا جاتا ہے۔';
+          guidance = 'اللہ کا شکر ادا کریں، دو رکعت نفل شکرانہ پڑھیں اور نیک کاموں و استغفار پر مداومت رکھیں۔';
+        } else if (warnScore > posScore + 1) {
+          verdict = 'تنبیہ، بیداری اور احتیاط کا خواب';
+          summaryBody = 'آپ کے خواب میں ' + symNames + ' کی علامات سامنے آئی ہیں۔ ان تمام علامات کا مجموعی پہلو یہ بتاتا ہے کہ کسی دینی یا دنیاوی معاملے میں غفلت، فکرمندی یا رکاوٹ سے محتاط رہنے اور اپنے اعمال و تعلقات کا جائزہ لینے کی ضرورت ہے۔';
+          guidance = 'گھبرانے کی ضرورت نہیں؛ حسبِ توفیق صدقہ دیں، کثرتِ استغفار کریں اور صبح و شام معوذتین و آیت الکرسی کا اہتمام کریں۔';
+        } else {
+          verdict = 'جامع و معتدل اشارہ (عبرت، احتیاط اور بعد ازاں آسانی)';
+          summaryBody = 'آپ کے خواب میں ' + symNames + ' کی علامات یکجا ہوئی ہیں۔ ایک پہلو سے یہ خواب توجہ، احتیاط اور اصلاحِ احوال کی طرف متوجہ کرتا ہے، جبکہ دوسرے پہلو سے صبر و تدبیر کے بعد خیر، آسانی اور فائدے کی امید دلاتا ہے۔';
+          guidance = 'اہم فیصلوں میں مشورہ و استخارہ کریں، حسبِ توفیق صدقہ نکالیں اور نماز و استغفار کی پابندی رکھیں۔';
+        }
+        if (ctxNotes.length) {
+          summaryBody += ' ' + ctxNotes.join(' ');
+        }
       }
 
       var sumBox = $('dreamSmartSummaryBox');
       if (sumBox) {
         sumBox.style.display = 'block';
+        var chipsHtml = matchedKeywords.length ? ('<div style="margin-bottom:8px; font-size:0.86rem; color:#1e3a8a;"><b>🔍 خواب سے شناخت شدہ اصل علامات:</b> ' + matchedKeywords.map(function(k){ return '<span style="display:inline-block; background:#eff6ff; color:#1e3a8a; border:1px solid #93c5fd; border-radius:999px; padding:1px 9px; margin:2px; font-weight:700;">' + k + '</span>'; }).join('') + '</div>') : '';
+
         var detailHtml = matched.length ? matched.map(function(m, idx) {
-          return '<div style="background:#ffffff; border:1px solid #cbd5e1; border-right:3px solid #1e3a8a; border-radius:8px; padding:7px 9px; margin-bottom:6px;">' +
-            '<div style="font-weight:800; color:#0b1936;">' + (idx + 1) + '. ' + m.title + '</div>' +
-            '<div style="color:#1e293b; font-size:0.86rem; line-height:1.85; margin-top:2px;">' + m.body + '</div>' +
-            '<small style="color:#065f46;">ماخذ: ' + m.src + '</small>' +
+          var fullB = String(m.body || '').trim();
+          var shortB = fullB.length > 260 ? (fullB.slice(0, 260) + '...') : fullB;
+          var bodyHtml = fullB.length > 260
+            ? ('<div style="color:#0f172a; font-size:0.95rem; line-height:2.0; margin-top:4px;">' + shortB + ' <details style="display:inline;"><summary style="cursor:pointer; color:#1e3a8a; font-weight:700; display:inline;">مزید پڑھیں</summary><div style="margin-top:5px; padding-top:5px; border-top:1px dashed #cbd5e1; color:#0f172a;">' + fullB + '</div></details></div>')
+            : ('<div style="color:#0f172a; font-size:0.95rem; line-height:2.0; margin-top:4px;">' + fullB + '</div>');
+          return '<div style="background:#ffffff; border:1.5px solid #cbd5e1; border-right:4px solid #1e3a8a; border-radius:10px; padding:10px 12px; margin-bottom:8px;">' +
+            '<div style="font-weight:800; color:#09152e; font-size:1.02rem;">' + (idx + 1) + '. ' + m.title + '</div>' +
+            bodyHtml +
+            '<div style="font-size:0.82rem; color:#065f46; font-weight:700; margin-top:4px;">📚 ماخذ: ' + m.src + '</div>' +
           '</div>';
-        }).join('') : '<div style="color:#64748b; margin-bottom:6px;">کوئی براہِ راست علامت نہیں ملی۔</div>';
+        }).join('') : '<div style="color:#475569; margin-bottom:6px; font-size:0.94rem;">کوئی براہِ راست علامت نہیں ملی۔</div>';
 
         var onlineUrl = 'https://www.google.com/search?q=' + encodeURIComponent('تعبیر الرؤیا امام ابن سیرین ' + raw.slice(0, 90));
         sumBox.innerHTML =
-          '<div style="font-weight:800; color:#1e3a8a; font-size:0.96rem; margin-bottom:6px;">۱. تفصیلی تعبیر (علامت وار):</div>' +
+          chipsHtml +
+          '<div style="font-weight:800; color:#1e3a8a; font-size:1.04rem; margin-bottom:7px;">۱. متعلقہ علامات کی مستند تعبیر (' + matched.length + '):</div>' +
           detailHtml +
-          '<div style="margin-top:8px; padding:9px 10px; background:#ffffff; border:1.5px solid #065f46; border-radius:9px;">' +
-            '<div style="font-weight:800; color:#065f46; font-size:0.95rem;">۲. مکمل خواب کا جامع خلاصہ: ' + verdict + '</div>' +
-            '<div style="color:#064e3b; font-size:0.88rem; line-height:1.9; margin-top:4px;">' + advice + '</div>' +
+          '<div style="margin-top:10px; padding:12px 14px; background:#f0fdf4; border:2px solid #065f46; border-radius:12px;">' +
+            '<div style="font-weight:800; color:#065f46; font-size:1.04rem;">۲. مکمل خواب کا جامع تجزیہ اور خلاصہ — ' + verdict + '</div>' +
+            '<div style="color:#0f172a; font-size:0.96rem; line-height:2.05; margin-top:6px;">' + summaryBody + '</div>' +
+            '<div style="margin-top:8px; padding-top:7px; border-top:1px dashed #6ee7b7; color:#064e3b; font-size:0.93rem; font-weight:700;">🌿 عملی روحانی ہدایت: ' + guidance + '</div>' +
           '</div>' +
-          '<div style="margin-top:8px;">' +
+          '<div style="margin-top:9px;">' +
             '<a href="' + onlineUrl + '" target="_blank" rel="noopener" class="ar-unibtn" style="text-decoration:none;">🌐 آن لائن مزید تعبیر تلاش کریں</a>' +
           '</div>';
       }
 
       var box3 = $('questionsPageTabeerInput');
       if (box3 && matched.length) {
-        var plainLines = matched.slice(0, 4).map(function(m, i) { return (i + 1) + '. ' + m.title + ': ' + m.body.slice(0, 180); });
-        box3.value = 'جامع خلاصہ (' + verdict + '):\n' + advice + '\n\nتفصیلی علامات:\n' + plainLines.join('\n');
+        var plainLines = matched.slice(0, 4).map(function(m, i) { return (i + 1) + '. ' + m.title + ': ' + String(m.body || '').slice(0, 180); });
+        box3.value = 'جامع خلاصہ (' + verdict + '):\n' + summaryBody + '\nعملی ہدایت: ' + guidance + '\n\nمتعلقہ علامات:\n' + plainLines.join('\n');
       }
 
-      _lastTabeerRenderArgs = [matched, bookMatched, 'خواب سے اخذ کردہ ابواب', uniqueTokens.slice(0, 3).join(' ')];
-      renderTabeerAccordionItems(matched, bookMatched, 'خواب سے اخذ کردہ ابواب', uniqueTokens.slice(0, 3).join(' '));
+      _lastTabeerRenderArgs = [matched, bookMatched, 'خواب سے اخذ کردہ ابواب', matchedKeywords.slice(0, 3).join(' ')];
+      renderTabeerAccordionItems(matched, bookMatched, 'خواب سے اخذ کردہ ابواب', matchedKeywords.slice(0, 3).join(' '));
     });
   };
 
@@ -7326,7 +7452,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
   // ================= MODULE 12: REFRESH-STAY + ADMIN 3 PRACTITIONERS + SAVE ADMIN PIN + HOME HEADER SHARE ICON (v2.1.15) =================
   (function() {
-    var BUILD_VER = 'v2.1.25';
+    var BUILD_VER = 'v2.1.27';
     try {
       var prevVer = localStorage.getItem('alraqi_app_build_ver');
       if (prevVer !== BUILD_VER) {
@@ -7372,7 +7498,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       sp.id = 'arBuildVerBadge';
       sp.style.cssText = 'opacity:0.78; font-size:0.74rem; margin-right:6px;';
       sp.setAttribute('dir', 'ltr');
-      sp.textContent = '• v2.1.25';
+      sp.textContent = '• v2.1.27';
       pill.appendChild(sp);
     }
 
@@ -7440,60 +7566,250 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     };
   }
 
-  // 3. Fix Admin Panel Registered Practitioners List (Fetch sync_admin_data + rbac_list_v143 + approved list + local cache!)
-  var _origLoadAdmB15 = window.loadLiveAdminCloudData;
+  // 3. Unified Zero-Flicker Interactive Admin Dashboard (Practitioners + 4+ Cases + Inbox — NO race condition!)
+  var K_ADM_SNAP = 'al_raqi_admin_snapshot_v27';
+  var _admLoadingLockV27 = false;
+
+  function escAdm(v){
+    return String(v || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function loadLocalCasesV27(){
+    var out = [];
+    var seen = {};
+    ['al_raqi_saved_cases_v2','al_mualij_cases_db_v1','al_raqi_cases_v1','alraqi_cases_history'].forEach(function(key){
+      try {
+        var arr = JSON.parse(localStorage.getItem(key) || '[]');
+        if (Array.isArray(arr)) {
+          arr.forEach(function(c){
+            if (!c || typeof c !== 'object') return;
+            var nm = c.p1_name || c.patientName || c.name || '';
+            var id = c.regId || c.id || (nm + '_' + (c.date || c.createdAt || ''));
+            if (!nm || seen[id]) return;
+            seen[id] = true;
+            out.push({
+              id: id,
+              name: nm,
+              mother: c.p1_mother || c.motherName || c.mother || '—',
+              phone: c.phone || c.whatsapp || '—',
+              city: c.p1_location || c.city || '—',
+              purpose: c.purpose || c.complaint || 'روحانی تشخیص',
+              date: c.date || (c.createdAt ? String(c.createdAt).slice(0,10) : '—')
+            });
+          });
+        }
+      } catch(e){}
+    });
+    return out;
+  }
+
+  window.toggleAdminUserCardV27 = function(idx){
+    var det = document.getElementById('admUserDetV27_' + idx);
+    if (det) det.style.display = (det.style.display === 'none' ? 'block' : 'none');
+  };
+
+  window.toggleAdminCasesDrawerV27 = function(){
+    var drw = document.getElementById('admCasesDrawerV27');
+    if (drw) drw.style.display = (drw.style.display === 'none' ? 'block' : 'none');
+  };
+
+  window.updateAdminUserStatusV27 = function(code, newStatus){
+    try {
+      var snap = JSON.parse(localStorage.getItem(K_ADM_SNAP) || '{}');
+      if (Array.isArray(snap.users)) {
+        snap.users.forEach(function(u){
+          if (String(u.code).toLowerCase() === String(code).toLowerCase()) u.status = newStatus;
+        });
+        localStorage.setItem(K_ADM_SNAP, JSON.stringify(snap));
+      }
+      var loc = JSON.parse(localStorage.getItem('al_mualij_licensed_users_v1') || '[]');
+      if (Array.isArray(loc)) {
+        loc.forEach(function(u){
+          var uc = u.code || u.mualijCode || u.username || '';
+          if (String(uc).toLowerCase() === String(code).toLowerCase()) u.status = newStatus;
+        });
+        localStorage.setItem('al_mualij_licensed_users_v1', JSON.stringify(loc));
+      }
+    } catch(e){}
+    if (typeof window.alRaqiCloudPost === 'function') {
+      window.alRaqiCloudPost({ action: 'update_user_status', username: code, status: newStatus }).catch(function(){});
+    }
+    renderAdminSnapshotV27();
+    if (typeof window.showToast === 'function') window.showToast('✅ معالج کا اسٹیٹس اپ ڈیٹ ہو گیا: ' + newStatus);
+  };
+
+  function renderAdminSnapshotV27(){
+    var snap = {};
+    try { snap = JSON.parse(localStorage.getItem(K_ADM_SNAP) || '{}'); } catch(e){}
+    var users = Array.isArray(snap.users) ? snap.users : [];
+    var cases = Array.isArray(snap.cases) ? snap.cases : [];
+    var msgs = Array.isArray(snap.msgs) ? snap.msgs : [];
+
+    // Always merge fresh local cases so 4+ cases NEVER disappear!
+    var locCases = loadLocalCasesV27();
+    var cSeen = {};
+    var mergedCases = [];
+    cases.concat(locCases).forEach(function(c){
+      var k = String(c.id || c.name).toLowerCase();
+      if (!cSeen[k]) { cSeen[k] = true; mergedCases.push(c); }
+    });
+
+    if ($('kpiTotalMualij')) {
+      $('kpiTotalMualij').textContent = String(users.length);
+      var kp1 = $('kpiTotalMualij').closest('.db-item');
+      if (kp1) { kp1.style.cursor = 'pointer'; kp1.onclick = function(){ var el = $('admBlueUsersList'); if (el) el.scrollIntoView({ behavior:'smooth' }); }; }
+    }
+    if ($('kpiTotalCases')) {
+      $('kpiTotalCases').textContent = String(mergedCases.length);
+      var kp2 = $('kpiTotalCases').closest('.db-item');
+      if (kp2) { kp2.style.cursor = 'pointer'; kp2.title = 'کیسز دیکھنے کے لیے کلک کریں'; kp2.onclick = window.toggleAdminCasesDrawerV27; }
+    }
+    if ($('kpiInboxCount')) {
+      $('kpiInboxCount').textContent = String(msgs.length);
+      var kp3 = $('kpiInboxCount').closest('.db-item');
+      if (kp3) { kp3.style.cursor = 'pointer'; kp3.onclick = function(){ var el = $('admBlueInboxList'); if (el) el.scrollIntoView({ behavior:'smooth' }); }; }
+    }
+
+    // Ensure clickable Cases Drawer exists right below KPI Grid
+    var kpiGrid = $('admBlueKpiGrid');
+    if (kpiGrid && !document.getElementById('admCasesDrawerV27')) {
+      var drw = document.createElement('div');
+      drw.id = 'admCasesDrawerV27';
+      drw.style.cssText = 'display:none; background:#f8fafc; border:1.5px solid #93c5fd; border-radius:12px; padding:10px; margin-bottom:10px;';
+      kpiGrid.parentNode.insertBefore(drw, kpiGrid.nextSibling);
+    }
+    var drwEl = document.getElementById('admCasesDrawerV27');
+    if (drwEl) {
+      drwEl.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:7px;">' +
+        '<b style="color:#1e3a8a; font-size:0.9rem;">📋 رجسٹرڈ مریض کیسز (' + mergedCases.length + ')</b>' +
+        '<button type="button" onclick="toggleAdminCasesDrawerV27()" style="padding:2px 8px; border-radius:6px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; font-family:inherit; font-size:0.76rem;">بند کریں ✕</button>' +
+      '</div>' +
+      (mergedCases.length ? mergedCases.map(function(c, i){
+        return '<div style="background:#fff; border:1px solid #e2e8f0; border-right:3px solid #1e3a8a; border-radius:8px; padding:7px 10px; margin-bottom:5px; font-size:0.82rem;">' +
+          '<b>' + (i + 1) + '. ' + escAdm(c.name) + '</b> <small style="color:#64748b;">(والدہ: ' + escAdm(c.mother) + ')</small>' +
+          '<div style="color:#334155; margin-top:2px;">مقصد: ' + escAdm(c.purpose) + ' | شہر: ' + escAdm(c.city) + ' | تاریخ: ' + escAdm(c.date) + '</div>' +
+        '</div>';
+      }).join('') : '<div style="color:#64748b; font-size:0.82rem;">کوئی کیس محفوظ نہیں۔</div>');
+    }
+
+    // Render fully clickable, interactive Practitioners List
+    if ($('admBlueUsersList')) {
+      $('admBlueUsersList').innerHTML = users.length ? users.map(function(u, idx){
+        var isAct = /ACTIVE|APPROVED/i.test(u.status || '');
+        return '<div class="db-item" style="border-right:4px solid ' + (isAct ? '#065f46' : '#d97706') + '; cursor:pointer;" onclick="toggleAdminUserCardV27(' + idx + ')">' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">' +
+            '<b style="color:#0b1936; font-size:0.95rem;">' + (idx + 1) + '. ' + escAdm(u.name) + '</b>' +
+            '<span style="padding:2px 9px; border-radius:999px; font-size:0.76rem; font-weight:800; background:' + (isAct ? '#ecfdf5' : '#fffbeb') + '; color:' + (isAct ? '#065f46' : '#92400e') + '; border:1px solid ' + (isAct ? '#6ee7b7' : '#fcd34d') + ';">' + escAdm(u.status) + ' ▼</span>' +
+          '</div>' +
+          '<div style="font-size:0.8rem; color:#475569; margin-top:2px;" dir="ltr">ID: ' + escAdm(u.code) + (u.email ? (' | ' + escAdm(u.email)) : '') + '</div>' +
+          '<div id="admUserDetV27_' + idx + '" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed #cbd5e1;" onclick="event.stopPropagation()">' +
+            '<div style="font-size:0.8rem; color:#334155; margin-bottom:7px;">فون: ' + escAdm(u.phone || '—') + ' | ای میل: ' + escAdm(u.email || '—') + '</div>' +
+            '<div style="display:flex; gap:6px; flex-wrap:wrap;">' +
+              '<button type="button" onclick="updateAdminUserStatusV27(\'' + escAdm(u.code).replace(/'/g, "\\'") + '\',\'ACTIVE\')" style="flex:1; padding:6px 8px; border-radius:7px; border:none; background:#065f46; color:#fff; font-family:inherit; font-size:0.78rem; font-weight:700; cursor:pointer;">✅ فعال / منظور کریں</button>' +
+              '<button type="button" onclick="updateAdminUserStatusV27(\'' + escAdm(u.code).replace(/'/g, "\\'") + '\',\'SUSPENDED\')" style="flex:1; padding:6px 8px; border-radius:7px; border:none; background:#b91c1c; color:#fff; font-family:inherit; font-size:0.78rem; font-weight:700; cursor:pointer;">⏸️ معطل کریں</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('') : '<div style="color:#64748b; font-size:0.86rem;">کوئی معالج ریکارڈ نہیں ملا۔</div>';
+    }
+
+    // Render Inbox Messages cleanly
+    if ($('admBlueInboxList')) {
+      $('admBlueInboxList').innerHTML = msgs.length ? msgs.map(function(m, idx){
+        return '<div class="db-item" style="border-right:4px solid #dc2626;">' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">' +
+            '<b>' + escAdm(m.senderName || m.userName || 'معالج') + '</b>' +
+            '<small style="color:#64748b;">' + escAdm(m.date || '') + '</small>' +
+          '</div>' +
+          '<div style="font-size:0.86rem; color:#0f172a; margin:4px 0;">' + escAdm(m.message || m.body || '') + '</div>' +
+          '<button type="button" onclick="replyToAdminInboxMsg(\'' + escAdm(m.id || ('MSG_' + idx)) + '\',\'' + escAdm(m.senderName || m.userName || 'معالج').replace(/'/g, "\\'") + '\')" style="padding:4px 10px; border-radius:7px; border:none; background:#1e3a8a; color:#fff; font-family:inherit; font-size:0.78rem; cursor:pointer;">↩️ جواب بھیجیں</button>' +
+        '</div>';
+      }).join('') : '<div style="color:#64748b; font-size:0.86rem;">ایڈمن انباکس میں کوئی نیا پیغام نہیں۔</div>';
+    }
+  }
+
+  // Override loadLiveAdminCloudData COMPLETELY (no parallel _origLoadAdmB15 race condition!)
   window.loadLiveAdminCloudData = function() {
-    if (_origLoadAdmB15) _origLoadAdmB15();
-    if (typeof window.alRaqiCloudPost !== 'function') return;
+    if (_admLoadingLockV27) return;
+    _admLoadingLockV27 = true;
+
+    // 1. Render cached snapshot + local data immediately (ZERO blank flash!)
+    var snap = {};
+    try { snap = JSON.parse(localStorage.getItem(K_ADM_SNAP) || '{}'); } catch(e){}
+    if (!Array.isArray(snap.users) || !snap.users.length) {
+      var initUsers = [];
+      try { initUsers = JSON.parse(localStorage.getItem('al_mualij_licensed_users_v1') || '[]'); } catch(e){}
+      if (initUsers.length) {
+        snap.users = initUsers.map(function(u){
+          return { name: u.fullName || u.name || u.username || 'معالج', code: u.code || u.mualijCode || u.username || '—', email: u.email || u.gmail || '', phone: u.phone || '', status: u.status || 'ACTIVE' };
+        });
+        try { localStorage.setItem(K_ADM_SNAP, JSON.stringify(snap)); } catch(e){}
+      }
+    }
+    renderAdminSnapshotV27();
+    if ($('admCloudStatusBar')) $('admCloudStatusBar').textContent = '🔄 کلاؤڈ ڈیٹا تازہ ہو رہا ہے...';
+
+    if (typeof window.alRaqiCloudPost !== 'function') {
+      _admLoadingLockV27 = false;
+      return;
+    }
+
     Promise.all([
       window.alRaqiCloudPost({ action: 'sync_admin_data' }).catch(function(){ return null; }),
       window.alRaqiCloudPost({ action: 'rbac_list_v143' }).catch(function(){ return null; }),
       window.alRaqiCloudPost({ action: 'patient_list_approved_mualijeen_v154' }).catch(function(){ return null; })
     ]).then(function(arr) {
-      var all = [];
-      var seen = {};
+      var allUsers = [];
+      var seenU = {};
       function addUser(u) {
         if (!u || typeof u !== 'object') return;
-        var nm = u.fullName || u.name || u.mualijName || u.username || u.email || '';
-        var cd = u.code || u.mualijCode || u.referralCode || u.username || u.email || '';
+        var nm = u.fullName || u.name || u.mualijName || u.username || u.email || u.gmail || '';
+        var cd = u.code || u.mualijCode || u.referralCode || u.username || u.email || u.gmail || '';
         if (!nm && !cd) return;
         var k = String(cd || nm).toLowerCase().trim();
-        if (seen[k]) return;
-        seen[k] = true;
-        all.push({
+        if (seenU[k]) return;
+        seenU[k] = true;
+        allUsers.push({
           name: nm || cd,
           code: cd || '—',
-          email: u.email || '',
+          email: u.email || u.gmail || '',
           phone: u.phone || u.whatsapp || '',
           status: u.status || (u.approved ? 'APPROVED' : 'ACTIVE')
         });
       }
+
+      var cloudMsgs = [];
       arr.forEach(function(res) {
         if (!res) return;
         ['users','practitioners','mualijeen','list','items','rows','data'].forEach(function(prop) {
           if (Array.isArray(res[prop])) res[prop].forEach(addUser);
         });
+        if (Array.isArray(res.contactMessages)) cloudMsgs = cloudMsgs.concat(res.contactMessages);
+        if (Array.isArray(res.messages)) cloudMsgs = cloudMsgs.concat(res.messages);
       });
+
+      // Merge local & previous snapshot users so nobody EVER vanishes on partial cloud response
       try {
         var loc = JSON.parse(localStorage.getItem('al_mualij_licensed_users_v1') || '[]');
         if (Array.isArray(loc)) loc.forEach(addUser);
-      } catch (e) {}
+      } catch(e){}
+      if (Array.isArray(snap.users)) snap.users.forEach(addUser);
 
-      if (all.length) {
-        if ($('kpiTotalMualij')) $('kpiTotalMualij').textContent = String(all.length);
-        if ($('admBlueUsersList')) {
-          $('admBlueUsersList').innerHTML = all.map(function(u, idx) {
-            return '<div class="db-item" style="border-right-color:#065f46;">' +
-              '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">' +
-                '<b style="color:#0b1936;">' + (idx + 1) + '. ' + u.name + '</b>' +
-                '<span class="ar-pat-badge ar-pat-badge-gold">' + u.status + '</span>' +
-              '</div>' +
-              '<div style="font-size:0.82rem; color:#475569; margin-top:2px;" dir="ltr">Code: ' + u.code + (u.email ? (' | ' + u.email) : '') + (u.phone ? (' | ' + u.phone) : '') + '</div>' +
-            '</div>';
-          }).join('');
-        }
-        if ($('admCloudStatusBar')) $('admCloudStatusBar').textContent = '✅ کلاؤڈ ڈیٹا تازہ ہو گیا — کل رجسٹرڈ معالجین: ' + all.length;
+      var finalSnap = {
+        users: allUsers,
+        cases: loadLocalCasesV27(),
+        msgs: cloudMsgs.length ? cloudMsgs : (Array.isArray(snap.msgs) ? snap.msgs : [])
+      };
+      try { localStorage.setItem(K_ADM_SNAP, JSON.stringify(finalSnap)); } catch(e){}
+
+      renderAdminSnapshotV27();
+      if ($('admCloudStatusBar')) {
+        $('admCloudStatusBar').textContent = '✅ لائیو کلاؤڈ ڈیٹا تازہ ہو گیا (' + new Date().toLocaleTimeString('en-US') + ') — معالجین: ' + finalSnap.users.length + ' | کیسز: ' + finalSnap.cases.length;
       }
+      _admLoadingLockV27 = false;
+    }).catch(function(){
+      _admLoadingLockV27 = false;
+      renderAdminSnapshotV27();
     });
   };
 
@@ -7704,7 +8020,22 @@ window.MASTER_THREE_BOOKS_DREAMS = [
         }
       }
     } catch (e) {}
+  
+  // High-contrast jet-black text & 6-line taller dream box (#scr_tabeer)
+  (function injectTabeerContrastV27(){
+    if (document.getElementById('arTabeerContrastPolishV27')) return;
+    var st = document.createElement('style');
+    st.id = 'arTabeerContrastPolishV27';
+    st.textContent = [
+      '#patientRawDreamTextInput { min-height: 155px !important; height: auto !important; color: #09152e !important; font-size: 1.06rem !important; font-weight: 700 !important; line-height: 2.05 !important; background: #ffffff !important; border: 2px solid #1e3a8a !important; padding: 10px 12px !important; opacity: 1 !important; -webkit-text-fill-color: #09152e !important; }',
+      '#patientRawDreamTextInput::placeholder { color: #64748b !important; font-weight: 400 !important; -webkit-text-fill-color: #64748b !important; }',
+      '#questionsPageTabeerInput { min-height: 140px !important; color: #09152e !important; font-size: 1.0rem !important; font-weight: 700 !important; line-height: 2.0 !important; background: #ffffff !important; border: 1.5px solid #065f46 !important; -webkit-text-fill-color: #09152e !important; }',
+      '#dreamSmartSummaryBox { color: #09152e !important; }'
+    ].join('\n');
+    document.head.appendChild(st);
   })();
+
+})();
 
   var _dreamSpeechRec = null;
   var _dreamSpeechActive = false;
@@ -9024,7 +9355,261 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     }
   }
 
+
+  // ---- 6. LIVE COUNTDOWN + NEXT SAAAT + 1-LINE GUIDANCE ON TOP HERO CARD (v2.1.26) ----
+  var PLANET_DO_NOW_V26 = {
+    'شمس': 'اس وقت عزت و سربلندی، حکام و افسران سے ملاقات، مقدمات میں حق کی فتح اور اہم کاروباری امور کے نقوش نہایت موزوں ہیں۔',
+    'قمر': 'اس وقت شفا و صحت، سفر، گھریلو سکون، تیز اثر دعائیں اور عوامی قبولیت کے اعمال کرنا بہترین ہے۔',
+    'مریخ': 'اس وقت سخت جادو و آسیب کے توڑ، جلالی حفاظت اور دفاعی حصار کے اعمال کریں؛ محبت یا عام نئے کاموں سے احتیاط کریں۔',
+    'عطارد': 'اس وقت تعلیم، امتحان، حافظہ، تحریر، تجارت، زبان بندیِ شر اور معاہدوں کے نقوش و اعمال موزوں ہیں۔',
+    'مشتری': 'اس وقت رزق و کاروبار میں برکت، شادی و رشتوں کی آسانی، اولاد اور ہر خیر و ترقی کے اعمال کے لیے بہترین وقت ہے۔',
+    'زہرہ': 'اس وقت محبت و الفت، میاں بیوی میں صلح، شادی، گھریلو سکون اور دلعزیزی کے نقوش و اعمال نہایت موزوں ہیں۔',
+    'زحل': 'اس وقت جائیداد کے تحفظ، بندش توڑنے اور دفعِ شر کے خاص اعمال کریں؛ عام خیر و برکت کے نئے کاموں سے پرہیز کریں۔'
+  };
+
+  function parseTime12ToMinV26(tStr){
+    var m = String(tStr || '').trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!m) return null;
+    var h = parseInt(m[1], 10);
+    var mn = parseInt(m[2], 10);
+    var ap = m[3].toUpperCase();
+    if (ap === 'PM' && h < 12) h += 12;
+    if (ap === 'AM' && h === 12) h = 0;
+    return h * 60 + mn;
+  }
+
+  function updateLiveHeroDetailsV26(){
+    var titleEl = document.getElementById('offLiveSaatTitle');
+    var subEl = document.getElementById('offLiveSaatSub');
+    if (!titleEl || !subEl) return;
+    var heroCard = titleEl.closest('.card');
+    if (!heroCard) return;
+
+    var box = document.getElementById('v26_liveSaatExtraBox');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'v26_liveSaatExtraBox';
+      box.style.cssText = 'margin-top:10px; padding-top:10px; border-top:1px solid rgba(253,224,71,0.35); display:flex; flex-direction:column; gap:7px;';
+      heroCard.appendChild(box);
+    }
+
+    // Collect all 24 hours from Day + Night tables
+    var allRows = [];
+    ['offDaySaatBody', 'offNightSaatBody'].forEach(function(tbId, pIdx){
+      var tb = document.getElementById(tbId);
+      if (!tb) return;
+      tb.querySelectorAll('tr').forEach(function(tr){
+        var tds = tr.querySelectorAll('td');
+        if (tds.length < 4) return;
+        var planet = (tds[1].textContent || '').trim();
+        var nature = (tds[2].textContent || '').trim();
+        var rangeTxt = (tds[3].textContent || '').trim();
+        var parts = rangeTxt.split(/\s*[-–]\s*/);
+        if (parts.length !== 2) return;
+        var sMin = parseTime12ToMinV26(parts[0]);
+        var eMin = parseTime12ToMinV26(parts[1]);
+        if (sMin === null || eMin === null) return;
+        allRows.push({ tr: tr, period: pIdx === 0 ? 'دن' : 'رات', planet: planet, nature: nature, range: rangeTxt, sMin: sMin, eMin: eMin });
+      });
+    });
+
+    if (!allRows.length) return;
+    var now = new Date();
+    var nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+    var nowMin = nowSec / 60;
+
+    var curIdx = -1;
+    for (var i = 0; i < allRows.length; i++) {
+      var r = allRows[i];
+      var s = r.sMin, e = r.eMin;
+      if (e > s) {
+        if (nowMin >= s && nowMin < e) { curIdx = i; break; }
+      } else {
+        // Crosses midnight (e.g. 11:56 PM - 1:05 AM)
+        if (nowMin >= s || nowMin < e) { curIdx = i; break; }
+      }
+    }
+
+    // Highlight active row cleanly
+    allRows.forEach(function(r, idx){
+      if (idx === curIdx) {
+        r.tr.style.background = '#fef9c3';
+        r.tr.style.outline = '2px solid #d97706';
+      } else {
+        r.tr.style.background = '';
+        r.tr.style.outline = '';
+      }
+    });
+
+    var cur = (curIdx >= 0) ? allRows[curIdx] : null;
+    var nxt = (curIdx >= 0) ? allRows[(curIdx + 1) % allRows.length] : null;
+
+    var remHtml = '';
+    if (cur) {
+      var endSec = cur.eMin * 60;
+      var diffSec = endSec - nowSec;
+      if (diffSec < 0) diffSec += 86400;
+      var rm = Math.floor(diffSec / 60);
+      var rs = Math.floor(diffSec % 60);
+      remHtml = '⏳ باقی وقت: ' + rm + ' منٹ ' + String(rs).padStart(2, '0') + ' سیکنڈ';
+      // Sync top title & sub with live running hour
+      titleEl.textContent = 'ساعتِ ' + cur.planet + ' (' + cur.nature + ')';
+      subEl.textContent = cur.period + ' کی ساعت | ' + cur.range;
+    }
+
+    var curPlanetName = cur ? cur.planet : '';
+    if (!curPlanetName) {
+      Object.keys(PLANET_DO_NOW_V26).forEach(function(k){
+        if (titleEl.textContent.indexOf(k) !== -1) curPlanetName = k;
+      });
+    }
+    var tipText = PLANET_DO_NOW_V26[curPlanetName] || 'اس ساعت کے مزاج کے مطابق خیر، ذکر و دعا اور موزوں روحانی عمل اختیار کریں۔';
+
+    var html = '';
+    if (remHtml || nxt) {
+      html += '<div style="display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:8px;">';
+      if (remHtml) {
+        html += '<span style="background:rgba(253,224,71,0.18); color:#fde047; border:1px solid rgba(253,224,71,0.55); border-radius:999px; padding:4px 13px; font-size:0.9rem; font-weight:800;">' + remHtml + '</span>';
+      }
+      if (nxt) {
+        html += '<span style="background:rgba(255,255,255,0.12); color:#e0f2fe; border:1px solid rgba(147,197,253,0.45); border-radius:999px; padding:4px 13px; font-size:0.88rem; font-weight:700;">⏭️ اگلی ساعت: ' + escH(nxt.planet) + ' (' + escH(nxt.nature) + ') — <span dir="ltr">' + escH(nxt.range) + '</span></span>';
+      }
+      html += '</div>';
+    }
+    html += '<div style="background:rgba(6,95,70,0.38); border:1px solid rgba(110,231,183,0.45); color:#ecfdf5; border-radius:10px; padding:7px 12px; font-size:0.9rem; line-height:1.85; text-align:center;">💡 <b>اس وقت کیا کریں:</b> ' + escH(tipText) + '</div>';
+    box.innerHTML = html;
+  }
+
+  function startLiveHeroTickerV26(){
+    updateLiveHeroDetailsV26();
+    if (!window._arLiveSaatTickerV26) {
+      window._arLiveSaatTickerV26 = setInterval(updateLiveHeroDetailsV26, 1000);
+    }
+  }
+
+
+  // ---- 7. MONTHLY HIJRI CALENDAR WITH HILAL ADJUSTMENT (-1/0/+1), AYYAM-E-BEEZ, NOCHANDI & NAHS/SAAD (v2.1.27) ----
+  var K_HILAL = 'al_raqi_hilal_adj_v27';
+  var HIJRI_M_UR_V27 = ['','محرم الحرام','صفر المظفر','ربیع الاول','ربیع الثانی','جمادی الاولیٰ','جمادی الثانیہ','رجب المرجب','شعبان المعظم','رمضان المبارک','شوال المکرم','ذوالقعدہ','ذوالحجہ'];
+  var WEEK_SHORT_UR_V27 = ['اتوار','پیر','منگل','بدھ','جمعرات','جمعہ','ہفتہ'];
+  var _hijriCalOffsetMonthsV27 = 0;
+
+  function getHilalAdjV27(){
+    try { var v = parseInt(localStorage.getItem(K_HILAL) || '0', 10); return (v >= -1 && v <= 1) ? v : 0; } catch(e){ return 0; }
+  }
+
+  window.setHilalAdjV27 = function(val){
+    try { localStorage.setItem(K_HILAL, String(val)); } catch(e){}
+    renderMonthlyHijriCalendarV27();
+  };
+
+  window.shiftHijriCalMonthV27 = function(delta){
+    if (delta === 0) _hijriCalOffsetMonthsV27 = 0;
+    else _hijriCalOffsetMonthsV27 += delta;
+    renderMonthlyHijriCalendarV27();
+  };
+
+  function getHijriPartsV27(dateObj, hilalAdj){
+    var d = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
+    if (hilalAdj) d.setDate(d.getDate() + hilalAdj);
+    var hD = 1, hM = 1, hY = 1448;
+    try {
+      var fmt = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { day: 'numeric', month: 'numeric', year: 'numeric' });
+      fmt.formatToParts(d).forEach(function(p){
+        if (p.type === 'day') hD = parseInt(p.value, 10);
+        if (p.type === 'month') hM = parseInt(p.value, 10);
+        if (p.type === 'year') hY = parseInt(p.value, 10);
+      });
+    } catch(e){}
+    return { day: hD, month: hM, year: hY, monthName: HIJRI_M_UR_V27[hM] || String(hM) };
+  }
+
+  window.renderMonthlyHijriCalendarV27 = function(){
+    var box = document.getElementById('v27_hijriCalBody');
+    if (!box) return;
+    var hilal = getHilalAdjV27();
+    var now = new Date();
+    var baseDate = new Date(now.getFullYear(), now.getMonth() + _hijriCalOffsetMonthsV27, 1);
+    var year = baseDate.getFullYear(), month = baseDate.getMonth();
+    var daysInMonth = new Date(year, month + 1, 0).getDate();
+    var firstDow = new Date(year, month, 1).getDay();
+    var midHijri = getHijriPartsV27(new Date(year, month, 15), hilal);
+    var nahsMap = (window.AL_RAQI_SAAET_REFERENCE_V23 && window.AL_RAQI_SAAET_REFERENCE_V23.nahs_hijri_dates) || {};
+    var gregM = ['جنوری','فروری','مارچ','اپریل','مئی','جون','جولائی','اگست','ستمبر','اکتوبر','نومبر','دسمبر'][month];
+
+    var html = '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">' +
+      '<div style="font-weight:800; color:#1e3a8a; font-size:0.98rem;">🌙 ' + escH(midHijri.monthName) + ' ' + midHijri.year + ' ہجری <small style="color:#475569;">(' + gregM + ' ' + year + ')</small></div>' +
+      '<div style="display:flex; gap:4px;">' +
+        '<button type="button" onclick="shiftHijriCalMonthV27(-1)" style="padding:4px 9px; border-radius:7px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; font-family:inherit; font-size:0.8rem;">◀ پچھلا</button>' +
+        '<button type="button" onclick="shiftHijriCalMonthV27(0)" style="padding:4px 9px; border-radius:7px; border:1px solid #1e3a8a; background:#1e3a8a; color:#fff; cursor:pointer; font-family:inherit; font-size:0.8rem;">آج</button>' +
+        '<button type="button" onclick="shiftHijriCalMonthV27(1)" style="padding:4px 9px; border-radius:7px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; font-family:inherit; font-size:0.8rem;">اگلا ▶</button>' +
+      '</div>' +
+    '</div>';
+
+    html += '<div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:6px 9px; margin-bottom:8px; font-size:0.8rem;">' +
+      '<b>🌙 رویتِ ہلال ایڈجسٹمنٹ:</b>' +
+      '<div style="display:flex; gap:5px;">' +
+        [-1, 0, 1].map(function(v){
+          var act = (v === hilal);
+          var lbl = v === -1 ? '-1 دن' : (v === 0 ? 'نارمل (0)' : '+1 دن');
+          return '<button type="button" onclick="setHilalAdjV27(' + v + ')" style="padding:3px 9px; border-radius:7px; border:1px solid ' + (act ? '#065f46' : '#cbd5e1') + '; background:' + (act ? '#065f46' : '#fff') + '; color:' + (act ? '#fff' : '#0f172a') + '; font-family:inherit; font-size:0.78rem; font-weight:700; cursor:pointer;">' + lbl + '</button>';
+        }).join('') +
+      '</div>' +
+    '</div>';
+
+    html += '<div style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px; text-align:center;">';
+    WEEK_SHORT_UR_V27.forEach(function(w){
+      html += '<div style="font-size:0.74rem; font-weight:800; color:#1e3a8a; padding:4px 2px; background:#eff6ff; border-radius:6px;">' + w + '</div>';
+    });
+    for (var b = 0; b < firstDow; b++) {
+      html += '<div></div>';
+    }
+    for (var day = 1; day <= daysInMonth; day++) {
+      var dObj = new Date(year, month, day);
+      var hp = getHijriPartsV27(dObj, hilal);
+      var isToday = (dObj.getFullYear() === now.getFullYear() && dObj.getMonth() === now.getMonth() && dObj.getDate() === now.getDate());
+      var nahsArr = nahsMap[String(hp.month)] || [];
+      var isNahs = nahsArr.indexOf(hp.day) !== -1;
+      var isBeez = (hp.day === 13 || hp.day === 14 || hp.day === 15);
+      var isNochandi = (hp.day >= 4 && hp.day <= 10 && dObj.getDay() === 4);
+
+      var bg = '#ffffff', brd = '#e2e8f0', tag = '';
+      if (isNahs) { bg = '#fef2f2'; brd = '#fca5a5'; tag = 'نحس'; }
+      else if (isNochandi) { bg = '#fef9c3'; brd = '#f59e0b'; tag = 'نوچندی'; }
+      else if (isBeez) { bg = '#ecfdf5'; brd = '#34d399'; tag = 'بیض'; }
+      if (isToday) { brd = '#1e3a8a'; }
+
+      html += '<div style="background:' + bg + '; border:' + (isToday ? '2.5px' : '1px') + ' solid ' + brd + '; border-radius:8px; padding:4px 2px; min-height:46px; display:flex; flex-direction:column; justify-content:center; align-items:center;">' +
+        '<div style="font-weight:800; font-size:0.9rem; color:#0f172a; line-height:1.1;">' + hp.day + '</div>' +
+        '<div style="font-size:0.66rem; color:#64748b; direction:ltr;">' + day + '</div>' +
+        (tag ? '<div style="font-size:0.62rem; font-weight:800; color:' + (isNahs ? '#991b1b' : (isNochandi ? '#92400e' : '#065f46')) + '; line-height:1.1;">' + tag + '</div>' : '') +
+      '</div>';
+    }
+    html += '</div>';
+    html += '<div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; font-size:0.75rem; color:#334155;">' +
+      '<span>🟩 <b>بیض:</b> ایامِ بیض (۱۳، ۱۴، ۱۵)</span>' +
+      '<span>🟨 <b>نوچندی:</b> نوچندی جمعرات</span>' +
+      '<span>🟥 <b>نحس:</b> قواعدِ عملیات کی نحس تاریخ</span>' +
+    '</div>';
+    box.innerHTML = html;
+  };
+
+  function injectMonthlyHijriCalendarCardV27(){
+    var scr = document.getElementById('scr_saaat');
+    if (!scr || document.getElementById('v27_monthlyHijriCard')) return;
+    var wrap = scr.querySelector('.wrap') || scr;
+    var c = document.createElement('div');
+    c.id = 'v27_monthlyHijriCard';
+    c.className = 'card';
+    c.style.cssText = 'border-top:4px solid #065f46; background:#ffffff; margin-top:10px;';
+    c.innerHTML = '<h3 style="margin-top:0; color:#065f46;">📅 ماہانہ ہجری کیلنڈر (ہلال ایڈجسٹمنٹ، ایامِ بیض و نحس تاریخیں)</h3><div id="v27_hijriCalBody"></div>';
+    wrap.appendChild(c);
+    window.renderMonthlyHijriCalendarV27();
+  }
+
   function bootMod17(){
+    injectMonthlyHijriCalendarCardV27();
+    startLiveHeroTickerV26();
     injectArabicFontControlsV25();
     hookSaatPolishV24();
     injectQuickGmailAuthBoxV23();
@@ -9039,6 +9624,299 @@ window.MASTER_THREE_BOOKS_DREAMS = [
   }
   setTimeout(bootMod17, 700);
   setTimeout(bootMod17, 2000);
+})();
+
+/* =========================================================================
+   MODULE 18: GLOBAL MULTI-LANGUAGE TRANSLATOR + FIRST-LAUNCH GMAIL AUTH
+              + CLEAN PASSWORD SAVE + AUTO-CLEAR DREAM WORKSPACE (v2.1.27)
+   Modular path: Al_Raqi_Modular_Sections_v1/12_Admin_Panel_And_Nav/v27_translator_auth_dreamclean_module.js
+   ========================================================================= */
+(function(){
+  'use strict';
+
+  var K_LANG = 'al_raqi_preferred_lang_v27';
+  var K_SESS = 'al_mualij_session_v14';
+  var K_CREDS = 'al_mualij_saved_login_creds_v16';
+
+  function escH(s){
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ---- 1. UNIVERSAL MULTI-LANGUAGE TRANSLATOR (Urdu / English / Arabic / Hindi / French / Turkish) ----
+  window.alRaqiTranslateTextV27 = function(text, targetLang, cb){
+    var txt = String(text || '').trim();
+    var tl = targetLang || 'ur';
+    if (!txt) { if (cb) cb(''); return; }
+    var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=' + encodeURIComponent(tl) + '&dt=t&q=' + encodeURIComponent(txt);
+    fetch(url)
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var out = '';
+        if (Array.isArray(data) && Array.isArray(data[0])) {
+          data[0].forEach(function(seg){ if (seg && seg[0]) out += seg[0]; });
+        }
+        if (cb) cb(out || txt);
+      })
+      .catch(function(){
+        if (cb) cb(txt);
+      });
+  };
+
+  function looksNonUrduV27(txt){
+    var s = String(txt || '').trim();
+    if (!s || s.length < 4) return false;
+    var latin = (s.match(/[A-Za-z]/g) || []).length;
+    var urdu = (s.match(/[\u0600-\u06FF]/g) || []).length;
+    return (latin >= 4 && latin > urdu);
+  }
+
+  window.translateDreamBoxToUrduV27 = function(silent){
+    var inp = document.getElementById('patientRawDreamTextInput');
+    if (!inp) return;
+    var raw = (inp.value || '').trim();
+    if (!raw) {
+      if (!silent && typeof window.showToast === 'function') window.showToast('پہلے خواب درج یا پیسٹ کریں');
+      return;
+    }
+    var statusEl = document.getElementById('v27_dreamTransStatus');
+    if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = '🌐 اردو میں ترجمہ ہو رہا ہے...'; }
+    window.alRaqiTranslateTextV27(raw, 'ur', function(translated){
+      if (translated && translated !== raw) {
+        inp.value = translated;
+        inp.dispatchEvent(new Event('input', { bubbles: true }));
+        if (statusEl) statusEl.textContent = '✅ خواب کا اردو ترجمہ مکمل ہو گیا۔';
+      } else {
+        if (statusEl) statusEl.textContent = 'ℹ️ متن پہلے سے اردو میں ہے یا انٹرنیٹ دستیاب نہیں۔';
+      }
+      setTimeout(function(){ if (statusEl) statusEl.style.display = 'none'; }, 3500);
+    });
+  };
+
+  window.runGlobalQuickTranslatorV27 = function(){
+    var inp = document.getElementById('v27_globalTransInput');
+    var langSel = document.getElementById('v27_globalTransLang');
+    var out = document.getElementById('v27_globalTransOutput');
+    if (!inp || !out) return;
+    var txt = (inp.value || '').trim();
+    var tl = (langSel && langSel.value) || 'ur';
+    if (!txt) { out.textContent = 'پہلے کوئی تحریر یا پیغام درج کریں۔'; return; }
+    out.textContent = '🌐 ترجمہ ہو رہا ہے...';
+    window.alRaqiTranslateTextV27(txt, tl, function(res){
+      out.textContent = res || txt;
+    });
+  };
+
+  // ---- 2. CLEAN AUTO-CLEAR DREAM WORKSPACE (Never retains previous patient's dream) ----
+  window.clearDreamWorkspaceCompletelyV27 = function(showMsg){
+    var inp = document.getElementById('patientRawDreamTextInput');
+    var sum = document.getElementById('dreamSmartSummaryBox');
+    var qBox = document.getElementById('questionsPageTabeerInput');
+    var srch = document.getElementById('offlineDreamSearch');
+    if (inp) inp.value = '';
+    if (sum) { sum.innerHTML = ''; sum.style.display = 'none'; }
+    if (qBox) qBox.value = '';
+    if (srch) srch.value = '';
+    try {
+      localStorage.removeItem('al_raqi_last_dream_text');
+      sessionStorage.removeItem('al_raqi_last_dream_text');
+    } catch(e){}
+    if (showMsg && typeof window.showToast === 'function') {
+      window.showToast('🧹 خواب اور تعبیر کی جگہ مکمل صاف ہو گئی');
+    }
+  };
+
+  function setupDreamTranslatorAndAutoClearV27(){
+    var inp = document.getElementById('patientRawDreamTextInput');
+    if (!inp || inp.dataset.v27Wired) return;
+    inp.dataset.v27Wired = '1';
+    inp.setAttribute('autocomplete', 'off');
+
+    // Auto-translate English / Roman / Foreign pasted text to Urdu on paste
+    inp.addEventListener('paste', function(){
+      setTimeout(function(){
+        if (looksNonUrduV27(inp.value)) {
+          window.translateDreamBoxToUrduV27(true);
+        }
+      }, 60);
+    });
+
+    // Add Translator + Clear Dream bar right under dream textarea
+    var bar = document.createElement('div');
+    bar.id = 'v27_dreamActionBar';
+    bar.style.cssText = 'display:flex; gap:6px; flex-wrap:wrap; margin:6px 0 8px;';
+    bar.innerHTML =
+      '<button type="button" onclick="translateDreamBoxToUrduV27(false)" style="flex:1; min-width:140px; padding:7px 10px; border-radius:9px; border:1px solid #1e3a8a; background:#eff6ff; color:#1e3a8a; font-family:inherit; font-size:0.84rem; font-weight:700; cursor:pointer;">🌐 انگریزی/دیگر زبان سے اردو ترجمہ</button>' +
+      '<button type="button" onclick="clearDreamWorkspaceCompletelyV27(true)" style="padding:7px 12px; border-radius:9px; border:1px solid #dc2626; background:#fef2f2; color:#991b1b; font-family:inherit; font-size:0.84rem; font-weight:700; cursor:pointer;">🧹 نیا خواب (صاف کریں)</button>' +
+      '<div id="v27_dreamTransStatus" style="display:none; width:100%; font-size:0.8rem; color:#065f46; font-weight:700;"></div>';
+    inp.parentNode.insertBefore(bar, inp.nextSibling);
+
+    // Collapse the big bottom encyclopedia card by default so ONLY relevant Tabeer + Summary stay prominent
+    var scrT = document.getElementById('scr_tabeer');
+    if (scrT) {
+      var cards = scrT.querySelectorAll('.card');
+      cards.forEach(function(c){
+        if (c.textContent.indexOf('انسائیکلوپیڈیا') !== -1 && !c.dataset.v27Collapsible) {
+          c.dataset.v27Collapsible = '1';
+          var h = c.querySelector('h3, h4');
+          if (h) {
+            var bodyWrap = document.createElement('div');
+            bodyWrap.style.display = 'none';
+            while (h.nextSibling) bodyWrap.appendChild(h.nextSibling);
+            c.appendChild(bodyWrap);
+            h.style.cursor = 'pointer';
+            h.innerHTML = h.innerHTML + ' <span style="float:left; font-size:0.78rem; color:#1e3a8a;">(کھولیں / بند کریں ▼)</span>';
+            h.addEventListener('click', function(){
+              bodyWrap.style.display = (bodyWrap.style.display === 'none') ? 'block' : 'none';
+            });
+          }
+        }
+      });
+    }
+
+    // Auto-clear dream workspace whenever user saves/sends Tabeer to Report Card or switches back to Tabeer fresh
+    if (!window._v27OpenScreenHooked && typeof window.openScreen === 'function') {
+      window._v27OpenScreenHooked = true;
+      var origOpen = window.openScreen;
+      window.openScreen = function(name){
+        var res = origOpen.apply(this, arguments);
+        if (name === 'tabeer') {
+          window.clearDreamWorkspaceCompletelyV27(false);
+        }
+        return res;
+      };
+    }
+
+    // Hook copy/save buttons inside #scr_tabeer to auto-clear right after saving/sending
+    var scrT2 = document.getElementById('scr_tabeer');
+    if (scrT2 && !scrT2.dataset.v27CopyHook) {
+      scrT2.dataset.v27CopyHook = '1';
+      scrT2.addEventListener('click', function(ev){
+        var btn = ev.target && ev.target.closest('button');
+        if (!btn) return;
+        var txt = (btn.textContent || '');
+        if (/محفوظ|رپورٹ|بھیجیں|کاپی/.test(txt) && txt.indexOf('تعبیر تلاش') === -1) {
+          setTimeout(function(){ window.clearDreamWorkspaceCompletelyV27(false); }, 900);
+        }
+      });
+    }
+  }
+
+  // ---- 3. PERMANENT GLOBAL TRANSLATOR CARD IN SETTINGS (#scr_settings) ----
+  function injectGlobalTranslatorCardV27(){
+    var sett = document.getElementById('scr_settings');
+    if (!sett || document.getElementById('v27_globalTranslatorCard')) return;
+    var wrap = sett.querySelector('.wrap') || sett;
+    var card = document.createElement('div');
+    card.id = 'v27_globalTranslatorCard';
+    card.className = 'card';
+    card.style.cssText = 'border-top:3px solid #0284c7; margin-top:10px;';
+    card.innerHTML =
+      '<h3 style="margin-top:0; color:#0369a1;">🌐 عالمی ملٹی لینگویج ٹرانسلیٹر (اردو / انگریزی / عربی و دیگر زبانیں)</h3>' +
+      '<div style="font-size:0.82rem; color:#475569; margin-bottom:7px;">کسی بھی زبان (انگریزی، عربی، ہندی، فرانسیسی، ترکی وغیرہ) کا پیغام یا آڈیو تحریر یہاں پیسٹ کر کے فوری ترجمہ کریں:</div>' +
+      '<textarea id="v27_globalTransInput" rows="3" autocomplete="off" placeholder="انگریزی یا کسی بھی زبان کا متن یہاں پیسٹ کریں..." style="width:100%; box-sizing:border-box; margin-bottom:7px; padding:8px; border:1px solid #cbd5e1; border-radius:9px; font-family:inherit;"></textarea>' +
+      '<div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">' +
+        '<select id="v27_globalTransLang" style="flex:1; min-width:140px; padding:7px; border-radius:8px; border:1px solid #cbd5e1;">' +
+          '<option value="ur" selected>اردو میں ترجمہ کریں (Urdu)</option>' +
+          '<option value="en">انگریزی میں ترجمہ کریں (English)</option>' +
+          '<option value="ar">عربی میں ترجمہ کریں (Arabic)</option>' +
+          '<option value="hi">ہندی میں ترجمہ کریں (Hindi)</option>' +
+          '<option value="fr">فرانسیسی (French)</option>' +
+          '<option value="tr">ترکی (Turkish)</option>' +
+        '</select>' +
+        '<button type="button" class="ar-unibtn active" style="width:auto; padding:7px 14px;" onclick="runGlobalQuickTranslatorV27()">🌐 ترجمہ کریں</button>' +
+      '</div>' +
+      '<div id="v27_globalTransOutput" style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:9px; padding:9px 11px; min-height:46px; font-size:0.94rem; color:#0f172a; line-height:1.95;">ترجمہ یہاں ظاہر ہوگا...</div>';
+    wrap.appendChild(card);
+  }
+
+  // ---- 4. FIRST-LAUNCH AUTH GATE + CLEAN CREDENTIAL SAVE (NO PAGE-STATE POLLUTION) ----
+  function enforceCleanAuthAndPasswordSaveV27(){
+    // 1. Set autocomplete="off" on all non-login inputs so browser Password Manager never binds to patient/dream fields
+    document.querySelectorAll('input, textarea').forEach(function(el){
+      var id = el.id || '';
+      if (id === 'gate_loginUsername' || id === 'gate_loginPassword' || id === 'v23_quickGmailInput' || id === 'reg_password') return;
+      if (!el.getAttribute('autocomplete')) el.setAttribute('autocomplete', 'off');
+    });
+
+    // 2. Properly label login username/password fields for clean password saving + add "Remember Credentials" checkbox
+    var uIn = document.getElementById('gate_loginUsername');
+    var pIn = document.getElementById('gate_loginPassword');
+    if (uIn) { uIn.setAttribute('name', 'username'); uIn.setAttribute('autocomplete', 'username'); }
+    if (pIn) { pIn.setAttribute('name', 'password'); pIn.setAttribute('autocomplete', 'current-password'); }
+
+    var loginPane = document.getElementById('clientLoginFormPane');
+    if (loginPane && !document.getElementById('v27_saveCredsCheckWrap')) {
+      var chkDiv = document.createElement('label');
+      chkDiv.id = 'v27_saveCredsCheckWrap';
+      chkDiv.style.cssText = 'display:flex; align-items:center; gap:7px; font-size:0.84rem; font-weight:700; color:#065f46; margin-bottom:10px; cursor:pointer;';
+      chkDiv.innerHTML = '<input type="checkbox" id="v27_saveCredsChk" checked style="width:16px; height:16px; accent-color:#065f46;"> <span>اپنا یوزر نام اور پاسورڈ محفوظ رکھیں (صرف لاگ ان کے لیے)</span>';
+      var btnRow = loginPane.querySelector('.ar-eq-grid-2');
+      if (btnRow) loginPane.insertBefore(chkDiv, btnRow);
+      else loginPane.appendChild(chkDiv);
+    }
+
+    // Pre-fill ONLY clean saved credentials (never any page text!)
+    try {
+      var saved = JSON.parse(localStorage.getItem(K_CREDS) || 'null');
+      if (saved) {
+        if (uIn && !uIn.value && saved.username) uIn.value = saved.username;
+        if (pIn && !pIn.value && saved.password) pIn.value = saved.password;
+        var gIn = document.getElementById('v23_quickGmailInput');
+        var gNm = document.getElementById('v23_quickGmailName');
+        if (gIn && !gIn.value && saved.gmail) gIn.value = saved.gmail;
+        if (gNm && !gNm.value && saved.fullName) gNm.value = saved.fullName;
+      }
+    } catch(e){}
+
+    // Hook submitNativeLogin so it saves ONLY username + password when checked (never page state)
+    if (!window._v27LoginWrapped && typeof window.submitNativeLogin === 'function') {
+      window._v27LoginWrapped = true;
+      var origLogin = window.submitNativeLogin;
+      window.submitNativeLogin = function(){
+        var chk = document.getElementById('v27_saveCredsChk');
+        var u = ((document.getElementById('gate_loginUsername') || {}).value || '').trim();
+        var p = ((document.getElementById('gate_loginPassword') || {}).value || '').trim();
+        if (chk && chk.checked && u && p) {
+          try {
+            var prev = JSON.parse(localStorage.getItem(K_CREDS) || '{}');
+            prev.username = u; prev.password = p;
+            localStorage.setItem(K_CREDS, JSON.stringify(prev));
+          } catch(e){}
+        } else if (chk && !chk.checked) {
+          try { localStorage.removeItem(K_CREDS); } catch(e){}
+        }
+        return origLogin.apply(this, arguments);
+      };
+    }
+
+    // 3. First-Launch Gate: if NO active session exists yet, show Sign-In / Gmail Sign-Up BEFORE running app!
+    if (!window._v27FirstLaunchChecked) {
+      window._v27FirstLaunchChecked = true;
+      var hasSess = false;
+      try {
+        var sObj = JSON.parse(localStorage.getItem(K_SESS) || 'null');
+        if (sObj && (sObj.username || sObj.gmail)) hasSess = true;
+      } catch(e){}
+      if (!hasSess) {
+        var modal = document.getElementById('clientLoginGateModal');
+        if (modal) modal.style.display = 'flex';
+      }
+    }
+  }
+
+  function bootMod18(){
+    setupDreamTranslatorAndAutoClearV27();
+    injectGlobalTranslatorCardV27();
+    enforceCleanAuthAndPasswordSaveV27();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootMod18);
+  } else {
+    bootMod18();
+  }
+  setTimeout(bootMod18, 900);
+  setTimeout(bootMod18, 2200);
 })();
 
   function bootAlRaqiV2() {
