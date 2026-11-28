@@ -2084,9 +2084,9 @@ window.AL_RAQI_DIGITAL_BOOKS_V23 = {"bk_qawaid": {"title": "قواعدِ عمل�
   };
 
   // Apply saved Night Mode automatically whenever Quran Reader opens
-  if (typeof window.openFullSurahReaderV31 === 'function' && !window.openFullSurahReaderV31._v38Wrapped) {
-    var _origOpenSR = window.openFullSurahReaderV31;
-    window.openFullSurahReaderV31 = function(surahNum, startAtLastPage){
+  if (typeof window.openFullScreenSurahV31 === 'function' && !window.openFullScreenSurahV31._v38Wrapped) {
+    var _origOpenSR = window.openFullScreenSurahV31;
+    window.openFullScreenSurahV31 = function(surahNum, startAtLastPage){
       window._arCurrentSurahNumV38 = parseInt(surahNum, 10) || 1;
       var res = _origOpenSR.apply(this, arguments);
       setTimeout(function(){
@@ -2104,7 +2104,7 @@ window.AL_RAQI_DIGITAL_BOOKS_V23 = {"bk_qawaid": {"title": "قواعدِ عمل�
       }, 60);
       return res;
     };
-    window.openFullSurahReaderV31._v38Wrapped = true;
+    window.openFullScreenSurahV31._v38Wrapped = true;
   }
 
   // Point 16: Continuous Surah-to-Surah (1 -> 114) seamless pagination!
@@ -2119,8 +2119,8 @@ window.AL_RAQI_DIGITAL_BOOKS_V23 = {"bk_qawaid": {"title": "قواعدِ عمل�
       }
       var curS = window._arCurrentSurahNumV38 || 1;
       if (delta > 0 && curPg >= totPg) {
-        if (curS < 114 && typeof window.openFullSurahReaderV31 === 'function') {
-          window.openFullSurahReaderV31(curS + 1);
+        if (curS < 114 && typeof window.openFullScreenSurahV31 === 'function') {
+          window.openFullScreenSurahV31(curS + 1);
           if (typeof window.showToast === 'function') window.showToast('📖 اگلی سورت (' + (curS + 1) + ') کھل گئی');
           return;
         } else {
@@ -2129,8 +2129,8 @@ window.AL_RAQI_DIGITAL_BOOKS_V23 = {"bk_qawaid": {"title": "قواعدِ عمل�
         }
       }
       if (delta < 0 && curPg <= 1) {
-        if (curS > 1 && typeof window.openFullSurahReaderV31 === 'function') {
-          window.openFullSurahReaderV31(curS - 1);
+        if (curS > 1 && typeof window.openFullScreenSurahV31 === 'function') {
+          window.openFullScreenSurahV31(curS - 1);
           if (typeof window.showToast === 'function') window.showToast('📖 پچھلی سورت (' + (curS - 1) + ') کھل گئی');
           return;
         }
@@ -3151,21 +3151,38 @@ window.AL_RAQI_DIGITAL_BOOKS_V23 = {"bk_qawaid": {"title": "قواعدِ عمل�
   function injectMaktabaKhawasButtonV32(){
     var scr = document.getElementById('scr_folders');
     if (!scr || document.getElementById('v32_maktabaKhawasBtn')) return;
-    var wrap = scr.querySelector('.wrap') || scr;
-    var bar = document.createElement('div');
-    bar.id = 'v32_maktabaKhawasBtn';
-    bar.className = 'no-print';
-    bar.style.cssText = 'margin:6px 0 8px;';
-    bar.innerHTML = '<button type="button" onclick="openKhawasModalV32()" style="width:100%; padding:10px 14px; border-radius:12px; border:1.5px solid #d4af37; background:linear-gradient(135deg,#09152e,#1e3a8a); color:#fde047; font-family:inherit; font-size:0.95rem; font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(11,25,54,0.16);">📖 خواصِ اعداد (۱ تا ۹)، مزاج و بروج — موافقت، توازن و مخالفت</button>';
-    var fontBar = document.getElementById('v25_maktabaFontBar');
-    if (fontBar && fontBar.nextSibling) wrap.insertBefore(bar, fontBar.nextSibling);
-    else if (wrap.firstChild) wrap.insertBefore(bar, wrap.firstChild);
-    else wrap.appendChild(bar);
+    // Point 3: Mount as sleek 6th equal button inside Maktaba tab grid (symmetrical 3x2 grid!)
+    var kutubBtn = scr.querySelector('button[onclick*="kutub"]') || scr.querySelector('#fTab_kutub');
+    var tabGrid = kutubBtn ? kutubBtn.parentNode : (scr.querySelector('.folder-tabs, .ar-eq-grid-3, .tabs-row'));
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'v32_maktabaKhawasBtn';
+    btn.className = kutubBtn ? kutubBtn.className.replace(/active/g, '').trim() : 'ar-unibtn';
+    btn.textContent = 'خواصِ اعداد';
+    btn.onclick = function(){ if (typeof window.openKhawasModalV32 === 'function') window.openKhawasModalV32(); };
+    if (tabGrid) {
+      tabGrid.appendChild(btn);
+    } else {
+      var wrap = scr.querySelector('.wrap') || scr;
+      wrap.insertBefore(btn, wrap.firstChild);
+    }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectMaktabaKhawasButtonV32);
   else injectMaktabaKhawasButtonV32();
   setTimeout(injectMaktabaKhawasButtonV32, 800);
+})();
+
+(function fixKhawasModalLayoutV39(){
+  if (document.getElementById('arKhawasV39FixCss')) return;
+  var st = document.createElement('style');
+  st.id = 'arKhawasV39FixCss';
+  st.textContent = [
+    '#arAadadBuroojModalV32 > div { display:flex !important; flex-direction:column !important; }',
+    '#arAadadBuroojModalV32 #v32_khawasListBody { padding-top: 14px !important; margin-top: 4px !important; }',
+    '#arAadadBuroojModalV32 button { white-space: nowrap !important; font-size: 0.78rem !important; padding: 6px 4px !important; }'
+  ].join('\n');
+  document.head.appendChild(st);
 })();
 
 
@@ -3521,6 +3538,169 @@ window.AL_RAQI_DIGITAL_BOOKS_V23 = {"bk_qawaid": {"title": "قواعدِ عمل�
   }
 
   setInterval(enhanceNaqshCardsV38, 1200);
+})();
+
+
+// === v2.1.39 POINTS 4 & 5: FULL-PAGE WAZIFA & MANZIL READER + INDIVIDUAL AYAH SELECTION ===
+(function initWazifaManzilFullPageReaderV39(){
+  if (!document.getElementById('arWazifaReaderCssV39')) {
+    var st = document.createElement('style');
+    st.id = 'arWazifaReaderCssV39';
+    st.textContent = [
+      '#arWazifaFullReaderV39 { position:fixed; inset:0; z-index:99985; background:#fffdf7; display:none; flex-direction:column; direction:rtl; }',
+      '#arWazifaFullReaderV39.ar-w-night { background:#0b1220 !important; color:#f3ecd8 !important; }',
+      '#arWazifaFullReaderV39.ar-w-night .ar-wr-body { background:#0b1220 !important; color:#f3ecd8 !important; }',
+      '#arWazifaFullReaderV39.ar-w-night .ar-wr-card { background:#111c33 !important; border-color:#b48a2c !important; color:#f3ecd8 !important; }',
+      '#arWazifaFullReaderV39.ar-w-night .ar-wr-ayah { background:#162440 !important; border-color:#334155 !important; color:#f3ecd8 !important; }',
+      '#arWazifaFullReaderV39.ar-w-night .ar-wr-ayah.sel { background:#064e3b !important; border-color:#fde047 !important; }',
+      '.ar-wr-ayah { display:block; padding:9px 11px; margin-bottom:8px; border-radius:10px; border:1.5px solid #e2e8f0; background:#ffffff; cursor:pointer; font-family:"NoorehudaMushaf","IndoPakQuranMushaf","Amiri",serif !important; line-height:2.25; transition:background 0.12s, border-color 0.12s; }',
+      '.ar-wr-ayah.sel { background:#ecfdf5 !important; border-color:#059669 !important; box-shadow:0 2px 8px rgba(5,150,105,0.18); }'
+    ].join('\n');
+    document.head.appendChild(st);
+  }
+
+  var _wrFontPx = 22;
+  var _wrSelectedAyah = '';
+  var _wrFullText = '';
+  var _wrTitle = '';
+
+  function ensureWazifaReaderV39(){
+    var ov = document.getElementById('arWazifaFullReaderV39');
+    if (ov) return ov;
+    ov = document.createElement('div');
+    ov.id = 'arWazifaFullReaderV39';
+    ov.innerHTML =
+      '<div style="background:linear-gradient(135deg,#09152e,#1e3a8a); color:#fde047; padding:9px 10px; display:flex; align-items:center; justify-content:space-between; gap:6px; border-bottom:2px solid #d4af37; flex-shrink:0;">' +
+        '<button type="button" onclick="window.closeWazifaFullReaderV39()" style="padding:5px 12px; border-radius:9px; border:1px solid #fde047; background:rgba(255,255,255,0.14); color:#fde047; font-family:inherit; font-size:0.86rem; font-weight:800; cursor:pointer;">← واپس</button>' +
+        '<div id="arWrTitleV39" style="flex:1; text-align:center; font-size:0.96rem; font-weight:800; color:#fde047; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">وظیفہ</div>' +
+        '<div style="display:flex; align-items:center; gap:4px;">' +
+          '<button type="button" onclick="window.stepWazifaFontV39(-2)" style="width:32px; height:32px; border-radius:8px; border:1px solid rgba(253,224,71,0.6); background:rgba(255,255,255,0.12); color:#fff; font-weight:800; cursor:pointer;">-A</button>' +
+          '<button type="button" onclick="window.stepWazifaFontV39(2)" style="width:32px; height:32px; border-radius:8px; border:1px solid #fde047; background:#d4af37; color:#0b1936; font-weight:800; cursor:pointer;">+A</button>' +
+          '<button type="button" id="arWrNightBtnV39" onclick="window.toggleWazifaNightV39()" style="width:32px; height:32px; border-radius:8px; border:1px solid rgba(253,224,71,0.6); background:rgba(255,255,255,0.12); color:#fde047; cursor:pointer;">🌙</button>' +
+        '</div>' +
+      '</div>' +
+      '<div id="arWrHintV39" style="background:#eff6ff; color:#1e3a8a; font-size:0.78rem; font-weight:700; text-align:center; padding:5px 10px; border-bottom:1px solid #bfdbfe;">💡 کسی بھی ایک آیت/حصے پر ٹیپ کر کے صرف اسے منتخب و کاپی کر سکتے ہیں</div>' +
+      '<div class="ar-wr-body" id="arWrBodyV39" style="flex:1; overflow-y:auto; padding:12px; -webkit-overflow-scrolling:touch;"></div>' +
+      '<div id="arWrSelBarV39" style="display:none; background:#ecfdf5; border-top:2px solid #059669; padding:8px 10px; gap:6px; align-items:center; justify-content:space-between; flex-shrink:0;">' +
+        '<button type="button" onclick="window.copySelectedWazifaAyahV39()" style="flex:1; padding:8px; border-radius:9px; border:none; background:#065f46; color:#fde047; font-family:inherit; font-weight:800; cursor:pointer;">📋 منتخب آیت کاپی کریں</button>' +
+        '<button type="button" onclick="window.sendSelectedAyahToZulV39()" style="flex:1; padding:8px; border-radius:9px; border:none; background:#1e3a8a; color:#fde047; font-family:inherit; font-weight:800; cursor:pointer;">✍️ ذوالکتابت بنائیں</button>' +
+      '</div>' +
+      '<div style="background:#f8fafc; border-top:1.5px solid #cbd5e1; padding:8px 10px; display:flex; gap:6px; flex-shrink:0;">' +
+        '<button type="button" onclick="window.copyFullWazifaV39()" style="flex:1; padding:8px; border-radius:9px; border:1.5px solid #1e3a8a; background:#fff; color:#1e3a8a; font-family:inherit; font-size:0.82rem; font-weight:800; cursor:pointer;">📋 مکمل کاپی</button>' +
+        '<button type="button" onclick="window.addOpenedWazifaToTasbeehV39()" style="flex:1; padding:8px; border-radius:9px; border:none; background:#0b1936; color:#fde047; font-family:inherit; font-size:0.82rem; font-weight:800; cursor:pointer;">📿 تسبیح میں شامل</button>' +
+      '</div>';
+    document.body.appendChild(ov);
+    return ov;
+  }
+
+  window.stepWazifaFontV39 = function(delta){
+    _wrFontPx = Math.max(15, Math.min(36, _wrFontPx + delta));
+    var body = document.getElementById('arWrBodyV39');
+    if (body) body.querySelectorAll('.ar-wr-ayah, .ar-wr-prose').forEach(function(el){ el.style.fontSize = _wrFontPx + 'px'; });
+  };
+  window.toggleWazifaNightV39 = function(){
+    var ov = document.getElementById('arWazifaFullReaderV39');
+    if (!ov) return;
+    var n = ov.classList.toggle('ar-w-night');
+    var b = document.getElementById('arWrNightBtnV39');
+    if (b) b.textContent = n ? '☀️' : '🌙';
+  };
+  window.closeWazifaFullReaderV39 = function(){
+    var ov = document.getElementById('arWazifaFullReaderV39');
+    if (ov) ov.style.display = 'none';
+  };
+  window.copySelectedWazifaAyahV39 = function(){
+    if (!_wrSelectedAyah) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(_wrSelectedAyah).catch(function(){});
+    if (typeof window.showToast === 'function') window.showToast('✅ منتخب آیت کاپی ہو گئی');
+  };
+  window.sendSelectedAyahToZulV39 = function(){
+    if (!_wrSelectedAyah) return;
+    window.closeWazifaFullReaderV39();
+    if (typeof window.sendToZulKitabatV34 === 'function') window.sendToZulKitabatV34(_wrSelectedAyah);
+    else if (typeof window.openFolder4 === 'function') {
+      window.openFolder4('naqsh');
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(_wrSelectedAyah).catch(function(){});
+      if (typeof window.showToast === 'function') window.showToast('✍️ آیت کاپی ہو گئی — ذوالکتابت باکس میں پیسٹ کریں');
+    }
+  };
+  window.copyFullWazifaV39 = function(){
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(_wrFullText).catch(function(){});
+    if (typeof window.showToast === 'function') window.showToast('✅ مکمل وظیفہ کاپی ہو گیا');
+  };
+  window.addOpenedWazifaToTasbeehV39 = function(){
+    if (typeof window.addItemToTasbeehPlaylist === 'function') window.addItemToTasbeehPlaylist(_wrTitle || 'وظیفہ', 100);
+    if (typeof window.showToast === 'function') window.showToast('📿 تسبیح لسٹ میں شامل ہو گیا');
+  };
+
+  window.openWazifaFullReaderV39 = function(title, fullText){
+    var ov = ensureWazifaReaderV39();
+    _wrTitle = String(title || 'وظیفہ').trim();
+    _wrFullText = String(fullText || '').trim();
+    _wrSelectedAyah = '';
+    document.getElementById('arWrTitleV39').textContent = _wrTitle;
+    var selBar = document.getElementById('arWrSelBarV39');
+    if (selBar) selBar.style.display = 'none';
+
+    // Split into selectable individual Ayahs / segments (by ۝, ﴿...﴾, newline, or numbered markers)
+    var rawSegs = _wrFullText
+      .split(/(?<=۝|\)|\n|۔)/)
+      .map(function(s){ return s.trim(); })
+      .filter(function(s){ return s.length > 3; });
+    if (rawSegs.length < 2) rawSegs = [_wrFullText];
+
+    var body = document.getElementById('arWrBodyV39');
+    body.innerHTML = '';
+    var wrap = document.createElement('div');
+    wrap.className = 'ar-wr-card';
+    wrap.style.cssText = 'background:#ffffff; border:1.5px solid #d4af37; border-radius:14px; padding:12px;';
+
+    rawSegs.forEach(function(seg, idx){
+      var item = document.createElement('div');
+      item.className = 'ar-wr-ayah';
+      item.style.fontSize = _wrFontPx + 'px';
+      item.textContent = seg;
+      item.onclick = function(){
+        wrap.querySelectorAll('.ar-wr-ayah.sel').forEach(function(el){ el.classList.remove('sel'); });
+        item.classList.add('sel');
+        _wrSelectedAyah = seg;
+        if (selBar) selBar.style.display = 'flex';
+      };
+      wrap.appendChild(item);
+    });
+    body.appendChild(wrap);
+    ov.style.display = 'flex';
+    if (typeof window.pushArStepV38 === 'function') window.pushArStepV38({ type: 'modal', id: 'wazifa_reader' });
+  };
+
+  // Add "📖 فل پیج میں کھولیں" button on every Wazifa / Manzil card cleanly
+  function enhanceWazaifFullPageBtnsV39(){
+    var containers = [document.getElementById('wazaifUnifiedList'), document.getElementById('fPane_wazaif')];
+    containers.forEach(function(c){
+      if (!c) return;
+      c.querySelectorAll('.db-item').forEach(function(card){
+        if (card.dataset.v39FpBtn) return;
+        var txt = (card.innerText || '').trim();
+        if (txt.length < 25) return;
+        card.dataset.v39FpBtn = '1';
+        var h = card.querySelector('b, strong, h4, .ar-waz-title');
+        var title = h ? h.textContent.trim() : 'وظیفہ / منزل';
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.style.cssText = 'margin-top:6px; padding:5px 11px; border-radius:8px; border:none; background:#1e3a8a; color:#fde047; font-family:inherit; font-size:0.78rem; font-weight:800; cursor:pointer;';
+        btn.textContent = '📖 فل پیج میں کھولیں (آیت سلیکشن)';
+        btn.onclick = function(ev){
+          ev.stopPropagation();
+          var bodyTxt = '';
+          var acc = card.querySelector('.ar-inline-acc, .ar-arabic-text, p, pre');
+          bodyTxt = (acc && acc.textContent.trim().length > 20) ? acc.textContent.trim() : txt;
+          window.openWazifaFullReaderV39(title, bodyTxt);
+        };
+        card.appendChild(btn);
+      });
+    });
+  }
+  setInterval(enhanceWazaifFullPageBtnsV39, 1200);
 })();
 
 

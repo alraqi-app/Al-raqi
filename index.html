@@ -972,7 +972,7 @@ html, body, #alRaqiV2Root,
 #alRaqiV2Root h1.ar-arabic-text, #alRaqiV2Root h2.ar-arabic-text, #alRaqiV2Root h3.ar-arabic-text {
   font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', Tahoma, sans-serif !important;
 }
-/* v2.1.38 Point 1: Header Brand Title below Monogram strictly in Arabic Mushaf/Amiri script */
+/* v2.1.39 Point 1: Header Brand Title below Monogram strictly in Arabic Mushaf/Amiri script */
 #alRaqiV2Root .ar-hero-header h1.ar-arabic-text {
   font-family: 'Amiri', 'IndoPakQuranMushaf', 'Scheherazade New', serif !important;
   font-weight: 700 !important;
@@ -1047,7 +1047,7 @@ html, body, #alRaqiV2Root,
 }
 
 
-/* === AL-RAQI v2.1.38 UNIFIED DESIGN TOKENS & MOBILE RTL POLISH === */
+/* === AL-RAQI v2.1.39 UNIFIED DESIGN TOKENS & MOBILE RTL POLISH === */
 :root {
   --ar-navy: #0b1936;
   --ar-navy-mid: #162b56;
@@ -2635,7 +2635,7 @@ html, body, #alRaqiV2Root,
     var file = (packName === 'maktaba') ? 'alraqi_pack_maktaba.js' : 'alraqi_pack_tabeer.js';
     _packPromises[packName] = new Promise(function(resolve) {
       var sc = document.createElement('script');
-      sc.src = './' + file + '?v=2138';
+      sc.src = './' + file + '?v=2139';
       sc.async = true;
       sc.onload = function() { resolve(true); };
       sc.onerror = function() {
@@ -7682,7 +7682,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
   // Auto-Purge Old PWA Caches & Force Service Worker Update on every new release (v2.1.33)
   (function autoBustOldPwaCacheV33(){
-    var LIVE_VER = 'v2.1.38';
+    var LIVE_VER = 'v2.1.39';
     try {
       var prev = localStorage.getItem('alraqi_live_build_ver_master');
       if (prev !== LIVE_VER) {
@@ -8168,13 +8168,17 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     function restoreScreenAfterBoot() {
       ensureHomeHeaderSharePillB15();
       ensureSaveAdminPinCheckboxB15();
-      // ALWAYS open Home Page on BOTH fresh launch AND refresh (never get stuck on Quran/Folders)
+      // [v2.1.39 Point 9] Smart Refresh: Fresh launch -> Home; Pull-to-refresh/reload -> stay on current active screen!
+      var targetScr = 'home';
       try {
-        sessionStorage.removeItem('alraqi_active_screen_v15');
-        localStorage.removeItem('alraqi_active_screen_v30');
-        if (history && history.replaceState) history.replaceState({ scr: 'home' }, '', '#home');
+        var navEntries = performance && performance.getEntriesByType ? performance.getEntriesByType('navigation') : [];
+        var isReload = (navEntries && navEntries[0] && navEntries[0].type === 'reload') || (performance && performance.navigation && performance.navigation.type === 1);
+        var savedScr = sessionStorage.getItem('alraqi_active_screen_v39') || '';
+        if (isReload && savedScr && savedScr !== 'home' && document.getElementById('scr_' + savedScr)) {
+          targetScr = savedScr;
+        }
       } catch (e) {}
-      if (typeof window.openScreen === 'function') window.openScreen('home');
+      if (typeof window.openScreen === 'function') window.openScreen(targetScr, true);
     }
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', function() { setTimeout(restoreScreenAfterBoot, 160); });
@@ -8284,7 +8288,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
   }, true);
 })();
 
-// === PRO UI/UX POLISH v2.1.38 (BACK PILL + FADE + ONLINE DOT + JSON BACKUP) ===
+// === PRO UI/UX POLISH v2.1.39 (BACK PILL + FADE + ONLINE DOT + JSON BACKUP) ===
 (function initProPolishV35(){
   if (!document.getElementById('arProPolishCssV35')) {
     var st = document.createElement('style');
@@ -8397,7 +8401,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 })();
 
 
-// === v2.1.38 MASTER ARCHITECTURE & DESIGN SYSTEM (EVENTBUS + DESIGN TOKENS) ===
+// === v2.1.39 MASTER ARCHITECTURE & DESIGN SYSTEM (EVENTBUS + DESIGN TOKENS) ===
 (function initAlRaqiV36Master(){
   // 1. Lightweight Centralized EventBus (prevents future monkey-patch chains)
   if (!window.AlRaqiBus) {
@@ -8442,7 +8446,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 })();
 
 
-// === v2.1.38 POINT 2 (AUTO-SYNC MUALIJ CODE) & POINT 4 (SMART EXISTING PATIENT REUSE) ===
+// === v2.1.39 POINT 2 (AUTO-SYNC MUALIJ CODE) & POINT 4 (SMART EXISTING PATIENT REUSE) ===
 (function initV37MualijCodeAndSmartCases(){
   function resolveActiveMualijCodeV37(){
     try {
@@ -8454,7 +8458,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       }
     } catch(e){}
     try {
-      var uRaw = localStorage.getItem('alraqi_v2_auth_user') || localStorage.getItem('alraqi_active_user') || localStorage.getItem('alraqi_logged_in_user') || '';
+      var uRaw = localStorage.getItem('al_mualij_active_user_session_v1') || localStorage.getItem('ALRAQI_ACTIVE_SESSION_V1') || localStorage.getItem('alraqi_v2_auth_user') || localStorage.getItem('alraqi_active_user') || '';
       if (uRaw) {
         var u = JSON.parse(uRaw);
         var c = (u && (u.code || u.mualijCode || u.username)) ? String(u.code || u.mualijCode || u.username).trim() : '';
@@ -8462,7 +8466,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       }
     } catch(e){}
     try {
-      if (localStorage.getItem('alraqi_is_admin') === 'true' || localStorage.getItem('alraqi_v2_is_admin') === 'true' || localStorage.getItem('alraqi_v2_auth_user')) {
+      if (localStorage.getItem('al_mualij_admin_unlocked_persistent_v16') === 'true' || localStorage.getItem('al_mualij_active_user_session_v1') || localStorage.getItem('ALRAQI_ACTIVE_SESSION_V1') || localStorage.getItem('alraqi_is_admin') === 'true') {
         return 'AFZAL-2026';
       }
     } catch(e){}
@@ -8623,7 +8627,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 })();
 
 
-// === v2.1.38 MASTER SUITE: POINTS 11 (EASY URDU + EXPAND), 12 (TRUE STEP-BY-STEP BACK),
+// === v2.1.39 MASTER SUITE: POINTS 11 (EASY URDU + EXPAND), 12 (TRUE STEP-BY-STEP BACK),
 //     14 (PURE BLACK MURAQABA), 15 (ZERO-BLINK TASBEEH), 21 (3-ANGLE MIZAJ), 22 (HOW-TO-USE GUIDE) ===
 (function initAlRaqiV38MasterSuite(){
 
@@ -8849,7 +8853,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       gb.id = 'arHomeGuidePillV38';
       gb.type = 'button';
       gb.textContent = '📖 رہنما';
-      gb.style.cssText = 'position:absolute; top:8px; right:10px; z-index:6; display:inline-flex; align-items:center; justify-content:center; padding:2px 11px; min-height:27px; border-radius:999px; background:rgba(254,240,138,0.18); border:1px solid rgba(212,175,55,0.82); color:#fef08a; font-family:"Jameel Noori Nastaleeq","Noto Nastaliq Urdu",Tahoma,sans-serif; font-size:0.80rem; font-weight:700; cursor:pointer;';
+      gb.style.cssText = 'position:absolute; top:8px; right:76px; z-index:6; display:inline-flex; align-items:center; justify-content:center; padding:2px 11px; min-height:27px; border-radius:999px; background:rgba(254,240,138,0.18); border:1px solid rgba(212,175,55,0.82); color:#fef08a; font-family:"Jameel Noori Nastaleeq","Noto Nastaliq Urdu",Tahoma,sans-serif; font-size:0.80rem; font-weight:700; cursor:pointer;';
       gb.onclick = window.openHowToUseGuideV38;
       homeHdr.insertBefore(gb, homeHdr.firstChild);
     }
@@ -8879,6 +8883,255 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     window.AlRaqiBus.on('screen:open', function(p){
       if (p && p.name === 'report') setTimeout(sync3AngleMizajCardV38, 150);
       if (p && p.name === 'tasbeeh') setTimeout(bindMuraqabaBtnV38, 100);
+    });
+  }
+})();
+
+
+// === v2.1.39 MASTER POLISH SUITE (POINTS 12, 13, 14, 15, 16, 17, 18, 19) ===
+(function initAlRaqiV39PolishAndTasbeehSuite(){
+
+  // Track active screen in sessionStorage for Point 9 Smart Refresh
+  if (window.AlRaqiBus && typeof window.AlRaqiBus.on === 'function') {
+    window.AlRaqiBus.on('screen:open', function(p){
+      if (p && p.name) {
+        try { sessionStorage.setItem('alraqi_active_screen_v39', p.name); } catch(e){}
+      }
+    });
+  }
+
+  // Also close Wazifa Full-Page Reader on Back button
+  var _origGoBackV39 = window.goBackOneScreen;
+  if (typeof _origGoBackV39 === 'function') {
+    window.goBackOneScreen = function(){
+      var wOv = document.getElementById('arWazifaFullReaderV39');
+      if (wOv && wOv.style.display !== 'none') { wOv.style.display = 'none'; return; }
+      return _origGoBackV39.apply(this, arguments);
+    };
+  }
+
+  // --- POINTS 15, 16, 17, 18, 19: PIXEL-PERFECT VISUAL ALIGNMENT CSS ---
+  if (!document.getElementById('arV39VisualFixCss')) {
+    var vst = document.createElement('style');
+    vst.id = 'arV39VisualFixCss';
+    vst.textContent = [
+      /* Point 15: Center #scr_tasbeeh header title cleanly so "تسبیح" never clips at top-right */
+      '#scr_tasbeeh .ar-hero-header h1, #scr_tasbeeh .ar-hero-header h2 { text-align:center !important; padding:0 72px !important; margin:4px auto !important; }',
+      /* Point 16: Full-width time input on Reminders screen */
+      '#scr_reminders input[type="time"], #scr_reminders input[type="date"], #scr_reminders select, #scr_reminders input[type="text"] { width:100% !important; display:block !important; box-sizing:border-box !important; margin:0 auto !important; }',
+      '#scr_reminders label { display:block !important; text-align:center !important; margin-bottom:4px !important; }',
+      /* Point 17 & 18: Clean LTR time inputs & proper chronological row order on Schedule screen */
+      '#scr_schedule input[type="time"] { direction:ltr !important; text-align:center !important; width:100% !important; min-height:42px !important; border-radius:10px !important; }',
+      '#scr_schedule .ar-sched-time-pair { display:flex !important; flex-direction:row !important; direction:ltr !important; align-items:center !important; gap:6px !important; width:100% !important; }',
+      /* Point 19: Full-width orphan Sign-In/Sign-Up button in Settings */
+      '#scr_settings button[onclick*="Login"], #scr_settings button[onclick*="Auth"] { grid-column: 1 / -1 !important; width:100% !important; }'
+    ].join('\n');
+    document.head.appendChild(vst);
+  }
+
+  // Point 15b: Fix "ا نی" spacing & Point 18: Fix Weekly Schedule time order (10:00 AM -> 8:00 PM)
+  function polishDomScreensV39(){
+    var tTitle = document.querySelector('#scr_tasbeeh .card h3, #scr_tasbeeh #tTitle, #scr_tasbeeh #tActiveTitle');
+    if (tTitle && tTitle.textContent && tTitle.textContent.indexOf('لسٹ سے وظیفہ') !== -1) {
+      tTitle.textContent = 'اپنی لسٹ سے وظیفہ منتخب کریں';
+    }
+    // Fix Weekly Schedule time rows to LTR (10:00 AM — 8:00 PM)
+    var sched = document.getElementById('scr_schedule');
+    if (sched) {
+      sched.querySelectorAll('input[type="time"]').forEach(function(inp){
+        inp.setAttribute('dir', 'ltr');
+        var p = inp.parentNode;
+        if (p && p.querySelectorAll('input[type="time"]').length === 2 && !p.classList.contains('ar-sched-time-pair')) {
+          p.classList.add('ar-sched-time-pair');
+        }
+      });
+    }
+  }
+
+  // --- POINT 12: ALWAYS SHOW "نام کا مزاج" ON REPORT CARD EVEN WITHOUT DOB ---
+  var BURJ_MIZAJ_MAP_V39 = {
+    'حمل':'🔥 آتشی (گرم و خشک)', 'اسد':'🔥 آتشی (گرم و خشک)', 'قوس':'🔥 آتشی (گرم و خشک)',
+    'ثور':'🪨 خاکی (سرد و خشک)', 'سنبلہ':'🪨 خاکی (سرد و خشک)', 'جدی':'🪨 خاکی (سرد و خشک)',
+    'جوزا':'💨 بادی (گرم و تر)',  'میزان':'💨 بادی (گرم و تر)',  'دلو':'💨 بادی (گرم و تر)',
+    'سرطان':'💧 آبی (سرد و تر)', 'عقرب':'💧 آبی (سرد و تر)',   'حوت':'💧 آبی (سرد و تر)'
+  };
+  function syncReportNameMizajV39(){
+    var nmEl = document.getElementById('repNameMizajBadge');
+    var dobEl = document.getElementById('repDobMizajBadge');
+    var sentEl = document.getElementById('repDobCompatSentence');
+    var burjEl = document.getElementById('repBurj') || document.querySelector('#scr_report [id*="Burj"]');
+    if (nmEl && (!nmEl.textContent || nmEl.textContent.trim() === '—')) {
+      var bTxt = burjEl ? burjEl.textContent.trim() : '';
+      var found = '';
+      Object.keys(BURJ_MIZAJ_MAP_V39).forEach(function(k){ if (bTxt.indexOf(k) !== -1) found = k + ' — ' + BURJ_MIZAJ_MAP_V39[k]; });
+      if (found) nmEl.textContent = found;
+    }
+    if (sentEl && sentEl.textContent.trim() === '—' && dobEl && dobEl.textContent.trim() === '—') {
+      sentEl.style.display = 'none';
+    } else if (sentEl && sentEl.textContent.trim() !== '—') {
+      sentEl.style.display = 'block';
+    }
+  }
+
+  // --- POINTS 13 & 14: TASBEEH TARGET COUNT LOCK + OPTIONAL TIMER (SOFT BEEP + VIBRATION) + PROGRESS TRACKER ---
+  var _tsTargetLock = 0;
+  var _tsSoundOn = true;
+  var _tsVibOn = true;
+  var _tsTimerId = null;
+  var _tsTimerEndAt = 0;
+  var _tsAlertedCount = false;
+
+  function playSoftBellV39(){
+    if (_tsVibOn) { try { if (navigator.vibrate) navigator.vibrate([120, 80, 120, 80, 220]); } catch(e){} }
+    if (!_tsSoundOn) return;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      var ctx = new AC();
+      [528, 660].forEach(function(freq, idx){
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.001, ctx.currentTime + idx * 0.18);
+        gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + idx * 0.18 + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.18 + 0.45);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + idx * 0.18);
+        osc.stop(ctx.currentTime + idx * 0.18 + 0.48);
+      });
+    } catch(e){}
+  }
+
+  function updateTasbeehProgressUiV39(){
+    var cur = parseInt(((document.getElementById('tCount') || {}).textContent || '0'), 10) || 0;
+    var bar = document.getElementById('arTsProgFillV39');
+    var stat = document.getElementById('arTsProgStatV39');
+    if (stat) {
+      if (_tsTargetLock > 0) {
+        var rem = Math.max(0, _tsTargetLock - cur);
+        var pct = Math.min(100, Math.round((cur / _tsTargetLock) * 100));
+        stat.textContent = 'ہدف: ' + _tsTargetLock + '  |  پڑھا گیا: ' + cur + '  |  باقی: ' + rem + ' (' + pct + '%)';
+        if (bar) bar.style.width = pct + '%';
+        if (cur >= _tsTargetLock && !_tsAlertedCount) {
+          _tsAlertedCount = true;
+          playSoftBellV39();
+          if (typeof window.showToast === 'function') window.showToast('✨ ماشاءاللہ! مقررہ تعداد (' + _tsTargetLock + ') مکمل ہو گئی');
+        }
+      } else {
+        stat.textContent = 'پڑھا گیا: ' + cur + '  (تعداد لاک کریں تاکہ ہدف مکمل ہونے پر بیپ/وائبریشن ملے)';
+        if (bar) bar.style.width = '0%';
+      }
+    }
+  }
+
+  window.lockTasbeehTargetV39 = function(){
+    var inp = document.getElementById('arTsLockInputV39');
+    var v = parseInt((inp && inp.value) || '0', 10) || 0;
+    _tsTargetLock = v > 0 ? v : 0;
+    _tsAlertedCount = false;
+    updateTasbeehProgressUiV39();
+    if (typeof window.showToast === 'function') {
+      window.showToast(_tsTargetLock > 0 ? ('🔒 تعداد ' + _tsTargetLock + ' پر لاک ہو گئی') : '🔓 تعداد لاک ختم کر دیا گیا');
+    }
+  };
+
+  window.startTasbeehTimerV39 = function(mins){
+    var m = parseInt(mins, 10) || 0;
+    if (_tsTimerId) { clearInterval(_tsTimerId); _tsTimerId = null; }
+    var lbl = document.getElementById('arTsTimerLblV39');
+    if (m <= 0) {
+      _tsTimerEndAt = 0;
+      if (lbl) lbl.textContent = 'ٹائمر بند ہے';
+      return;
+    }
+    _tsTimerEndAt = Date.now() + m * 60 * 1000;
+    if (typeof window.showToast === 'function') window.showToast('⏱️ ' + m + ' منٹ کا مراقبہ/ورد ٹائمر شروع ہو گیا');
+    _tsTimerId = setInterval(function(){
+      var left = Math.max(0, Math.round((_tsTimerEndAt - Date.now()) / 1000));
+      var mm = Math.floor(left / 60), ss = left % 60;
+      var txt = '⏱️ باقی وقت: ' + (mm < 10 ? '0' : '') + mm + ':' + (ss < 10 ? '0' : '') + ss;
+      if (lbl) lbl.textContent = txt;
+      var mqHint = document.querySelector('#arMuraqabaFsV38 .mq-hint');
+      if (mqHint && left > 0) mqHint.textContent = txt;
+      if (left <= 0) {
+        clearInterval(_tsTimerId); _tsTimerId = null;
+        if (lbl) lbl.textContent = '✅ مقررہ وقت پورا ہو گیا!';
+        playSoftBellV39();
+        if (typeof window.showToast === 'function') window.showToast('🔔 مقررہ وقت (' + m + ' منٹ) پورا ہو گیا!');
+      }
+    }, 1000);
+  };
+
+  function mountTasbeehControlsV39(){
+    var scr = document.getElementById('scr_tasbeeh');
+    if (!scr || document.getElementById('arTasbeehLockCardV39')) return;
+    var wrap = scr.querySelector('.wrap');
+    if (!wrap) return;
+    var card = document.createElement('div');
+    card.id = 'arTasbeehLockCardV39';
+    card.className = 'card';
+    card.style.cssText = 'margin-bottom:10px; border-right:4px solid #d4af37; background:#fffdf7;';
+    card.innerHTML =
+      '<div style="font-weight:800; color:#0b1936; font-size:0.92rem; margin-bottom:7px;">🔒 تعداد لاک، مراقبہ ٹائمر اور پڑھائی کا حساب</div>' +
+      '<div style="display:flex; gap:6px; align-items:center; margin-bottom:7px;">' +
+        '<input type="number" id="arTsLockInputV39" placeholder="ہدف (مثلاً 100، 313)" style="flex:1; min-height:40px; padding:5px 9px; border-radius:9px; border:1.5px solid #cbd5e1;">' +
+        '<button type="button" onclick="window.lockTasbeehTargetV39()" style="padding:8px 12px; border-radius:9px; border:none; background:#0b1936; color:#fde047; font-family:inherit; font-weight:800; cursor:pointer; white-space:nowrap;">🔒 لاک کریں</button>' +
+      '</div>' +
+      '<div id="arTsProgStatV39" style="font-size:0.80rem; font-weight:800; color:#065f46; margin-bottom:4px;">پڑھا گیا: 0</div>' +
+      '<div style="width:100%; height:7px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-bottom:9px;"><div id="arTsProgFillV39" style="width:0%; height:100%; background:linear-gradient(90deg,#059669,#d4af37); transition:width 0.2s;"></div></div>' +
+      '<div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center; margin-bottom:6px;">' +
+        '<span style="font-size:0.78rem; font-weight:800; color:#1e3a8a;">⏱️ ٹائمر:</span>' +
+        [15,30,45,60].map(function(m){ return '<button type="button" onclick="window.startTasbeehTimerV39(' + m + ')" style="padding:4px 8px; border-radius:7px; border:1px solid #93c5fd; background:#eff6ff; color:#1e3a8a; font-family:inherit; font-size:0.76rem; font-weight:800; cursor:pointer;">' + m + ' منٹ</button>'; }).join('') +
+        '<button type="button" onclick="window.startTasbeehTimerV39(0)" style="padding:4px 8px; border-radius:7px; border:1px solid #fecaca; background:#fef2f2; color:#b91c1c; font-family:inherit; font-size:0.76rem; font-weight:800; cursor:pointer;">بند</button>' +
+      '</div>' +
+      '<div style="display:flex; justify-content:space-between; align-items:center; font-size:0.76rem; color:#475569;">' +
+        '<span id="arTsTimerLblV39" style="font-weight:800; color:#b45309;">ٹائمر بند ہے</span>' +
+        '<div style="display:flex; gap:10px;">' +
+          '<label style="display:inline-flex; align-items:center; gap:3px; cursor:pointer;"><input type="checkbox" checked onchange="window._arTsSoundV39=this.checked" style="width:15px;height:15px;min-height:15px!important;"> 🔔 بیپ</label>' +
+          '<label style="display:inline-flex; align-items:center; gap:3px; cursor:pointer;"><input type="checkbox" checked onchange="window._arTsVibV39=this.checked" style="width:15px;height:15px;min-height:15px!important;"> 📳 وائبریشن</label>' +
+        '</div>' +
+      '</div>';
+    var firstCard = wrap.querySelector('.card');
+    if (firstCard && firstCard.nextSibling) wrap.insertBefore(card, firstCard.nextSibling);
+    else wrap.appendChild(card);
+  }
+
+  // Hook tapTasbeeh & resetTasbeeh to update progress & trigger beep/vibration
+  if (typeof window.tapTasbeeh === 'function' && !window.tapTasbeeh._v39Wrapped) {
+    var _origTap39 = window.tapTasbeeh;
+    window.tapTasbeeh = function(){
+      var r = _origTap39.apply(this, arguments);
+      if (typeof window._arTsSoundV39 === 'boolean') _tsSoundOn = window._arTsSoundV39;
+      if (typeof window._arTsVibV39 === 'boolean') _tsVibOn = window._arTsVibV39;
+      updateTasbeehProgressUiV39();
+      return r;
+    };
+    window.tapTasbeeh._v39Wrapped = true;
+  }
+  if (typeof window.resetTasbeeh === 'function' && !window.resetTasbeeh._v39Wrapped) {
+    var _origRst39 = window.resetTasbeeh;
+    window.resetTasbeeh = function(){
+      _tsAlertedCount = false;
+      var r = _origRst39.apply(this, arguments);
+      updateTasbeehProgressUiV39();
+      return r;
+    };
+    window.resetTasbeeh._v39Wrapped = true;
+  }
+
+  function bootV39All(){
+    polishDomScreensV39();
+    mountTasbeehControlsV39();
+    syncReportNameMizajV39();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootV39All);
+  else bootV39All();
+  setTimeout(bootV39All, 600);
+  setInterval(syncReportNameMizajV39, 1800);
+  if (window.AlRaqiBus && typeof window.AlRaqiBus.on === 'function') {
+    window.AlRaqiBus.on('screen:open', function(p){
+      setTimeout(bootV39All, 120);
     });
   }
 })();
@@ -9502,17 +9755,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
   function toUrNum(n){ return String(n).replace(/\d/g, function(d){ return UR_DIG[Number(d)]; }); }
 
-  function getHilalAdjV34(){
-    var keys = ['alraqi_hijri_adj_v27', 'ar_hijri_adj_v27', 'alraqi_hilal_adj', 'hijri_adj'];
-    for (var i = 0; i < keys.length; i++) {
-      var v = localStorage.getItem(keys[i]);
-      if (v !== null && v !== '') {
-        var n = parseInt(v, 10);
-        if (!isNaN(n)) return n;
-      }
-    }
-    return 0;
-  }
+  function getHilalAdjV34(){ try { var v = localStorage.getItem('al_raqi_hilal_adj_v39'); if (v !== null && v !== '') { var n = parseInt(v, 10); if (!isNaN(n)) return Math.max(-2, Math.min(2, n)); } } catch(e){} return -1; }
 
   function getHijriPartsV34(dt){
     var adj = getHilalAdjV34();
@@ -9678,10 +9921,10 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     cst.id = 'arSaaatTableColFixV38';
     cst.textContent = [
       '#scr_saaat table { table-layout: fixed !important; width: 100% !important; }',
-      '#scr_saaat table th:nth-child(1), #scr_saaat table td:nth-child(1) { width: 16% !important; padding: 6px 2px !important; font-weight: 800 !important; white-space: nowrap !important; text-align: center !important; }',
-      '#scr_saaat table th:nth-child(2), #scr_saaat table td:nth-child(2) { width: 19% !important; text-align: center !important; }',
-      '#scr_saaat table th:nth-child(3), #scr_saaat table td:nth-child(3) { width: 29% !important; text-align: center !important; }',
-      '#scr_saaat table th:nth-child(4), #scr_saaat table td:nth-child(4) { width: 36% !important; font-size: 0.70rem !important; direction: ltr !important; text-align: center !important; }'
+      '#scr_saaat table th:nth-child(1), #scr_saaat table td:nth-child(1) { width: 13% !important; padding: 6px 2px !important; font-weight: 800 !important; white-space: nowrap !important; text-align: center !important; }',
+      '#scr_saaat table th:nth-child(2), #scr_saaat table td:nth-child(2) { width: 18% !important; padding: 5px 2px !important; text-align: center !important; }',
+      '#scr_saaat table th:nth-child(3), #scr_saaat table td:nth-child(3) { width: 26% !important; padding: 5px 2px !important; text-align: center !important; }',
+      '#scr_saaat table th:nth-child(4), #scr_saaat table td:nth-child(4) { width: 43% !important; padding: 5px 3px !important; font-size: 0.67rem !important; direction: ltr !important; unicode-bidi: isolate !important; text-align: center !important; white-space: nowrap !important; overflow: visible !important; text-overflow: clip !important; }'
     ].join('\n');
     document.head.appendChild(cst);
   }
@@ -9691,6 +9934,26 @@ window.MASTER_THREE_BOOKS_DREAMS = [
   else runV38Saaat();
   setInterval(syncSunriseSunsetBarV38, 2500);
 })();
+
+window.syncAhkamQamariDateV39 = function(){
+  try {
+    var adj = -1;
+    var sv = localStorage.getItem('al_raqi_hilal_adj_v39');
+    if (sv !== null && sv !== '' && !isNaN(parseInt(sv, 10))) adj = Math.max(-2, Math.min(2, parseInt(sv, 10)));
+    var d = new Date(); d.setDate(d.getDate() + adj);
+    var hd = 1;
+    var fmt = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { day:'numeric' });
+    fmt.formatToParts(d).forEach(function(p){ if (p.type === 'day') hd = parseInt(p.value, 10) || 1; });
+    var scr = document.getElementById('scr_saaat');
+    if (!scr) return;
+    scr.querySelectorAll('b, div, span').forEach(function(el){
+      if (el.children.length === 0 && el.textContent && el.textContent.indexOf('آج کی قمری تاریخ (') !== -1) {
+        el.textContent = el.textContent.replace(/آج کی قمری تاریخ \(\d+\)/, 'آج کی قمری تاریخ (' + hd + ')');
+      }
+    });
+  } catch(e){}
+};
+setTimeout(window.syncAhkamQamariDateV39, 900);
 
 /* =========================================================================
    MODULE 17: V2.1.23 FINAL POLISH — DIRECT GMAIL AUTH + CLASSIC RESTORE
@@ -10227,16 +10490,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     window.applyArabicFontScaleV25(window.getArabicFontScaleV25());
 
     // 1. Inside Maktaba / Quran / Wazaif screen (#scr_folders)
-    var fScr = document.getElementById('scr_folders');
-    if (fScr && !document.getElementById('v25_maktabaFontBar')) {
-      var fw = fScr.querySelector('.wrap') || fScr;
-      var div = document.createElement('div');
-      div.id = 'v25_maktabaFontBar';
-      div.className = 'no-print';
-      div.innerHTML = buildFontBarHtmlV25();
-      if (fw.firstChild) fw.insertBefore(div, fw.firstChild);
-      else fw.appendChild(div);
-    }
+    /* [v2.1.39 Point 2] Maktaba top font bar physically removed — font controls live inside Quran & Wazifa Full-Page Readers only */
 
     // 2. Inside Settings screen (#scr_settings)
     var sScr = document.getElementById('scr_settings');
@@ -10353,7 +10607,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       remHtml = '⏳ باقی وقت: ' + rm + ' منٹ ' + String(rs).padStart(2, '0') + ' سیکنڈ';
       // Sync top title & sub with live running hour
       titleEl.textContent = 'ساعتِ ' + cur.planet + ' (' + cur.nature + ')';
-      subEl.textContent = cur.period + ' کی ساعت | ' + cur.range;
+      subEl.textContent = cur.period + ' کی ساعت | <span dir="ltr" style="display:inline-block; unicode-bidi:isolate;">' + cur.range + '</span>';
     }
 
     var curPlanetName = cur ? cur.planet : '';
@@ -10406,12 +10660,22 @@ window.MASTER_THREE_BOOKS_DREAMS = [
   var _hijriCalOffsetMonthsV27 = 0;
 
   function getHilalAdjV27(){
-    try { var v = parseInt(localStorage.getItem(K_HILAL) || '0', 10); return (v >= -1 && v <= 1) ? v : 0; } catch(e){ return 0; }
+    try {
+      var v = localStorage.getItem('al_raqi_hilal_adj_v39');
+      if (v === null || v === '') return -1;
+      var n = parseInt(v, 10);
+      return isNaN(n) ? -1 : Math.max(-2, Math.min(2, n));
+    } catch(e){ return -1; }
   }
-
   window.setHilalAdjV27 = function(val){
-    try { localStorage.setItem(K_HILAL, String(val)); } catch(e){}
-    renderMonthlyHijriCalendarV27();
+    var n = Math.max(-2, Math.min(2, parseInt(val, 10) || 0));
+    try {
+      localStorage.setItem('al_raqi_hilal_adj_v39', String(n));
+      localStorage.setItem('al_raqi_hilal_adj_v27', String(n));
+    } catch(e){}
+    if (typeof window.renderMonthlyHijriCalendarV27 === 'function') window.renderMonthlyHijriCalendarV27();
+    if (typeof window.updateSaaatDualDateBannerV34 === 'function') window.updateSaaatDualDateBannerV34();
+    if (typeof window.syncAhkamQamariDateV39 === 'function') window.syncAhkamQamariDateV39();
   };
 
   window.shiftHijriCalMonthV27 = function(delta){
@@ -10460,7 +10724,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     html += '<div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:6px 9px; margin-bottom:8px; font-size:0.8rem;">' +
       '<b>🌙 رویتِ ہلال ایڈجسٹمنٹ:</b>' +
       '<div style="display:flex; gap:5px;">' +
-        [-1, 0, 1].map(function(v){
+        [-2, -1, 0, 1, 2].map(function(v){
           var act = (v === hilal);
           var lbl = v === -1 ? '-1 دن' : (v === 0 ? 'نارمل (0)' : '+1 دن');
           return '<button type="button" onclick="setHilalAdjV27(' + v + ')" style="padding:3px 9px; border-radius:7px; border:1px solid ' + (act ? '#065f46' : '#cbd5e1') + '; background:' + (act ? '#065f46' : '#fff') + '; color:' + (act ? '#fff' : '#0f172a') + '; font-family:inherit; font-size:0.78rem; font-weight:700; cursor:pointer;">' + lbl + '</button>';
