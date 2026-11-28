@@ -1307,8 +1307,8 @@ html, body, #alRaqiV2Root,
       <!-- فولڈر ۱: قرآنِ کریم -->
       <div id="fpane_quran" class="folder-pane open card">
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
-          <button type="button" class="btn-sm" id="qModeTextBtn" onclick="switchQuranSubMode('text')">ٹیکسٹ قرآن</button>
-          <button type="button" class="btn-outline" id="qModePdfBtn" onclick="switchQuranSubMode('pdf')">قرآن</button>
+          
+          
         </div>
 
         <div id="qSub_text">
@@ -1340,16 +1340,7 @@ html, body, #alRaqiV2Root,
           <div id="quranFolderList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:8px;"></div>
         </div>
 
-        <div id="qSub_pdf" style="display:none;">
-          <div style="background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:10px; margin-bottom:10px;">
-            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
-              <select id="pdfSurahJumpSel" onchange="openPdfSurahResume(this.value)" style="flex:1; min-width:180px;"></select>
-              
-            </div>
-            <div style="font-size:0.82rem; color:#065f46; margin-top:6px;">آخری تلاوت کا مقام محفوظ رہتا ہے — آیت پر آدھا سیکنڈ دبا کر رکھنے سے ستارہ (⭐) لگ جائے گا۔</div>
-          </div>
-          <div id="pdfLongPressDemoArea" class="item-list"></div>
-        </div>
+        
       </div>
 
       <!-- فولڈر ۲: وظائف و اذکار (ماسٹر انڈیکس فہرست — ایموجیز اور ڈپلیکیٹ ختم) -->
@@ -7021,12 +7012,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       ensureAdminSettingsTabB14();
       if (typeof window.loadLiveAdminCloudData === 'function') window.loadLiveAdminCloudData();
     }
-    if (name === 'folders') {
-      try {
-        var prefQ = localStorage.getItem('alraqi_pref_quran_submode');
-        if (prefQ === 'pdf') setTimeout(function(){ window.switchQuranSubMode('pdf'); }, 80);
-      } catch (e) {}
-    }
+
   };
 
   var _origOpenF4B14 = window.openFolder4;
@@ -7460,7 +7446,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
   // ================= MODULE 12: REFRESH-STAY + ADMIN 3 PRACTITIONERS + SAVE ADMIN PIN + HOME HEADER SHARE ICON (v2.1.15) =================
   (function() {
-    var BUILD_VER = 'v2.1.30';
+    var BUILD_VER = 'v2.1.31';
     try {
       var prevVer = localStorage.getItem('alraqi_app_build_ver');
       if (prevVer !== BUILD_VER) {
@@ -7506,7 +7492,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       sp.id = 'arBuildVerBadge';
       sp.style.cssText = 'opacity:0.78; font-size:0.74rem; margin-right:6px;';
       sp.setAttribute('dir', 'ltr');
-      sp.textContent = '• v2.1.30';
+      sp.textContent = '• v2.1.31';
       pill.appendChild(sp);
     }
 
@@ -8009,28 +7995,194 @@ window.MASTER_THREE_BOOKS_DREAMS = [
   })();
 
 
-  // Inject compact sticky A- / % / A+ font size bar right inside every opened Surah reader box (#qAcc_*) (v2.1.30)
-  (function injectInlineSurahFontBarV30(){
-    function addBars(){
-      document.querySelectorAll('.ar-inline-acc[id^="qAcc_"]').forEach(function(acc){
-        if (acc.style.display === 'none' || !acc.innerHTML.trim()) return;
-        if (acc.querySelector('.v30-inline-q-zoom')) return;
-        var cur = (typeof window.getArabicFontScaleV25 === 'function') ? window.getArabicFontScaleV25() : 115;
-        var bar = document.createElement('div');
-        bar.className = 'v30-inline-q-zoom no-print';
-        bar.style.cssText = 'position:sticky; top:0; z-index:4; display:flex; align-items:center; justify-content:space-between; gap:6px; background:#eff6ff; border:1px solid #93c5fd; border-radius:9px; padding:5px 9px; margin-bottom:8px;';
-        bar.onclick = function(e){ e.stopPropagation(); };
-        bar.innerHTML =
-          '<span style="font-size:0.82rem; font-weight:800; color:#1e3a8a;">📖 قرآنی فونٹ (<span class="v25-ar-font-pct">' + cur + '%</span>)</span>' +
-          '<span style="display:inline-flex; align-items:center; gap:5px;">' +
-            '<button type="button" onclick="event.stopPropagation(); if(window.stepArabicFontScaleV25) stepArabicFontScaleV25(-10)" style="padding:2px 9px; border-radius:7px; border:1px solid #1e3a8a; background:#fff; color:#1e3a8a; font-weight:800; font-size:0.84rem; cursor:pointer;">A-</button>' +
-            '<button type="button" onclick="event.stopPropagation(); if(window.stepArabicFontScaleV25) stepArabicFontScaleV25(10)" style="padding:2px 9px; border-radius:7px; border:1px solid #1e3a8a; background:#1e3a8a; color:#fff; font-weight:800; font-size:0.84rem; cursor:pointer;">A+</button>' +
-            '<button type="button" onclick="event.stopPropagation(); if(window.applyArabicFontScaleV25) applyArabicFontScaleV25(115)" style="padding:2px 7px; border-radius:7px; border:1px solid #cbd5e1; background:#fff; color:#0f172a; font-family:inherit; font-size:0.74rem; cursor:pointer;">نارمل</button>' +
-          '</span>';
-        acc.insertBefore(bar, acc.firstChild);
+
+  // ================= FULL-SCREEN PAGE-WISE QURAN READER (ONLY A-/A+ + PAGE TURN + 1-TAP AYAH SELECT) (v2.1.31) =================
+  (function initFullScreenPageWiseQuranV31(){
+    var _fsState = { num: 1, name: '', ayahs: [], pages: [], pageIdx: 0, selectedAyah: null };
+
+    function paginateAyahsV31(ayahs){
+      var pages = [];
+      var cur = [], curChars = 0;
+      var MAX_CHARS = 720;
+      ayahs.forEach(function(a){
+        var len = String(a.t || '').length + 8;
+        if (cur.length && (curChars + len > MAX_CHARS || cur.length >= 10)) {
+          pages.push(cur);
+          cur = []; curChars = 0;
+        }
+        cur.push(a);
+        curChars += len;
       });
+      if (cur.length) pages.push(cur);
+      return pages.length ? pages : [ayahs];
     }
-    setInterval(addBars, 500);
+
+    function ensureOverlayV31(){
+      var ov = document.getElementById('v31_fullSurahReaderOverlay');
+      if (ov) return ov;
+      ov = document.createElement('div');
+      ov.id = 'v31_fullSurahReaderOverlay';
+      ov.style.cssText = 'display:none; position:fixed; inset:0; z-index:96500; background:#fffdf7; flex-direction:column; height:100dvh; width:100vw; overflow:hidden;';
+      ov.innerHTML =
+        '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; background:linear-gradient(135deg,#09152e,#1e3a8a); color:#fff; border-bottom:2px solid #d4af37; flex-shrink:0;">' +
+          '<button type="button" onclick="closeFullSurahReaderV31()" style="padding:6px 12px; border-radius:9px; border:1px solid rgba(253,224,71,0.55); background:rgba(255,255,255,0.12); color:#fde047; font-family:inherit; font-size:0.88rem; font-weight:800; cursor:pointer;">← واپس</button>' +
+          '<div style="text-align:center; flex:1; min-width:0;">' +
+            '<div id="v31_fsSurahTitle" style="font-size:1.1rem; font-weight:800; color:#fde047; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">قرآنِ کریم</div>' +
+            '<div id="v31_fsPageMeta" style="font-size:0.76rem; color:#e2e8f0;">صفحہ 1 / 1</div>' +
+          '</div>' +
+          '<div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">' +
+            '<button type="button" onclick="if(window.stepArabicFontScaleV25) stepArabicFontScaleV25(-10); renderFullSurahPageV31();" style="width:36px; height:34px; border-radius:8px; border:1px solid #fde047; background:rgba(255,255,255,0.12); color:#fff; font-weight:800; font-size:0.9rem; cursor:pointer;">A-</button>' +
+            '<button type="button" onclick="if(window.stepArabicFontScaleV25) stepArabicFontScaleV25(10); renderFullSurahPageV31();" style="width:36px; height:34px; border-radius:8px; border:1px solid #fde047; background:#d4af37; color:#09152e; font-weight:800; font-size:0.9rem; cursor:pointer;">A+</button>' +
+          '</div>' +
+        '</div>' +
+        '<div id="v31_fsPageContent" style="flex:1; overflow-y:auto; padding:16px 16px 20px; -webkit-overflow-scrolling:touch; background:#fffdf7;"></div>' +
+        '<div id="v31_fsAyahBar" style="display:none; padding:9px 12px; background:#eff6ff; border-top:2px solid #1e3a8a; flex-shrink:0;"></div>' +
+        '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 12px; background:#f8fafc; border-top:1.5px solid #cbd5e1; flex-shrink:0;">' +
+          '<button type="button" id="v31_fsPrevBtn" onclick="turnFullSurahPageV31(-1)" style="flex:1; padding:9px 10px; border-radius:10px; border:1.5px solid #1e3a8a; background:#fff; color:#1e3a8a; font-family:inherit; font-size:0.9rem; font-weight:800; cursor:pointer;">▶ پچھلا صفحہ</button>' +
+          '<span id="v31_fsBottomCount" style="font-size:0.86rem; font-weight:800; color:#0f172a; padding:0 8px; white-space:nowrap;">1 / 1</span>' +
+          '<button type="button" id="v31_fsNextBtn" onclick="turnFullSurahPageV31(1)" style="flex:1; padding:9px 10px; border-radius:10px; border:none; background:#1e3a8a; color:#fde047; font-family:inherit; font-size:0.9rem; font-weight:800; cursor:pointer;">اگلا صفحہ ◀</button>' +
+        '</div>';
+      document.body.appendChild(ov);
+      return ov;
+    }
+
+    window.closeFullSurahReaderV31 = function(){
+      var ov = document.getElementById('v31_fullSurahReaderOverlay');
+      if (ov) ov.style.display = 'none';
+      _fsState.selectedAyah = null;
+    };
+
+    window.turnFullSurahPageV31 = function(delta){
+      var np = _fsState.pageIdx + delta;
+      if (np < 0 || np >= _fsState.pages.length) return;
+      _fsState.pageIdx = np;
+      _fsState.selectedAyah = null;
+      window.renderFullSurahPageV31();
+      var box = document.getElementById('v31_fsPageContent');
+      if (box) box.scrollTop = 0;
+    };
+
+    window.selectFullSurahAyahV31 = function(ayahNum){
+      var found = _fsState.ayahs.filter(function(a){ return a.n === ayahNum; })[0];
+      if (!found) return;
+      _fsState.selectedAyah = found;
+      window.renderFullSurahPageV31();
+      var bar = document.getElementById('v31_fsAyahBar');
+      if (bar) {
+        bar.style.display = 'block';
+        bar.innerHTML =
+          '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">' +
+            '<b style="color:#1e3a8a; font-size:0.86rem;">آیت نمبر ' + found.n + ' منتخب ہے:</b>' +
+            '<button type="button" onclick="document.getElementById(\'v31_fsAyahBar\').style.display=\'none\';" style="border:none; background:none; color:#64748b; font-weight:800; cursor:pointer;">✕</button>' +
+          '</div>' +
+          '<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px;">' +
+            '<button type="button" onclick="fsAyahActionV31(\'copy\')" style="padding:7px 4px; border-radius:8px; border:1px solid #1e3a8a; background:#fff; color:#1e3a8a; font-family:inherit; font-size:0.8rem; font-weight:800; cursor:pointer;">📋 کاپی</button>' +
+            '<button type="button" onclick="fsAyahActionV31(\'zul\')" style="padding:7px 4px; border-radius:8px; border:none; background:#1e3a8a; color:#fff; font-family:inherit; font-size:0.8rem; font-weight:800; cursor:pointer;">📐 ذوالکتابت</button>' +
+            '<button type="button" onclick="fsAyahActionV31(\'awfaq\')" style="padding:7px 4px; border-radius:8px; border:none; background:#065f46; color:#fff; font-family:inherit; font-size:0.8rem; font-weight:800; cursor:pointer;">🔢 اوفاقی</button>' +
+            '<button type="button" onclick="fsAyahActionV31(\'tasbeeh\')" style="padding:7px 4px; border-radius:8px; border:none; background:#b45309; color:#fff; font-family:inherit; font-size:0.8rem; font-weight:800; cursor:pointer;">📿 تسبیح</button>' +
+          '</div>';
+      }
+    };
+
+    window.fsAyahActionV31 = function(act){
+      var a = _fsState.selectedAyah;
+      if (!a) return;
+      var txt = String(a.t || '').trim();
+      if (act === 'copy') {
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).catch(function(){});
+        if (typeof window.showToast === 'function') window.showToast('✅ آیت نمبر ' + a.n + ' کاپی ہو گئی');
+        return;
+      }
+      window.closeFullSurahReaderV31();
+      if (typeof window.pickSpecificAyah === 'function') {
+        try { window.pickSpecificAyah(_fsState.num, a.n); } catch(e){}
+      }
+      if (act === 'zul' && typeof window.sendWazifaToNaqshV15 === 'function') {
+        window.sendWazifaToNaqshV15(txt, 'zulkitabat');
+      } else if (act === 'awfaq' && typeof window.sendWazifaToNaqshV15 === 'function') {
+        window.sendWazifaToNaqshV15(txt, 'murabba');
+      } else if (act === 'tasbeeh' && typeof window.addItemToTasbeehPlaylist === 'function') {
+        window.addItemToTasbeehPlaylist(txt, 100);
+        if (typeof window.openScreen === 'function') window.openScreen('tasbeeh');
+      }
+    };
+
+    window.renderFullSurahPageV31 = function(){
+      var box = document.getElementById('v31_fsPageContent');
+      var meta = document.getElementById('v31_fsPageMeta');
+      var bCnt = document.getElementById('v31_fsBottomCount');
+      var pBtn = document.getElementById('v31_fsPrevBtn');
+      var nBtn = document.getElementById('v31_fsNextBtn');
+      var aBar = document.getElementById('v31_fsAyahBar');
+      if (!box) return;
+
+      var tot = _fsState.pages.length || 1;
+      var idx = _fsState.pageIdx;
+      var curAyahs = _fsState.pages[idx] || [];
+      var scale = (typeof window.getArabicFontScaleV25 === 'function') ? window.getArabicFontScaleV25() : 120;
+      var rem = (scale / 100 * 1.48).toFixed(2);
+
+      if (meta) meta.textContent = 'صفحہ ' + (idx + 1) + ' از ' + tot;
+      if (bCnt) bCnt.textContent = (idx + 1) + ' / ' + tot;
+      if (pBtn) pBtn.style.opacity = (idx === 0) ? '0.45' : '1';
+      if (nBtn) nBtn.style.opacity = (idx >= tot - 1) ? '0.45' : '1';
+      if (aBar && !_fsState.selectedAyah) aBar.style.display = 'none';
+
+      var bismillahHtml = (idx === 0 && _fsState.num !== 1 && _fsState.num !== 9)
+        ? '<div data-ar-quran="1" class="ar-arabic-text" style="text-align:center; color:#065f46; font-size:' + rem + 'rem; margin-bottom:12px; padding-bottom:8px; border-bottom:1px dashed #d4af37;">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</div>'
+        : '';
+
+      var bodyHtml = curAyahs.map(function(a){
+        var isSel = _fsState.selectedAyah && _fsState.selectedAyah.n === a.n;
+        return '<span data-ar-quran="1" class="ar-arabic-text" onclick="selectFullSurahAyahV31(' + a.n + ')" style="font-size:' + rem + 'rem; line-height:2.4; color:#09152e; cursor:pointer; padding:2px 4px; border-radius:6px; background:' + (isSel ? '#fef08a' : 'transparent') + ';">' +
+          a.t + ' <span style="color:#065f46; font-size:0.82em;">﴿' + a.n + '﴾</span> </span>';
+      }).join('');
+
+      box.innerHTML =
+        '<div style="background:#ffffff; border:2px solid #d4af37; border-radius:14px; padding:16px 14px; min-height:calc(100% - 10px); box-shadow:0 4px 16px rgba(11,25,54,0.06); text-align:justify; direction:rtl;">' +
+          bismillahHtml +
+          '<div>' + bodyHtml + '</div>' +
+        '</div>';
+    };
+
+    window.openFullScreenSurahV31 = function(num, labelEl){
+      var ov = ensureOverlayV31();
+      ov.style.display = 'flex';
+      var titleEl = document.getElementById('v31_fsSurahTitle');
+      var box = document.getElementById('v31_fsPageContent');
+      var sName = '';
+      if (labelEl) {
+        var b = labelEl.querySelector('b');
+        if (b) sName = (b.textContent || '').trim();
+      }
+      _fsState = { num: num, name: sName || ('سورت ' + num), ayahs: [], pages: [], pageIdx: 0, selectedAyah: null };
+      if (titleEl) titleEl.textContent = _fsState.name;
+      if (box) box.innerHTML = '<div style="text-align:center; padding:40px 12px; color:#1e3a8a; font-weight:700;">مکمل سورت لوڈ ہو رہی ہے...</div>';
+
+      if (typeof window.getSurahAyahsList === 'function') {
+        window.getSurahAyahsList(num, function(ayahs){
+          if (!ayahs || !ayahs.length) {
+            if (box) box.innerHTML = '<div style="text-align:center; padding:40px 12px; color:#b91c1c; font-weight:700;">سورت لوڈ کرنے کے لیے انٹرنیٹ چیک کریں۔</div>';
+            return;
+          }
+          _fsState.ayahs = ayahs;
+          _fsState.pages = paginateAyahsV31(ayahs);
+          _fsState.pageIdx = 0;
+          window.renderFullSurahPageV31();
+        });
+      }
+    };
+
+    // Route every Surah tap straight into the clean Full-Screen Page-Wise Reader!
+    function hookToggleSurahV31(){
+      window.toggleInlineSurah = function(num, el){
+        window.openFullScreenSurahV31(num, el);
+      };
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hookToggleSurahV31);
+    else hookToggleSurahV31();
+    setTimeout(hookToggleSurahV31, 400);
+    setTimeout(hookToggleSurahV31, 1500);
   })();
 
 })();
@@ -10161,6 +10313,508 @@ window.MASTER_THREE_BOOKS_DREAMS = [
   }
   setTimeout(bootMod18, 900);
   setTimeout(bootMod18, 2200);
+})();
+
+/* =========================================================================
+   MODULE 19: PRACTITIONER-ONLY 7-ANGLE DIAGNOSIS & VERIFICATION ENGINE (v2.1.31)
+   Modular path: Al_Raqi_Modular_Sections_v1/03_Diagnosis_Form_And_Questions/practitioner_7angle_diagnosis_module.js
+   - Strictly for Practitioner eyes ONLY (class="no-print", never on patient PDF/share)
+   - Clean angle selector (formulas hidden by default; optional 1-tap "حساب کی تصدیق" audit toggle per angle)
+   - Grounded in Kash Al-Barni's Qawaid-e-Amliyat, Aamil-e-Kamil & Al-Saaat
+   ========================================================================= */
+(function(){
+  'use strict';
+
+  var ABJAD_QAMARI = {
+    'ا':1,'أ':1,'إ':1,'آ':1,'ب':2,'پ':2,'ج':3,'چ':3,'د':4,'ڈ':4,'ہ':5,'ھ':5,'ة':5,'و':6,'ز':7,'ژ':7,'ح':8,'ط':9,'ی':10,'ي':10,'ے':10,'ى':10,
+    'ک':20,'ك':20,'گ':20,'ل':30,'م':40,'ن':50,'س':60,'ع':70,'ف':80,'ص':90,'ق':100,'ر':200,'ڑ':200,'ش':300,'ت':400,'ٹ':400,'ث':500,'خ':600,'ذ':700,'ض':800,'ظ':900,'غ':1000
+  };
+
+  var ELEM_GROUPS = {
+    'آتشی': { letters:'اہطمفشذ', saad:'اہطم', nahs:'فشذ', color:'#991b1b', bg:'#fef2f2' },
+    'بادی': { letters:'بوینصتض', saad:'ویصت', nahs:'بنض', color:'#0f766e', bg:'#f0fdfa' },
+    'آبی':  { letters:'جزکسقثظ', saad:'کسقث', nahs:'جزظ', color:'#1e40af', bg:'#eff6ff' },
+    'خاکی': { letters:'دحلعرخغ', saad:'دحلع', nahs:'رخغ', color:'#92400e', bg:'#fffbeb' }
+  };
+
+  var JALALI_L = 'رہطمفشذبو';
+  var JAMALI_L = 'دحلعخنی';
+
+  var BURJ_12 = [
+    { name:'حمل', elem:'آتشی', mahiyat:'منقلب', planet:'مریخ' },
+    { name:'ثور', elem:'خاکی', mahiyat:'ثابت', planet:'زہرہ' },
+    { name:'جوزا', elem:'بادی', mahiyat:'ذوجسدین', planet:'عطارد' },
+    { name:'سرطان', elem:'آبی', mahiyat:'منقلب', planet:'قمر' },
+    { name:'اسد', elem:'آتشی', mahiyat:'ثابت', planet:'شمس' },
+    { name:'سنبلہ', elem:'خاکی', mahiyat:'ذوجسدین', planet:'عطارد' },
+    { name:'میزان', elem:'بادی', mahiyat:'منقلب', planet:'زہرہ' },
+    { name:'عقرب', elem:'آبی', mahiyat:'ثابت', planet:'مریخ' },
+    { name:'قوس', elem:'آتشی', mahiyat:'ذوجسدین', planet:'مشتری' },
+    { name:'جدی', elem:'خاکی', mahiyat:'منقلب', planet:'زحل' },
+    { name:'دلو', elem:'بادی', mahiyat:'ثابت', planet:'زحل' },
+    { name:'حوت', elem:'آبی', mahiyat:'ذوجسدین', planet:'مشتری' }
+  ];
+
+  var PLANET_HEALTH_SADQA = {
+    'شمس':  { health:'زیادہ سوچنے سے ضعفِ قلب و دباؤ کا اندیشہ', sadqa:'گندم، صندل سرخ، تانبا یا سرخ چیز (اتوار طلوعِ آفتاب)', bakhoor:'عود / زعفران', saatCond:'عزت، حرارت یا دل کی گھبراہٹ سے متعلق معاملہ؛ صدقہ اور آیت الکرسی مفید۔' },
+    'قمر':  { health:'بدہضمی، معدہ اور رطوبت کے امراض کا اندیشہ', sadqa:'چاول، دہی، سفید کپڑا یا کافور (پیر شام)', bakhoor:'لوبان / کافور', saatCond:'جلد شفا اور عارضی کیفیت کی علامت؛ روحانی دم اور پانی کا عمل تیز اثر کرے گا۔' },
+    'مریخ': { health:'گرمی، خون کا دباؤ، غصہ، چوٹ اور حادثات سے بچاؤ', sadqa:'دال مسور، گندم، سرخ کپڑا یا قند سیاہ (منگل دن چڑھے)', bakhoor:'سندروس / قسط', saatCond:'تیز حرارت، شدید نظرِ بد یا جلالی اثرات کا شبہ؛ فوری حصار اور دفعیہ عمل لازم۔' },
+    'عطارد':{ health:'غم، فکر، اعصابی تناؤ اور وساوس صحت کے لیے خطرہ', sadqa:'لونگ، سبز کپڑا، روغنِ زرد (بدھ دن چڑھے)', bakhoor:'مصطکی / لوبان', saatCond:'ذہنی الجھن، وساوس یا کاروباری/تحریری فکر کی علامت؛ اذکارِ سکون و معوذتین مفید۔' },
+    'مشتری':{ health:'انجمادِ خون اور ثقیل غذا سے احتیاط', sadqa:'دال چنا، زرد کپڑا، شکر، ہلدی (جمعرات شام)', bakhoor:'حب الغار / عود', saatCond:'مبارک اور سعد ساعت؛ علاج میں جلد برکت اور بہتری کی قوی امید ہے۔' },
+    'زہرہ': { health:'حلق کے امراض، گلے اور جذباتی حساسیت کا خیال', sadqa:'چاول، سفید و سرخ کپڑا، گھی (جمعہ طلوعِ آفتاب)', bakhoor:'زعفران / صندل سفید', saatCond:'گھریلو، جذباتی یا رشتوں کی کیفیت نمایاں؛ جمالی و محبت کے اعمال نہایت موافق۔' },
+    'زحل':  { health:'ہڈیوں کا درد، سردی، خشکی، زکام اور دیرینہ تھکن', sadqa:'کالا کپڑا، ماش سیاہ، سرسوں کا تیل، لوہا (ہفتہ دوپہر)', bakhoor:'میعہ سائلہ / سیاہ دانہ', saatCond:'دیرینہ مرض، سوداوی کیفیت، بندش یا آسیب/سحر کا قوی شبہ؛ جامع رقیہ و صدقہ لازم۔' }
+  };
+
+
+  var ASMA_DB_V31 = [
+    {n:'یا اللہ', v:66, t:'جامع', u:'ہر حاجت، برکت اور روحانی قوت'},
+    {n:'یا رحمٰن', v:298, t:'جمالی', u:'رحمت، دل کی نرمی اور پریشانی کا خاتمہ'},
+    {n:'یا رحیم', v:258, t:'جمالی', u:'شفقت، محبت اور گھریلو سکون'},
+    {n:'یا ملک', v:90, t:'جلالی', u:'عزت، حکومت اور وقار'},
+    {n:'یا قدوس', v:170, t:'جمالی', u:'قلبی پاکیزگی اور وسوسوں سے نجات'},
+    {n:'یا سلام', v:131, t:'جمالی', u:'ہر بیماری سے شفا اور آفات سے حفاظت'},
+    {n:'یا مؤمن', v:136, t:'جمالی', u:'خوف، گھبراہٹ اور دشمن سے امان'},
+    {n:'یا عزیز', v:94, t:'جلالی', u:'عزت، خود کفالت اور غلبہ'},
+    {n:'یا جبار', v:206, t:'جلالی', u:'ظالم سے حفاظت اور جادو کا توڑ'},
+    {n:'یا غفار', v:1281, t:'جمالی', u:'مغفرت اور گناہوں سے معافی'},
+    {n:'یا قہار', v:306, t:'جلالی', u:'دشمن، آسیب اور سحر پر غلبہ'},
+    {n:'یا وہاب', v:14, t:'جمالی', u:'رزق، دولت اور بے حساب عطا'},
+    {n:'یا رزاق', v:308, t:'جمالی', u:'کشائشِ رزق اور کاروبار میں برکت'},
+    {n:'یا فتاح', v:489, t:'جمالی', u:'بندشوں کا خاتمہ اور کشائشِ کار'},
+    {n:'یا علیم', v:150, t:'جمالی', u:'علم، حافظہ اور امتحان میں کامیابی'},
+    {n:'یا باسط', v:72, t:'جمالی', u:'فراخیِ رزق اور شرحِ صدر'},
+    {n:'یا رافع', v:351, t:'جلالی', u:'بلندیِ مرتبہ اور ترقی'},
+    {n:'یا معز', v:117, t:'جلالی', u:'عزت و سربلندی'},
+    {n:'یا سمیع', v:180, t:'جمالی', u:'قبولیتِ دعا'},
+    {n:'یا بصیر', v:302, t:'جمالی', u:'بصیرت، آنکھوں کی شفا اور ہدایت'},
+    {n:'یا لطیف', v:129, t:'جمالی', u:'مشکلات کا حل، رشتوں اور رزق میں آسانی'},
+    {n:'یا حلیم', v:88, t:'جمالی', u:'غصہ ختم کرنے اور بردباری کے لیے'},
+    {n:'یا عظیم', v:1020, t:'جلالی', u:'بزرگی اور بڑی مصیبت سے نجات'},
+    {n:'یا شکور', v:526, t:'جمالی', u:'نعمتوں میں برکت اور شفا'},
+    {n:'یا کبیر', v:232, t:'جلالی', u:'ادائیگیِ قرض اور مرتبہ'},
+    {n:'یا حفیظ', v:998, t:'جلالی', u:'جادو، آسیب، نظرِ بد اور حادثات سے حفاظت'},
+    {n:'یا کریم', v:270, t:'جمالی', u:'عزت اور غیر متوقع رزق'},
+    {n:'یا مجیب', v:55, t:'جمالی', u:'دعاؤں کی فوری قبولیت'},
+    {n:'یا واسع', v:137, t:'جمالی', u:'وسعتِ رزق و قرض سے نجات'},
+    {n:'یا حکیم', v:78, t:'جمالی', u:'حکمت، فہم اور کاروباری سمجھ'},
+    {n:'یا ودود', v:20, t:'جمالی', u:'میاں بیوی میں محبت اور صلح'},
+    {n:'یا وکیل', v:66, t:'جمالی', u:'آفات سے تحفظ اور معاملات کی درستی'},
+    {n:'یا قوی', v:116, t:'جلالی', u:'جسمانی و روحانی قوت اور دشمن پر غلبہ'},
+    {n:'یا ولی', v:46, t:'جمالی', u:'دوستی، ولایت اور گھریلو خیر'},
+    {n:'یا حی', v:18, t:'جمالی', u:'صحت، تندرستی اور درازیِ عمر'},
+    {n:'یا قیوم', v:156, t:'جلالی', u:'استحکام، بیداری اور حفاظت'},
+    {n:'یا واحد', v:19, t:'جمالی', u:'دل کی تسلی اور اولاد کے لیے'},
+    {n:'یا صمد', v:134, t:'جلالی', u:'بے نیازی اور حاجت برآری'},
+    {n:'یا قادر', v:305, t:'جلالی', u:'دشمن پر فتح اور مشکل آسانی'},
+    {n:'یا غنی', v:1060, t:'جمالی', u:'دولت، برکت اور قرض سے خلاصی'},
+    {n:'یا نافع', v:201, t:'جمالی', u:'جسمانی شفا اور ہر کام میں نفع'},
+    {n:'یا نور', v:256, t:'جمالی', u:'باطنی نور اور ذہنی سکون'},
+    {n:'یا ہادی', v:20, t:'جمالی', u:'ہدایت اور اولاد کی اصلاح'},
+    {n:'یا بدیع', v:86, t:'جمالی', u:'غم و پریشانی کا خاتمہ'},
+    {n:'یا صبور', v:298, t:'جمالی', u:'صبر، استقامت اور مصائب سے رہائی'},
+    {n:'یا شافی', v:391, t:'جمالی', u:'ہر ظاہری و باطنی بیماری سے کامل شفا'}
+  ];
+
+  function findMatchingAsmaV31(targetNum, prefType){
+    var exact = ASMA_DB_V31.filter(function(a){ return a.v === targetNum; });
+    var sorted = ASMA_DB_V31.slice().sort(function(a, b){
+      var da = Math.abs(a.v - targetNum) + (prefType && a.t !== prefType ? 25 : 0);
+      var db = Math.abs(b.v - targetNum) + (prefType && b.t !== prefType ? 25 : 0);
+      return da - db;
+    });
+    // Also check 2-name exact sum match!
+    var pair = null;
+    for (var i = 0; i < ASMA_DB_V31.length && !pair; i++) {
+      for (var j = i + 1; j < ASMA_DB_V31.length; j++) {
+        if (ASMA_DB_V31[i].v + ASMA_DB_V31[j].v === targetNum) {
+          pair = [ASMA_DB_V31[i], ASMA_DB_V31[j]];
+          break;
+        }
+      }
+    }
+    return { exact: exact, pair: pair, closest: sorted.slice(0, 3) };
+  }
+
+  window.sendPractitionerSelectionToReportV31 = function(textToAdd){
+    var targets = [
+      document.getElementById('wazaifText'),
+      document.getElementById('reportWazaifInput'),
+      document.getElementById('v2_wazaifBox'),
+      document.querySelector('#scr_report textarea')
+    ];
+    var dest = null;
+    for (var i = 0; i < targets.length; i++) { if (targets[i]) { dest = targets[i]; break; } }
+    if (dest) {
+      dest.value = (dest.value ? (dest.value.trim() + '\n') : '') + textToAdd;
+      dest.dispatchEvent(new Event('input', { bubbles: true }));
+      if (typeof window.showToast === 'function') window.showToast('✅ منتخب تجویز رپورٹ کارڈ / وظائف میں شامل ہو گئی');
+    } else {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(textToAdd).catch(function(){});
+      if (typeof window.showToast === 'function') window.showToast('📋 منتخب تجویز کاپی ہو گئی (رپورٹ کارڈ میں پیسٹ کریں)');
+    }
+  };
+
+  window.runImtizajAndIslahV31 = function(){
+    var p1Nm = ((document.getElementById('v31_inP1') || {}).value || '').trim();
+    var itemTxt = ((document.getElementById('v31_imtizajTarget') || {}).value || 'یا لطیف').trim();
+    var orderN = parseInt(((document.getElementById('v31_islahOrder') || {}).value || '4'), 10);
+    var out = document.getElementById('v31_imtizajResultBox');
+    if (!out) return;
+    if (!p1Nm) { out.innerHTML = '<div style="color:#92400e;">پہلے اوپر سائل کا نام درج کریں۔</div>'; return; }
+
+    var c1 = cleanLetters(p1Nm), c2 = cleanLetters(itemTxt);
+    // Letter-by-letter Imtizaj (interleave)
+    var maxL = Math.max(c1.length, c2.length);
+    var merged = [];
+    for (var i = 0; i < maxL; i++) {
+      if (i < c1.length) merged.push(c1[i]);
+      if (i < c2.length) merged.push(c2[i]);
+    }
+    var seen = {}, takhlees = [];
+    merged.forEach(function(ch){ if (!seen[ch]) { seen[ch] = true; takhlees.push(ch); } });
+
+    var ab1 = calcAbjadDetailed(p1Nm), ab2 = calcAbjadDetailed(itemTxt);
+    var combinedTotal = ab1.total + ab2.total;
+    var tarhMap = {3:12, 4:30, 5:60};
+    var tarh = tarhMap[orderN] || 30;
+    var rem = ((combinedTotal - tarh) % orderN + orderN) % orderN;
+    var needAdd = rem === 0 ? 0 : (orderN - rem);
+
+    var fixAsma = ASMA_DB_V31.filter(function(a){
+      return ((combinedTotal + a.v - tarh) % orderN + orderN) % orderN === 0;
+    }).slice(0, 3);
+
+    out.innerHTML =
+      '<div style="background:#fff; border:1.5px solid #cbd5e1; border-right:4px solid #065f46; border-radius:10px; padding:10px 12px; font-size:0.88rem; line-height:1.95;">' +
+        '<div><b>🔗 امتزاجی سطر (نام + اسم/آیت):</b> <span style="color:#1e3a8a; font-weight:800; letter-spacing:2px;">' + escH(merged.join(' ')) + '</span></div>' +
+        '<div><b>✨ تخلیص (بغیر تکرار حروف — کل ' + takhlees.length + '):</b> <span style="color:#065f46; font-weight:800; letter-spacing:2px;">' + escH(takhlees.join(' ')) + '</span></div>' +
+        '<div style="margin-top:6px; padding-top:6px; border-top:1px dashed #cbd5e1;"><b>⚖️ اصلاحِ عددین (مجموعی عدد: ' + combinedTotal + ' | نقش ' + orderN + '×' + orderN + '):</b> ' +
+          (rem === 0
+            ? '<span style="color:#065f46; font-weight:800;">✅ عدد بالکل بے کسر ہے (کسر = 0)</span>'
+            : '<span style="color:#b45309; font-weight:800;">⚠️ کسر باقی: ' + rem + '</span> — بے کسر بنانے کے لیے ان میں سے کوئی ایک اسم شامل کریں: ' + fixAsma.map(function(a){ return '<b>' + a.n + ' (' + a.v + ')</b>'; }).join(' ، ')) +
+        '</div>' +
+        '<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">' +
+          '<button type="button" onclick="sendPractitionerSelectionToReportV31(\'منتخب عمل: ' + escH(itemTxt).replace(/'/g,'') + ' (مجموعی عدد: ' + combinedTotal + ')\')" style="padding:5px 10px; border-radius:7px; border:none; background:#065f46; color:#fff; font-family:inherit; font-size:0.78rem; font-weight:700; cursor:pointer;">➕ رپورٹ کارڈ میں شامل کریں</button>' +
+          '<button type="button" onclick="if(window.sendWazifaToNaqshV15) sendWazifaToNaqshV15(\'' + escH(itemTxt).replace(/'/g,'') + '\', \'murabba\')" style="padding:5px 10px; border-radius:7px; border:none; background:#1e3a8a; color:#fff; font-family:inherit; font-size:0.78rem; font-weight:700; cursor:pointer;">📐 نقش بنائیں</button>' +
+        '</div>' +
+        '<details style="margin-top:8px; background:#f8fafc; border:1px dashed #94a3b8; border-radius:7px; padding:5px 8px;">' +
+          '<summary style="cursor:pointer; font-size:0.78rem; font-weight:800; color:#1e3a8a;">📐 حساب اور قانون کی تصدیق (Verify)</summary>' +
+          '<div style="margin-top:4px; font-size:0.78rem; color:#334155;">نام (' + ab1.total + ') + اسم/آیت (' + ab2.total + ') = ' + combinedTotal + ' | طرح (' + tarh + ') ← (' + combinedTotal + ' - ' + tarh + ') ÷ ' + orderN + ' باقی = ' + rem + '</div>' +
+        '</details>' +
+      '</div>';
+  };
+
+  function escH(s){
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function cleanLetters(str){
+    return String(str || '').replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\s\d\.\-_,،]+/g, '').replace(/[أإآ]/g,'ا').replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/ة/g,'ہ').replace(/ھ/g,'ہ');
+  }
+
+  function calcAbjadDetailed(str){
+    var clean = cleanLetters(str);
+    var total = 0, breakdown = [];
+    for (var i = 0; i < clean.length; i++) {
+      var ch = clean[i];
+      var val = ABJAD_QAMARI[ch] || 0;
+      if (val > 0) {
+        total += val;
+        breakdown.push(ch + '(' + val + ')');
+      }
+    }
+    return { clean: clean, total: total, breakdown: breakdown };
+  }
+
+  function getFirstLetterAnalysis(name){
+    var clean = cleanLetters(name);
+    if (!clean) return null;
+    var first = clean[0];
+    // Map Urdu extras to base Arabic letter for element lookup
+    var mapBase = {'پ':'ب','چ':'ج','ڈ':'د','ژ':'ز','گ':'ک','ٹ':'ت','ڑ':'ر','ے':'ی'};
+    var bCh = mapBase[first] || first;
+    var elem = 'آتشی', saadStatus = 'سعد';
+    Object.keys(ELEM_GROUPS).forEach(function(k){
+      if (ELEM_GROUPS[k].letters.indexOf(bCh) !== -1) {
+        elem = k;
+        saadStatus = (ELEM_GROUPS[k].saad.indexOf(bCh) !== -1) ? 'سعد' : 'نحس';
+      }
+    });
+    return { first: first, base: bCh, elem: elem, saadStatus: saadStatus };
+  }
+
+  function getElementRelation(e1, e2){
+    if (!e1 || !e2) return { label:'—', detail:'' };
+    if (e1 === e2) return { label:'ہم عنصر (موافق)', color:'#065f46', detail:'دونوں کا عنصر یکساں ہے، فطری ہم آہنگی پائی جاتی ہے۔' };
+    var pair = [e1, e2].sort().join('+');
+    if (pair === 'آتشی+بادی' || pair === 'آبی+خاکی') {
+      return { label:'دوست / کامل موافق', color:'#065f46', detail:'قواعدِ عملیات کے مطابق یہ دونوں عناصر آپس میں دوست اور نہایت موافق ہیں۔' };
+    }
+    if (pair === 'آتشی+خاکی' || pair === 'آبی+بادی') {
+      return { label:'مصادق / معتدل موافق', color:'#1e40af', detail:'دونوں عناصر میں میمن و مصادق تعلق ہے؛ صبر اور تدبیر سے عمدہ نبھاہ ہوتا ہے۔' };
+    }
+    return { label:'دشمن / عنصری مخالفت', color:'#991b1b', detail:'آتش و آب یا باد و خاک میں فطری تضاد ہے؛ موافقت کے لیے جمالی اعمال و صدقہ تجویز کریں۔' };
+  }
+
+  function getCurrentHourPlanet(){
+    var titleEl = document.getElementById('offLiveSaatTitle');
+    var txt = (titleEl && titleEl.textContent) || '';
+    var keys = Object.keys(PLANET_HEALTH_SADQA);
+    for (var i = 0; i < keys.length; i++) {
+      if (txt.indexOf(keys[i]) !== -1) return keys[i];
+    }
+    var byDay = ['شمس','قمر','مریخ','عطارد','مشتری','زہرہ','زحل'];
+    return byDay[new Date().getDay()] || 'شمس';
+  }
+
+  function getActivePatientInputs(){
+    var nm = ((document.getElementById('p1_name') || document.getElementById('v2_pName') || {}).value || '').trim();
+    var mo = ((document.getElementById('p1_mother') || document.getElementById('v2_pMother') || {}).value || '').trim();
+    var nm2 = ((document.getElementById('v31_p2Name') || document.getElementById('p2_name') || {}).value || '').trim();
+    var mo2 = ((document.getElementById('v31_p2Mother') || document.getElementById('p2_mother') || {}).value || '').trim();
+    if (!nm) {
+      var rcName = document.querySelector('#scr_report #cardPatientName, #scr_report .rc-patient-name');
+      if (rcName) nm = (rcName.textContent || '').trim();
+    }
+    return { nm: nm, mo: mo, nm2: nm2, mo2: mo2 };
+  }
+
+  window.renderPractitionerAngleV31 = function(angleKey){
+    var body = document.getElementById('v31_diagAngleBody');
+    if (!body) return;
+    window._v31ActiveDiagAngle = angleKey;
+
+    ['sarharf','tala','compat','ghalib','jalali','planet','saat','istikhraj','imtizaj','counter'].forEach(function(k){
+      var b = document.getElementById('v31_angBtn_' + k);
+      if (b) {
+        var act = (k === angleKey);
+        b.style.background = act ? '#1e3a8a' : '#f8fafc';
+        b.style.color = act ? '#fde047' : '#0f172a';
+        b.style.borderColor = act ? '#1e3a8a' : '#cbd5e1';
+      }
+    });
+
+    var p = getActivePatientInputs();
+    var p1Nm = ((document.getElementById('v31_inP1') || {}).value || p.nm || '').trim();
+    var p1Mo = ((document.getElementById('v31_inM1') || {}).value || p.mo || '').trim();
+    var p2Nm = ((document.getElementById('v31_inP2') || {}).value || p.nm2 || '').trim();
+    var p2Mo = ((document.getElementById('v31_inM2') || {}).value || p.mo2 || '').trim();
+
+    if (!p1Nm && angleKey !== 'saat') {
+      body.innerHTML = '<div style="color:#92400e; background:#fffbeb; border:1px solid #fcd34d; border-radius:9px; padding:10px; font-size:0.88rem;">اوپر سائل کا نام (اور والدہ کا نام) درج کر کے کوئی بھی تشخیصی زاویہ منتخب کریں۔</div>';
+      return;
+    }
+
+    var ab1 = calcAbjadDetailed(p1Nm);
+    var abM1 = calcAbjadDetailed(p1Mo);
+    var sum1 = ab1.total + abM1.total;
+    var rem12 = sum1 ? ((sum1 % 12) || 12) : 1;
+    var burjObj = BURJ_12[rem12 - 1];
+    var sar = getFirstLetterAnalysis(p1Nm);
+
+    function wrapWithVerify(resultHtml, verifyStepsHtml){
+      return '<div style="background:#ffffff; border:1.5px solid #cbd5e1; border-right:4px solid #1e3a8a; border-radius:10px; padding:11px 12px; font-size:0.9rem; line-height:1.95; color:#0f172a;">' +
+        resultHtml +
+        '<details style="margin-top:9px; background:#f8fafc; border:1px dashed #94a3b8; border-radius:8px; padding:6px 9px;">' +
+          '<summary style="cursor:pointer; font-size:0.8rem; font-weight:800; color:#1e3a8a;">📐 حساب اور قانون کی تصدیق (Verify)</summary>' +
+          '<div style="margin-top:6px; font-size:0.8rem; color:#334155; line-height:1.85;">' + verifyStepsHtml + '</div>' +
+        '</details>' +
+      '</div>';
+    }
+
+    if (angleKey === 'sarharf') {
+      var res = '<div><b>۱. سرِ حرف (پہلا حرف):</b> «' + escH(sar.first) + '» — عنصر: <b style="color:#1e3a8a;">' + sar.elem + '</b></div>' +
+        '<div><b>حرف کی تاثیر:</b> <b style="color:' + (sar.saadStatus === 'سعد' ? '#065f46' : '#991b1b') + ';">' + sar.saadStatus + ' حرف</b></div>' +
+        '<div style="margin-top:4px; color:#334155;">' + (sar.saadStatus === 'سعد' ? 'نام کا ابتدائی حرف سعد ہے؛ دعا، خیر کے اعمال اور روحانی علاج میں قبولیت و آسانی کا اشارہ ہے۔' : 'نام کا ابتدائی حرف نحس/تیز ہے؛ معاملات میں رکاوٹ یا حساسیت ممکن ہے، اس لیے صدقہ و حفاظتی اذکار ساتھ رکھیں۔') + '</div>';
+      var ver = 'پہلا مکتوبی حرف: «' + escH(sar.first) + '» (بنیادی حرف: «' + escH(sar.base) + '»)<br>قانونِ قواعدِ عملیات (باب ۴): عنصری گروپ «' + ELEM_GROUPS[sar.elem].letters + '» ← سعد حروف: ' + ELEM_GROUPS[sar.elem].saad + ' | نحس حروف: ' + ELEM_GROUPS[sar.elem].nahs;
+      body.innerHTML = wrapWithVerify(res, ver);
+    } else if (angleKey === 'tala') {
+      var res = '<div><b>۲. نام مع والدہ کا جفری طالع:</b> <b style="color:#1e3a8a; font-size:1.02rem;">برج ' + burjObj.name + '</b> (' + burjObj.elem + ')</div>' +
+        '<div><b>ماہیتِ برج:</b> ' + burjObj.mahiyat + ' | <b>حاکم سیارہ:</b> <b style="color:#065f46;">' + burjObj.planet + '</b></div>' +
+        '<div><b>مجموعی ابجدِ قمری:</b> <b dir="ltr">' + sum1 + '</b></div>';
+      var ver = 'نام (' + escH(p1Nm) + '): ' + ab1.total + ' [' + ab1.breakdown.join(' + ') + ']<br>' +
+        'والدہ (' + escH(p1Mo || 'درج نہیں') + '): ' + abM1.total + (abM1.breakdown.length ? (' [' + abM1.breakdown.join(' + ') + ']') : '') + '<br>' +
+        'کل مجموعہ: ' + sum1 + ' ÷ 12 ← باقی <b>' + rem12 + '</b> (برج حمل سے گننے پر: برج ' + burjObj.name + ')';
+      body.innerHTML = wrapWithVerify(res, ver);
+    } else if (angleKey === 'compat') {
+      if (!p2Nm) {
+        body.innerHTML = '<div style="color:#92400e; background:#fffbeb; border:1px solid #fcd34d; border-radius:9px; padding:10px; font-size:0.86rem;">میاں بیوی یا طالب و مطلوب کی عنصری مطابقت کے لیے اوپر <b>فریقِ دوم کا نام</b> بھی درج کریں۔</div>';
+        return;
+      }
+      var ab2 = calcAbjadDetailed(p2Nm), abM2 = calcAbjadDetailed(p2Mo);
+      var sum2 = ab2.total + abM2.total;
+      var rem12_2 = sum2 ? ((sum2 % 12) || 12) : 1;
+      var burj2 = BURJ_12[rem12_2 - 1];
+      var rel = getElementRelation(burjObj.elem, burj2.elem);
+      var res = '<div><b>۳. عنصری مطابقت (فریقِ اول بمقابلہ فریقِ دوم):</b> <b style="color:' + rel.color + ';">' + rel.label + '</b></div>' +
+        '<div>فریقِ اول: برج ' + burjObj.name + ' (<b>' + burjObj.elem + '</b>) | فریقِ دوم: برج ' + burj2.name + ' (<b>' + burj2.elem + '</b>)</div>' +
+        '<div style="margin-top:4px; color:#334155;">' + rel.detail + '</div>';
+      var ver = 'فریقِ اول کل اعداد: ' + sum1 + ' (÷12 باقی ' + rem12 + ' = ' + burjObj.name + '/' + burjObj.elem + ')<br>' +
+        'فریقِ دوم کل اعداد: ' + sum2 + ' (÷12 باقی ' + rem12_2 + ' = ' + burj2.name + '/' + burj2.elem + ')<br>' +
+        'قانونِ قواعدِ عملیات (باب ۴): آتش+باد و آب+خاک دوست، آتش+خاک و باد+آب مصادق، آتش+آب و باد+خاک دشمن۔';
+      body.innerHTML = wrapWithVerify(res, ver);
+    } else if (angleKey === 'ghalib') {
+      if (!p2Nm) {
+        body.innerHTML = '<div style="color:#92400e; background:#fffbeb; border:1px solid #fcd34d; border-radius:9px; padding:10px; font-size:0.86rem;">غالب و مغلوب جانچنے کے لیے اوپر <b>فریقِ دوم (مطلوب / مدمقابل) کا نام</b> درج کریں۔</div>';
+        return;
+      }
+      var ab2g = calcAbjadDetailed(p2Nm), abM2g = calcAbjadDetailed(p2Mo);
+      var sum2g = ab2g.total + abM2g.total;
+      var r1 = (sum1 % 9) || 9, r2 = (sum2g % 9) || 9;
+      var winner = '';
+      if (r1 === r2) winner = 'برابر کا مقابلہ (دونوں کا باقی عدد ' + r1 + ' یکساں ہے — صلح یا تدبیر بہتر)';
+      else if ((r1 % 2 === r2 % 2) ? (r1 > r2) : (r1 < r2)) winner = 'فریقِ اول (' + escH(p1Nm) + ') کا پلڑا بھاری (غالب)';
+      else winner = 'فریقِ دوم (' + escH(p2Nm) + ') کا پلڑا بھاری (غالب — فریقِ اول کو حفاظتی/تقویتی عمل درکار)';
+      var res = '<div><b>۴. غالب و مغلوب کا نتیجہ:</b> <b style="color:#1e3a8a;">' + winner + '</b></div>' +
+        '<div>فریقِ اول باقی عدد: <b>' + r1 + '</b> | فریقِ دوم باقی عدد: <b>' + r2 + '</b></div>';
+      var ver = 'فریقِ اول (' + sum1 + ' ÷ 9) ← باقی <b>' + r1 + '</b><br>فریقِ دوم (' + sum2g + ' ÷ 9) ← باقی <b>' + r2 + '</b><br>قانونِ قواعدِ عملیات (باب ۱۲، عمل ۱۸۷): ہم جنس (دونوں جفت یا دونوں طاق) میں بڑا عدد غالب، اور مختلف (ایک جفت ایک طاق) میں چھوٹا عدد غالب ہوتا ہے۔';
+      body.innerHTML = wrapWithVerify(res, ver);
+    } else if (angleKey === 'jalali') {
+      var jal = 0, jam = 0, mush = 0;
+      var cl = ab1.clean;
+      for (var j = 0; j < cl.length; j++) {
+        var ch = cl[j];
+        if (JALALI_L.indexOf(ch) !== -1) jal++;
+        else if (JAMALI_L.indexOf(ch) !== -1) jam++;
+        else mush++;
+      }
+      var rec = (jal > jam) ? 'نام میں جلالی حروف غالب ہیں ← توازن کے لیے <b>جمالی اسمِ الٰہی</b> (یا لطیف، یا ودود، یا رحیم) اور مربع ۴×۴ موزوں ہے۔'
+              : (jam > jal) ? 'نام میں جمالی حروف غالب ہیں ← قوت و حفاظت کے لیے <b>معتدل/جلالی اسمِ الٰہی</b> (یا قوی، یا حفیظ، یا قادر) اور مثلث/مخمس موزوں ہے۔'
+              : 'نام میں جلالی و جمالی توازن برابر ہے ← مقصد کے مطابق کوئی بھی موزوں اسمِ الٰہی تجویز کیا جا سکتا ہے۔';
+      var res = '<div><b>۵. حروفِ جلالی و جمالی کا تناسب:</b> جلالی: <b style="color:#991b1b;">' + jal + '</b> | جمالی: <b style="color:#065f46;">' + jam + '</b> | مشترک: <b>' + mush + '</b></div>' +
+        '<div style="margin-top:4px;">' + rec + '</div>';
+      var ver = 'نام کے مکتوبی حروف: ' + escH(cl.split('').join(' ، ')) + '<br>قانونِ قواعدِ عملیات (باب ۳): جلالی (ر، ہ، ط، م، ف، ش، ذ، ب، و) | جمالی (د، ح، ل، ع، خ، ن، ی) | باقی مشترک۔';
+      body.innerHTML = wrapWithVerify(res, ver);
+    } else if (angleKey === 'planet') {
+      var info = PLANET_HEALTH_SADQA[burjObj.planet] || PLANET_HEALTH_SADQA['شمس'];
+      var res = '<div><b>۶. حاکم سیارہ (' + burjObj.planet + ' — از برج ' + burjObj.name + '):</b></div>' +
+        '<div>🩺 <b>صحت کی احتیاط:</b> ' + info.health + '</div>' +
+        '<div>💰 <b>مخصوص صدقہ و وقت:</b> <span style="color:#065f46; font-weight:700;">' + info.sadqa + '</span></div>' +
+        '<div>🌿 <b>موافق بخور:</b> ' + info.bakhoor + '</div>';
+      var ver = 'برج ' + burjObj.name + ' کا حاکم سیارہ: ' + burjObj.planet + ' — ماخذ: الساعات (باب ہفتم: صحت کے خطرات و صدقاتِ کواکب) اور قواعدِ عملیات (باب اول: بخورات)۔';
+      body.innerHTML = wrapWithVerify(res, ver);
+    } else if (angleKey === 'istikhraj') {
+      var jalC = 0, jamC = 0;
+      for (var k = 0; k < ab1.clean.length; k++) {
+        if (JALALI_L.indexOf(ab1.clean[k]) !== -1) jalC++;
+        else if (JAMALI_L.indexOf(ab1.clean[k]) !== -1) jamC++;
+      }
+      var prefT = (jalC > jamC) ? 'جمالی' : 'جلالی';
+      var matchRes = findMatchingAsmaV31(ab1.total, prefT);
+      var exactHtml = matchRes.exact.length
+        ? matchRes.exact.map(function(a){ return '<b style="color:#065f46;">' + a.n + ' (' + a.v + ')</b> — ' + a.u; }).join('<br>')
+        : (matchRes.pair ? ('دو اسماء کا عین ہم عدد جوڑ: <b style="color:#065f46;">' + matchRes.pair[0].n + ' + ' + matchRes.pair[1].n + ' (' + (matchRes.pair[0].v + matchRes.pair[1].v) + ')</b>') : 'عین ہم عدد سنگل اسم موجود نہیں؛ قریبی موافق اسماء نیچے ہیں:');
+      var recCards = matchRes.closest.map(function(a){
+        var sendStr = a.n + ' — روزانہ ' + a.v + ' بار (' + a.u + ')';
+        return '<div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:7px 9px; margin-top:6px;">' +
+          '<div><b style="color:#1e3a8a;">' + a.n + '</b> (عدد: <b>' + a.v + '</b> | مزاج: ' + a.t + ') — ' + a.u + '</div>' +
+          '<div style="display:flex; gap:6px; margin-top:5px; flex-wrap:wrap;">' +
+            '<button type="button" onclick="sendPractitionerSelectionToReportV31(\'' + sendStr.replace(/'/g,'') + '\')" style="padding:4px 9px; border-radius:7px; border:none; background:#065f46; color:#fff; font-family:inherit; font-size:0.76rem; font-weight:700; cursor:pointer;">➕ رپورٹ کارڈ میں بھیجیں</button>' +
+            '<button type="button" onclick="if(window.sendWazifaToNaqshV15) sendWazifaToNaqshV15(\'' + a.n + '\',\'murabba\')" style="padding:4px 9px; border-radius:7px; border:none; background:#1e3a8a; color:#fff; font-family:inherit; font-size:0.76rem; font-weight:700; cursor:pointer;">📐 مربع نقش</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      var res = '<div><b>🔢 استخراجِ اسمائے حسنیٰ (نام کا عدد: ' + ab1.total + ' | موزوں مزاج: ' + prefT + '):</b></div>' +
+        '<div style="margin:4px 0;">' + exactHtml + '</div>' + recCards;
+      var ver = 'نام (' + escH(p1Nm) + ') = ' + ab1.total + ' [' + ab1.breakdown.join(' + ') + '] | جلالی حروف: ' + jalC + '، جمالی: ' + jamC + ' ← توازن کے لیے ' + prefT + ' اسمائے حسنیٰ مع ان کے ابجدی عددِ ورد منتخب کیے گئے۔';
+      body.innerHTML = wrapWithVerify(res, ver);
+    } else if (angleKey === 'imtizaj') {
+      body.innerHTML =
+        '<div style="background:#fff; border:1.5px solid #cbd5e1; border-radius:10px; padding:10px 12px;">' +
+          '<div style="font-weight:800; color:#065f46; margin-bottom:6px; font-size:0.9rem;">🔗 نام اور اسمِ الٰہی / آیت کا امتزاج اور اصلاحِ عددین</div>' +
+          '<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">' +
+            '<input type="text" id="v31_imtizajTarget" value="یا لطیف" autocomplete="off" placeholder="اسمِ الٰہی یا قرآنی آیت درج کریں..." style="flex:1; min-width:150px;">' +
+            '<select id="v31_islahOrder" style="width:auto;"><option value="3">مثلث 3×3</option><option value="4" selected>مربع 4×4</option><option value="5">مخمس 5×5</option></select>' +
+            '<button type="button" onclick="runImtizajAndIslahV31()" style="padding:7px 12px; border-radius:8px; border:none; background:#065f46; color:#fff; font-family:inherit; font-size:0.84rem; font-weight:700; cursor:pointer;">چیک کریں</button>' +
+          '</div>' +
+          '<div id="v31_imtizajResultBox"></div>' +
+        '</div>';
+      window.runImtizajAndIslahV31();
+    } else if (angleKey === 'counter') {
+      var pInfo = PLANET_HEALTH_SADQA[burjObj.planet] || PLANET_HEALTH_SADQA['شمس'];
+      var curPlC = getCurrentHourPlanet();
+      var sInfoC = PLANET_HEALTH_SADQA[curPlC] || PLANET_HEALTH_SADQA['شمس'];
+      var mAsma = findMatchingAsmaV31(ab1.total, 'جمالی').closest[0];
+      var summaryForPatient = 'تجویز کردہ وظیفہ: ' + mAsma.n + ' (' + mAsma.v + ' بار روزانہ)\nصدقہ و وقت: ' + pInfo.sadqa + '\nصحت کی احتیاط: ' + pInfo.health;
+      var res =
+        '<div style="font-weight:800; color:#1e3a8a; font-size:0.96rem; margin-bottom:6px;">📊 معالج کاؤنٹر — مکمل یکجا خلاصہ (' + escH(p1Nm) + ')</div>' +
+        '<div>• <b>جفری طالع:</b> برج ' + burjObj.name + ' (' + burjObj.elem + ' / ' + burjObj.mahiyat + ') — حاکم سیارہ: <b>' + burjObj.planet + '</b></div>' +
+        '<div>• <b>سرِ حرف:</b> «' + escH(sar.first) + '» (' + sar.elem + ' — ' + sar.saadStatus + ')</div>' +
+        '<div>• <b>ساعتِ استفسار (' + curPlC + '):</b> ' + sInfoC.saatCond + '</div>' +
+        '<div>• <b>تجویز کردہ اسمِ الٰہی:</b> <b style="color:#065f46;">' + mAsma.n + ' (' + mAsma.v + ' بار روزانہ)</b> — ' + mAsma.u + '</div>' +
+        '<div>• <b>مخصوص صدقہ:</b> ' + pInfo.sadqa + '</div>' +
+        '<div>• <b>صحت کی احتیاط:</b> ' + pInfo.health + '</div>' +
+        '<div style="margin-top:8px;">' +
+          '<button type="button" onclick="sendPractitionerSelectionToReportV31(\'' + summaryForPatient.replace(/\n/g, '\\n').replace(/'/g,'') + '\')" style="width:100%; padding:8px 12px; border-radius:9px; border:none; background:#065f46; color:#fff; font-family:inherit; font-size:0.86rem; font-weight:800; cursor:pointer;">📤 منتخب وظیفہ و صدقہ رپورٹ کارڈ میں شامل کریں</button>' +
+        '</div>';
+      var ver = 'مکمل حساب: نام (' + ab1.total + ') + والدہ (' + abM1.total + ') = ' + sum1 + ' | ÷12 باقی ' + rem12 + ' (برج ' + burjObj.name + ') | سیارہ: ' + burjObj.planet + ' | جاری ساعت: ' + curPlC;
+      body.innerHTML = wrapWithVerify(res, ver);
+    } else if (angleKey === 'saat') {
+      var curPl = getCurrentHourPlanet();
+      var sInfo = PLANET_HEALTH_SADQA[curPl] || PLANET_HEALTH_SADQA['شمس'];
+      var res = '<div><b>۷. ساعتِ استفسار (اس وقت جاری سیارہ):</b> <b style="color:#1e3a8a;">' + curPl + '</b></div>' +
+        '<div style="margin-top:4px;"><b>حالتِ مریض کا اشارہ:</b> ' + sInfo.saatCond + '</div>' +
+        '<div style="margin-top:4px; color:#065f46;"><b>موافق صدقہ:</b> ' + sInfo.sadqa + '</div>';
+      var ver = 'موجودہ وقت: ' + new Date().toLocaleTimeString('en-US') + ' | جاری ساعت کا کوکب: ' + curPl + ' — ماخذ: الساعات (حصہ دوم: عنوان ۲۹، حالتِ مریض)۔';
+      body.innerHTML = wrapWithVerify(res, ver);
+    }
+  };
+
+  function injectPractitioner7AnglesCardV31(){
+    var rep = document.getElementById('scr_report');
+    if (!rep || document.getElementById('v31_practitioner7AnglesCard')) return;
+    var wrap = rep.querySelector('.wrap') || rep;
+
+    var card = document.createElement('div');
+    card.id = 'v31_practitioner7AnglesCard';
+    card.className = 'card no-print';
+    card.style.cssText = 'border-top:4px solid #1e3a8a; background:#f8fafc; margin-top:12px;';
+    card.innerHTML =
+      '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer;" onclick="var b=document.getElementById(\'v31_diagWrap\'); b.style.display=(b.style.display===\'none\'?\'block\':\'none\'); if(b.style.display===\'block\'){var p=getActivePatientInputsV31Safe(); renderPractitionerAngleV31(window._v31ActiveDiagAngle || \'tala\');}">' +
+        '<div>' +
+          '<h3 style="margin:0; color:#1e3a8a; font-size:1.05rem; border:none; padding:0;">🔍 جامع تشخیصی زاویے (صرف معالج کے لیے)</h3>' +
+          '<div style="font-size:0.78rem; color:#475569;">قواعدِ عملیات، عاملِ کامل اور الساعات کے ۷ تشخیصی پیمانے — پرنٹ میں شامل نہیں</div>' +
+        '</div>' +
+        '<span style="font-size:0.82rem; font-weight:800; color:#1e3a8a;">کھولیں ▼</span>' +
+      '</div>' +
+      '<div id="v31_diagWrap" style="display:none; margin-top:10px;">' +
+        '<div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px;">' +
+          '<input type="text" id="v31_inP1" autocomplete="off" placeholder="سائل کا نام" oninput="renderPractitionerAngleV31(window._v31ActiveDiagAngle || \'tala\')">' +
+          '<input type="text" id="v31_inM1" autocomplete="off" placeholder="والدہ کا نام" oninput="renderPractitionerAngleV31(window._v31ActiveDiagAngle || \'tala\')">' +
+        '</div>' +
+        '<div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:9px;">' +
+          '<input type="text" id="v31_inP2" autocomplete="off" placeholder="فریقِ دوم کا نام (اختیاری)" oninput="renderPractitionerAngleV31(window._v31ActiveDiagAngle || \'compat\')">' +
+          '<input type="text" id="v31_inM2" autocomplete="off" placeholder="فریقِ دوم کی والدہ (اختیاری)" oninput="renderPractitionerAngleV31(window._v31ActiveDiagAngle || \'compat\')">' +
+        '</div>' +
+        '<div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:10px;">' +
+          '<button type="button" id="v31_angBtn_tala" onclick="renderPractitionerAngleV31(\'tala\')" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-family:inherit; font-size:0.8rem; font-weight:700; cursor:pointer;">جفری طالع</button>' +
+          '<button type="button" id="v31_angBtn_sarharf" onclick="renderPractitionerAngleV31(\'sarharf\')" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-family:inherit; font-size:0.8rem; font-weight:700; cursor:pointer;">سرِ حرف سعد/نحس</button>' +
+          '<button type="button" id="v31_angBtn_compat" onclick="renderPractitionerAngleV31(\'compat\')" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-family:inherit; font-size:0.8rem; font-weight:700; cursor:pointer;">عنصری مطابقت</button>' +
+          '<button type="button" id="v31_angBtn_ghalib" onclick="renderPractitionerAngleV31(\'ghalib\')" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-family:inherit; font-size:0.8rem; font-weight:700; cursor:pointer;">غالب و مغلوب</button>' +
+          '<button type="button" id="v31_angBtn_jalali" onclick="renderPractitionerAngleV31(\'jalali\')" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-family:inherit; font-size:0.8rem; font-weight:700; cursor:pointer;">جلالی/جمالی حروف</button>' +
+          '<button type="button" id="v31_angBtn_planet" onclick="renderPractitionerAngleV31(\'planet\')" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-family:inherit; font-size:0.8rem; font-weight:700; cursor:pointer;">صحت، صدقہ و بخور</button>' +
+          '<button type="button" id="v31_angBtn_istikhraj" onclick="renderPractitionerAngleV31(\'istikhraj\')" style="padding:6px 10px; border-radius:8px; border:1.5px solid #065f46; background:#ecfdf5; color:#065f46; font-family:inherit; font-size:0.82rem; font-weight:800; cursor:pointer;">🔢 استخراج (اسمائے حسنیٰ)</button>' +
+          '<button type="button" id="v31_angBtn_imtizaj" onclick="renderPractitionerAngleV31(\'imtizaj\')" style="padding:6px 10px; border-radius:8px; border:1.5px solid #b45309; background:#fffbeb; color:#92400e; font-family:inherit; font-size:0.82rem; font-weight:800; cursor:pointer;">🔗 امتزاج و اصلاحِ عددین</button>' +
+          '<button type="button" id="v31_angBtn_counter" onclick="renderPractitionerAngleV31(\'counter\')" style="padding:6px 10px; border-radius:8px; border:1.5px solid #1e3a8a; background:#eff6ff; color:#1e3a8a; font-family:inherit; font-size:0.82rem; font-weight:800; cursor:pointer;">📊 سب ایک ساتھ (معالج کاؤنٹر)</button>' +
+          '<button type="button" id="v31_angBtn_saat" onclick="renderPractitionerAngleV31(\'saat\')" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-family:inherit; font-size:0.8rem; font-weight:700; cursor:pointer;">ساعتِ استفسار</button>' +
+        '</div>' +
+        '<div id="v31_diagAngleBody"></div>' +
+      '</div>';
+
+    wrap.appendChild(card);
+  }
+
+  window.getActivePatientInputsV31Safe = function(){
+    var p = getActivePatientInputs();
+    var i1 = document.getElementById('v31_inP1'), m1 = document.getElementById('v31_inM1');
+    if (i1 && !i1.value && p.nm) i1.value = p.nm;
+    if (m1 && !m1.value && p.mo) m1.value = p.mo;
+    return p;
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectPractitioner7AnglesCardV31);
+  else injectPractitioner7AnglesCardV31();
+  setTimeout(injectPractitioner7AnglesCardV31, 900);
 })();
 
   function bootAlRaqiV2() {
