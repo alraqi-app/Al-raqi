@@ -958,9 +958,14 @@ html, body, #alRaqiV2Root,
   font-variant-ligatures: normal !important;
   font-feature-settings: normal !important;
 }
+@font-face {
+  font-family: 'IndoPakQuranMushaf';
+  src: url('https://verses.quran.foundation/fonts/quran/hafs/nastaleeq/indopak/indopak-nastaleeq-waqf-lazim-v4.2.1.woff2') format('woff2');
+  font-display: swap;
+}
 #alRaqiV2Root .ar-arabic-text, #alRaqiV2Root .ar-arabic-text * {
-  font-family: 'Scheherazade New', 'Amiri', 'Noto Naskh Arabic', 'Traditional Arabic', serif !important;
-  font-weight: 700 !important;
+  font-family: 'IndoPakQuranMushaf', 'Scheherazade New', 'Amiri', 'Traditional Arabic', serif !important;
+  font-weight: 400 !important;
 }
 /* Home Screen: 10-tile side-by-side icon + text, 100dvh exact mobile fit (zero dead space, zero overflow) */
 #alRaqiV2Root #scr_home.active {
@@ -7452,7 +7457,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
   // ================= MODULE 12: REFRESH-STAY + ADMIN 3 PRACTITIONERS + SAVE ADMIN PIN + HOME HEADER SHARE ICON (v2.1.15) =================
   (function() {
-    var BUILD_VER = 'v2.1.28';
+    var BUILD_VER = 'v2.1.29';
     try {
       var prevVer = localStorage.getItem('alraqi_app_build_ver');
       if (prevVer !== BUILD_VER) {
@@ -7498,7 +7503,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       sp.id = 'arBuildVerBadge';
       sp.style.cssText = 'opacity:0.78; font-size:0.74rem; margin-right:6px;';
       sp.setAttribute('dir', 'ltr');
-      sp.textContent = '• v2.1.28';
+      sp.textContent = '• v2.1.29';
       pill.appendChild(sp);
     }
 
@@ -7899,114 +7904,61 @@ window.MASTER_THREE_BOOKS_DREAMS = [
         }
       }
     } catch (e) {}
-  })();
-
-  function getSelectedQuranTextAndTitleB21() {
-    var prev = $('qPickerPreviewText');
-    var sSel = $('qPickerSurahSel');
-    var aSel = $('qPickerAyahSel');
-    var txt = (prev ? (prev.textContent || '') : '').trim();
-    var sName = (sSel && sSel.options[sSel.selectedIndex]) ? sSel.options[sSel.selectedIndex].text : 'قرآنِ کریم';
-    var aVal = aSel ? aSel.value : '';
-    var label = aVal ? (sName + ' — آیت ' + aVal) : sName;
-    return { text: txt, label: label, surahNum: sSel ? parseInt(sSel.value, 10) || 0 : 0, ayahNum: aVal };
-  }
-
-  // Send selected Ayah or Full Surah directly to Awfaqi Naqsh (مثلث / مربع / مخمس...) with auto-calculated Abjad!
-  window.sendPickedQuranToAwfaqiNaqsh = function() {
-    var picked = getSelectedQuranTextAndTitleB21();
-    if (!picked.text) {
-      if (typeof window.showToast === 'function') window.showToast('پہلے اوپر سے کوئی سورت یا آیت منتخب کریں');
-      return;
-    }
-    var abj = 0;
-    try {
-      if (typeof window.calculatePureAbjadTotal === 'function') abj = window.calculatePureAbjadTotal(picked.text) || 0;
-    } catch (e) {}
-    if (!abj && picked.surahNum && typeof EXACT_SURAH_ABJAD_114 !== 'undefined') {
-      abj = EXACT_SURAH_ABJAD_114[String(picked.surahNum)] || 786;
-    }
-    if (typeof window.openFolder4 === 'function') window.openFolder4('naqsh');
-    if (typeof window.switchNaqshSubTab === 'function') window.switchNaqshSubTab('awfaq');
-    setTimeout(function() {
-      var nInp = $('naqshAbjadInput') || $('awfaqAbjadInp') || document.querySelector('#nSub_awfaq input[type="number"], #nSub_awfaq input[type="text"]');
-      if (nInp && abj) nInp.value = String(abj);
-      var tInp = $('naqshPurposeInput') || $('awfaqTitleInp');
-      if (tInp) tInp.value = picked.label;
-      if (typeof window.generateAwfaqiNaqsh === 'function') window.generateAwfaqiNaqsh();
-      else if (typeof window.buildSelectedNaqsh === 'function') window.buildSelectedNaqsh();
-      if (typeof window.showToast === 'function') {
-        window.showToast('✅ «' + picked.label + '» (اعداد: ' + (abj || '—') + ') اوفاقی نقش میں منتقل ہو گیا');
-      }
-    }, 120);
-  };
-
-  // Send selected Ayah or Full Surah directly to Report Card / Patient Wazifa!
-  window.sendPickedQuranToReportCard = function() {
-    var picked = getSelectedQuranTextAndTitleB21();
-    if (!picked.text) {
-      if (typeof window.showToast === 'function') window.showToast('پہلے اوپر سے کوئی سورت یا آیت منتخب کریں');
-      return;
-    }
-    var entry = picked.label + '\n' + picked.text;
-    if (typeof window.attachWazifaToReport === 'function') {
-      window.attachWazifaToReport(entry);
-    } else {
-      var ta = $('repWazifaTxt');
-      if (ta) ta.value = ta.value ? (ta.value + '\n\n' + entry) : entry;
-      if (typeof window.showToast === 'function') window.showToast('✅ منتخب آیت/سورت رپورٹ کارڈ میں شامل کر دی گئی');
-    }
-  };
-
-  function setupCleanSingleQuranTabB21() {
-    var pane = $('fpane_quran');
-    if (!pane) return;
-    // 1. Hide the 2-tab toggle bar ('ٹیکسٹ قرآن | قرآن') and hide #qSub_pdf completely
-    var btnText = $('qModeTextBtn'), btnPdf = $('qModePdfBtn');
-    if (btnText && btnText.parentNode) btnText.parentNode.style.display = 'none';
-    if ($('qSub_pdf')) $('qSub_pdf').style.display = 'none';
-    if ($('qSub_text')) $('qSub_text').style.display = 'block';
-
-    // 2. Add the extra action buttons ('اوفاقی نقش' & 'مریض / رپورٹ کارڈ') cleanly right inside the Surah/Ayah picker
-    var pickerPrev = $('qPickerPreviewBox');
-    if (pickerPrev && !$('qPickerExtraLinksRowB21')) {
-      var row = document.createElement('div');
-      row.id = 'qPickerExtraLinksRowB21';
-      row.className = 'ar-eq-grid-2';
-      row.style.marginTop = '6px';
-      row.innerHTML =
-        '<button type="button" class="ar-unibtn" onclick="sendPickedQuranToAwfaqiNaqsh()">اوفاقی نقش بنائیں</button>' +
-        '<button type="button" class="ar-unibtn" onclick="sendPickedQuranToReportCard()">رپورٹ کارڈ / مریض کو بھیجیں</button>';
-      pickerPrev.appendChild(row);
+  
+  // High-contrast bold Surah Ayahs/Abjad + tasteful color-coded Mizaj badges (v2.1.29)
+  (function enhanceSurahCardsV29(){
+    if (!document.getElementById('arSurahBoldMizajCssV29')) {
+      var st = document.createElement('style');
+      st.id = 'arSurahBoldMizajCssV29';
+      st.textContent = [
+        '.ar-surah-meta-v29 { font-size: 0.96rem !important; color: #09152e !important; font-weight: 700 !important; margin-top: 5px !important; display: flex !important; align-items: center !important; flex-wrap: wrap !important; gap: 8px !important; line-height: 1.8 !important; }',
+        '.ar-surah-meta-v29 b { color: #09152e !important; font-weight: 800 !important; }',
+        '.ar-mz-pill-v29 { display: inline-flex; align-items: center; gap: 4px; padding: 1px 10px; border-radius: 999px; font-size: 0.88rem; font-weight: 800; border: 1.2px solid transparent; }',
+        '.ar-mz-fire { background: #fef2f2; color: #991b1b; border-color: #fca5a5; }',
+        '.ar-mz-water { background: #eff6ff; color: #1e40af; border-color: #93c5fd; }',
+        '.ar-mz-air { background: #f0fdfa; color: #0f766e; border-color: #5eead4; }',
+        '.ar-mz-earth { background: #fffbeb; color: #92400e; border-color: #fcd34d; }'
+      ].join('\n');
+      document.head.appendChild(st);
     }
 
-    // 3. Ensure Surah list titles use pure Nastaliq for Urdu readability
-    var list = $('quranFolderList');
-    if (list) {
-      list.querySelectorAll('.db-item > b.ar-arabic-text').forEach(function(b) {
-        b.classList.remove('ar-arabic-text');
-        b.style.fontSize = '1.14rem';
+    function polishSurahRows(){
+      var scr = document.getElementById('scr_folders');
+      if (!scr) return;
+      scr.querySelectorAll('.db-item').forEach(function(item){
+        if (item.dataset.v29SurahPolished) return;
+        var divs = item.querySelectorAll('div');
+        for (var i = 0; i < divs.length; i++) {
+          var d = divs[i];
+          var txt = d.textContent || '';
+          if (txt.indexOf('آیات:') !== -1 && txt.indexOf('مزاج:') !== -1 && !d.querySelector('.ar-mz-pill-v29')) {
+            item.dataset.v29SurahPolished = '1';
+            d.classList.add('ar-surah-meta-v29');
+            var m = txt.match(/آیات:\s*([^\s|]+)\s*\|\s*اعداد:\s*([^\s|]+)\s*\|\s*مزاج:\s*(.+)/);
+            if (m) {
+              var ayahs = m[1].trim(), abj = m[2].trim(), mz = m[3].trim();
+              var cls = 'ar-mz-water', ic = '💧';
+              if (mz.indexOf('آتشی') !== -1) { cls = 'ar-mz-fire'; ic = '🔥'; }
+              else if (mz.indexOf('بادی') !== -1) { cls = 'ar-mz-air'; ic = '💨'; }
+              else if (mz.indexOf('خاکی') !== -1) { cls = 'ar-mz-earth'; ic = '🪨'; }
+              d.innerHTML =
+                '<span>آیات: <b>' + ayahs + '</b></span>' +
+                '<span style="color:#94a3b8;">|</span>' +
+                '<span>اعداد: <b dir="ltr">' + abj + '</b></span>' +
+                '<span class="ar-mz-pill-v29 ' + cls + '">' + ic + ' مزاج: ' + mz + '</span>';
+            }
+            break;
+          }
+        }
       });
     }
-  }
 
-  window.switchQuranSubMode = function() {
-    setupCleanSingleQuranTabB21();
-  };
+    setInterval(polishSurahRows, 600);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', polishSurahRows);
+    else polishSurahRows();
+  })();
 
-  var _origRenderQuranB21 = window.renderQuranFolder;
-  window.renderQuranFolder = function() {
-    if (_origRenderQuranB21) _origRenderQuranB21();
-    setupCleanSingleQuranTabB21();
-  };
-
-  var _origOpenF4B21 = window.openFolder4;
-  window.openFolder4 = function(key) {
-    if (_origOpenF4B21) _origOpenF4B21(key);
-    if (key === 'quran') setTimeout(setupCleanSingleQuranTabB21, 50);
-  };
-
-  setTimeout(setupCleanSingleQuranTabB21, 260);
+})();
 
   // ================= MODULE 14: TABEER LIVE URDU VOICE DICTATION + WHATSAPP AUDIO FILE PLAYER & TRANSCRIBE HELPER (v2.1.22) =================
   (function() {
@@ -8820,7 +8772,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     card.className = 'card';
     card.style.cssText = 'border-top:3px solid #065f46; background:#f8fafc; margin-top:10px;';
     card.innerHTML =
-      '<h3 style="margin-top:0; color:#065f46;">⚖️ الساعات و قواعدِ عملیات — عملی احکام، صدقات اور احتیاطیں</h3>' +
+      '<h3 style="margin:0 0 2px; color:#065f46; border:none; padding:0;">⚖️ عملی احکام، صدقات اور احتیاطیں</h3><div style="font-size:0.82rem; color:#475569; margin-bottom:9px; padding-bottom:6px; border-bottom:1.5px solid #d1fae5;">الساعات اور قواعدِ عملیات کے مستند اصول</div>' +
       '<div style="font-size:0.8rem; color:' + (st.isNahs ? '#991b1b' : '#065f46') + '; background:' + (st.isNahs ? '#fef2f2' : '#f0fdf4') + '; border:1px solid ' + (st.isNahs ? '#fecaca' : '#bbf7d0') + '; border-radius:8px; padding:7px 10px; margin-bottom:7px;">' +
         '<b>📅 آج کی قمری تاریخ (' + st.hDay + '):</b> ' + (st.isNahs ? '⚠️ نحس تاریخ (نیا عمل/زکوٰۃ شروع نہ کریں)' : '✅ سعد تاریخ') + ' | ' + escHtml(st.ayyamType) +
         '<div style="font-size:0.75rem; color:#475569; margin-top:2px;">اس ماہ کی نحس تاریخیں: ' + st.nahsList.join('، ') + ' (باقی تاریخیں سعد ہیں)</div>' +
@@ -9088,7 +9040,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     card.className = 'card';
     card.style.cssText = 'border-top:3px solid #1e3a8a; background:#ffffff; margin-top:10px;';
     card.innerHTML =
-      '<h3 style="margin-top:0; color:#1e3a8a;">🌙 قمر در عقرب، رجال الغیب، قبلہ اور گرہن شیڈول</h3>' +
+      '<h3 style="margin:0 0 2px; color:#1e3a8a; border:none; padding:0;">🌙 قمر در عقرب، رجال الغیب اور گرہن</h3><div style="font-size:0.82rem; color:#475569; margin-bottom:9px; padding-bottom:6px; border-bottom:1.5px solid #dbeafe;">برجِ قمر، قبلہ رخ اور سورج و چاند گرہن کے اوقات</div>' +
       '<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:8px; margin-bottom:10px;">' +
         '<div style="background:' + (moon.isAqrab || moon.isTareeqMuhtariq ? '#fef2f2' : '#f0fdf4') + '; border:1px solid ' + (moon.isAqrab || moon.isTareeqMuhtariq ? '#fecaca' : '#bbf7d0') + '; border-radius:10px; padding:9px 11px; font-size:0.83rem;">' +
           '<div style="font-weight:800; color:' + (moon.isAqrab ? '#991b1b' : '#065f46') + ';">🌙 آج کا برجِ قمر: ' + escH(moon.burj) + ' (' + moon.deg + '°)</div>' +
@@ -9247,7 +9199,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       '#scr_saaat .card:nth-of-type(2) { background: linear-gradient(135deg, #09152e 0%, #152c61 55%, #1e3a8a 100%) !important; border: 2px solid #d4af37 !important; box-shadow: 0 10px 28px rgba(11,25,54,0.28) !important; padding: 16px 18px !important; text-align: center !important; }',
       '#scr_saaat .card:nth-of-type(2) > div:first-child { color: #93c5fd !important; font-size: 0.9rem !important; font-weight: 700 !important; letter-spacing: 0.3px; }',
       '#scr_saaat #offLiveSaatTitle { color: #fde047 !important; font-size: 1.65rem !important; font-weight: 800 !important; margin: 6px 0 !important; line-height: 1.5 !important; text-shadow: 0 2px 10px rgba(0,0,0,0.45) !important; border: none !important; padding: 0 !important; }',
-      '#scr_saaat #offLiveSaatSub { color: #f8fafc !important; font-size: 0.98rem !important; font-weight: 600 !important; background: rgba(255,255,255,0.12); display: inline-block; padding: 4px 14px; border-radius: 999px; border: 1px solid rgba(253,224,71,0.45); margin-top: 4px; }',
+      '#scr_saaat #offLiveSaatSub { color: #f8fafc !important; font-size: 0.96rem !important; font-weight: 600 !important; background: rgba(255,255,255,0.12); display: inline-block; padding: 7px 16px; border-radius: 999px; border: 1px solid rgba(253,224,71,0.45); margin-top: 6px; line-height: 1.85; }',
       '#scr_saaat .card:nth-of-type(3) { border-top: 4px solid #d97706 !important; }',
       '#scr_saaat .card:nth-of-type(3) > h3 { color: #92400e !important; font-size: 1.18rem !important; border-bottom: 2px solid #fde68a !important; padding-bottom: 8px !important; margin-bottom: 10px !important; }',
       '#scr_saaat .card:nth-of-type(4) { border-top: 4px solid #1e3a8a !important; }',
@@ -9261,7 +9213,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       '#scr_saaat .saat-table tbody td:first-child { font-weight: 800; color: #1e3a8a; width: 34px; }',
       '#scr_saaat .saat-table tbody td:nth-child(2) { font-weight: 800; font-size: 1.02rem !important; color: #0f172a; }',
       '#scr_saaat .saat-table tbody td:last-child { direction: ltr !important; font-family: system-ui, -apple-system, sans-serif !important; font-weight: 700 !important; font-size: 0.82rem !important; color: #1e293b !important; white-space: nowrap !important; }',
-      '.ar-saat-badge-v24 { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 0.84rem; font-weight: 700; line-height: 1.5; white-space: nowrap; }',
+      '.ar-saat-badge-v24 { display: inline-flex; align-items: center; justify-content: center; padding: 5px 13px; border-radius: 999px; font-size: 0.88rem; font-weight: 700; line-height: 1.85; min-height: 30px; white-space: nowrap; overflow: visible; }',
       '.ar-saat-good { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }',
       '.ar-saat-gold { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }',
       '.ar-saat-bad { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }',
@@ -9324,16 +9276,24 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     try { localStorage.setItem(K_AR_SIZE, String(clamped)); } catch(e){}
     var rem = (clamped / 100 * 1.35).toFixed(2);
     var st = document.getElementById('arQuranArabicFontStyleV25');
+    if (!document.getElementById('arArabicNaskhGoogleFontV29')) {
+      var lnk = document.createElement('link');
+      lnk.id = 'arArabicNaskhGoogleFontV29';
+      lnk.rel = 'stylesheet';
+      lnk.href = 'https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap';
+      document.head.appendChild(lnk);
+    }
     if (!st) {
       st = document.createElement('style');
       st.id = 'arQuranArabicFontStyleV25';
       document.head.appendChild(st);
     }
     st.textContent = [
+      '@font-face { font-family: "IndoPakQuranMushaf"; src: url("https://verses.quran.foundation/fonts/quran/hafs/nastaleeq/indopak/indopak-nastaleeq-waqf-lazim-v4.2.1.woff2") format("woff2"); font-display: swap; }',
       ':root { --ar-quran-scale: ' + clamped + '%; --ar-quran-size: ' + rem + 'rem; }',
-      '.ar-arabic-text, .quran-ayah, .quran-text, .mushaf-ayah, .ar-mushaf-line, #mushafTextBody, #mushafReaderArea, #wazaifManzilList .ar-arabic-text, #activeGeneratedNaqshBox td, [data-ar-quran="1"] {',
-      '  font-family: "Amiri", "Scheherazade New", "Traditional Arabic", serif !important;',
-      '  font-weight: 700 !important;',
+      'html body #alRaqiV2Root .ar-arabic-text, html body #alRaqiV2Root [data-ar-quran="1"], html body #alRaqiV2Root .quran-ayah, html body #alRaqiV2Root .quran-text, html body #alRaqiV2Root .mushaf-ayah, html body #alRaqiV2Root .ar-mushaf-line, html body #alRaqiV2Root #mushafTextBody, html body #alRaqiV2Root #mushafTextBody *, html body #alRaqiV2Root #mushafReaderArea, html body #alRaqiV2Root #mushafReaderArea *, html body #alRaqiV2Root #wazaifManzilList .ar-arabic-text, html body #alRaqiV2Root #activeGeneratedNaqshBox td {',
+      '  font-family: "IndoPakQuranMushaf", "Scheherazade New", "Amiri", "Traditional Arabic", serif !important;',
+      '  font-weight: 400 !important;',
       '  line-height: 2.25 !important;',
       '  letter-spacing: 0 !important;',
       '}',
@@ -9395,7 +9355,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       sdiv.style.cssText = 'border-top:3px solid #1e3a8a; margin-top:10px;';
       sdiv.innerHTML = '<h3 style="margin-top:0; color:#1e3a8a;">🔤 قرآن اور عربی عبارات کا فونٹ سائز</h3>' +
         buildFontBarHtmlV25() +
-        '<div data-ar-quran="1" style="text-align:center; padding:8px; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; color:#0f172a;">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ — وَنُنَزِّلُ مِنَ الْقُرْآنِ مَا هُوَ شِفَاءٌ وَرَحْمَةٌ لِّلْمُؤْمِنِيْنَ</div>';
+        '<div data-ar-quran="1" class="ar-arabic-text" style="text-align:center; padding:10px 12px; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; color:#0f172a;"><div data-ar-quran="1" class="ar-arabic-text" style="color:#065f46; margin-bottom:4px;">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</div><div data-ar-quran="1" class="ar-arabic-text">وَنُنَزِّلُ مِنَ الْقُرْآنِ مَا هُوَ شِفَاءٌ وَرَحْمَةٌ لِّلْمُؤْمِنِيْنَ</div></div>';
       if (sw.firstChild) sw.insertBefore(sdiv, sw.firstChild);
       else sw.appendChild(sdiv);
     }
@@ -9515,10 +9475,10 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     if (remHtml || nxt) {
       html += '<div style="display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:8px;">';
       if (remHtml) {
-        html += '<span style="background:rgba(253,224,71,0.18); color:#fde047; border:1px solid rgba(253,224,71,0.55); border-radius:999px; padding:4px 13px; font-size:0.9rem; font-weight:800;">' + remHtml + '</span>';
+        html += '<span style="background:rgba(253,224,71,0.18); color:#fde047; border:1px solid rgba(253,224,71,0.55); border-radius:999px; padding:7px 16px; font-size:0.9rem; font-weight:800; line-height:1.85;">' + remHtml + '</span>';
       }
       if (nxt) {
-        html += '<span style="background:rgba(255,255,255,0.12); color:#e0f2fe; border:1px solid rgba(147,197,253,0.45); border-radius:999px; padding:4px 13px; font-size:0.88rem; font-weight:700;">⏭️ اگلی ساعت: ' + escH(nxt.planet) + ' (' + escH(nxt.nature) + ') — <span dir="ltr">' + escH(nxt.range) + '</span></span>';
+        html += '<span style="background:rgba(255,255,255,0.12); color:#e0f2fe; border:1px solid rgba(147,197,253,0.45); border-radius:999px; padding:7px 16px; font-size:0.88rem; font-weight:700; line-height:1.85;">⏭️ اگلی ساعت: ' + escH(nxt.planet) + ' (' + escH(nxt.nature) + ') — <span dir="ltr">' + escH(nxt.range) + '</span></span>';
       }
       html += '</div>';
     }
@@ -9648,12 +9608,148 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     c.id = 'v27_monthlyHijriCard';
     c.className = 'card';
     c.style.cssText = 'border-top:4px solid #065f46; background:#ffffff; margin-top:10px;';
-    c.innerHTML = '<h3 style="margin-top:0; color:#065f46;">📅 ماہانہ ہجری کیلنڈر (ہلال ایڈجسٹمنٹ، ایامِ بیض و نحس تاریخیں)</h3><div id="v27_hijriCalBody"></div>';
+    c.innerHTML = '<h3 style="margin:0 0 2px; color:#065f46; border:none; padding:0;">📅 ماہانہ ہجری کیلنڈر</h3><div style="font-size:0.82rem; color:#475569; margin-bottom:9px; padding-bottom:6px; border-bottom:1.5px solid #d1fae5;">ہلال ایڈجسٹمنٹ، ایامِ بیض اور سعد و نحس تاریخیں</div><div id="v27_hijriCalBody"></div>';
     wrap.appendChild(c);
     window.renderMonthlyHijriCalendarV27();
   }
 
+
+  // ---- 8. COMPACT 4-TAB LAYOUT FOR #scr_saaat (ZERO LONG SCROLLING) (v2.1.29) ----
+  window.switchSaaatMainTabV29 = function(tabKey){
+    var scr = document.getElementById('scr_saaat');
+    if (!scr) return;
+    var wrap = scr.querySelector('.wrap');
+    if (!wrap) return;
+    var cards = Array.prototype.slice.call(wrap.children).filter(function(el){ return el.classList && el.classList.contains('card'); });
+    // cards[0]=city/date, cards[1]=live hero, cards[2]=day 12h, cards[3]=night 12h, others by ID
+    var dayCard = cards[2] || null;
+    var nightCard = cards[3] || null;
+    var pracCard = document.getElementById('arSaaatPracticalCardV23');
+    var hijriCard = document.getElementById('v27_monthlyHijriCard');
+    var astroCard = document.getElementById('v23_classicAstroCard');
+
+    if (dayCard) dayCard.style.display = (tabKey === 'hours') ? 'block' : 'none';
+    if (nightCard) nightCard.style.display = (tabKey === 'hours') ? 'block' : 'none';
+    if (pracCard) pracCard.style.display = (tabKey === 'rules') ? 'block' : 'none';
+    if (hijriCard) hijriCard.style.display = (tabKey === 'hijri') ? 'block' : 'none';
+    if (astroCard) astroCard.style.display = (tabKey === 'astro') ? 'block' : 'none';
+
+    ['hours','rules','hijri','astro'].forEach(function(k){
+      var b = document.getElementById('v29_saaatTabBtn_' + k);
+      if (b) {
+        var act = (k === tabKey);
+        b.style.background = act ? 'linear-gradient(135deg,#0b1936,#1e3a8a)' : '#ffffff';
+        b.style.color = act ? '#fde047' : '#0f172a';
+        b.style.borderColor = act ? '#d4af37' : '#cbd5e1';
+      }
+    });
+  };
+
+  function injectSaaatTabsBarV29(){
+    var scr = document.getElementById('scr_saaat');
+    if (!scr || document.getElementById('v29_saaatTabsBar')) return;
+    var wrap = scr.querySelector('.wrap');
+    if (!wrap) return;
+    var cards = Array.prototype.slice.call(wrap.children).filter(function(el){ return el.classList && el.classList.contains('card'); });
+    if (cards.length < 3) return;
+
+    var bar = document.createElement('div');
+    bar.id = 'v29_saaatTabsBar';
+    bar.style.cssText = 'display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:2px 0 4px;';
+    var tabs = [
+      { k:'hours', lbl:'☀️ دن اور رات کی ساعات' },
+      { k:'rules', lbl:'⚖️ عملی احکام و صدقات' },
+      { k:'hijri', lbl:'📅 ماہانہ ہجری کیلنڈر' },
+      { k:'astro', lbl:'🌙 قمر در عقرب و گرہن' }
+    ];
+    bar.innerHTML = tabs.map(function(t){
+      return '<button type="button" id="v29_saaatTabBtn_' + t.k + '" onclick="switchSaaatMainTabV29(\'' + t.k + '\')" style="padding:10px 8px; min-height:44px; border-radius:12px; border:1.5px solid #cbd5e1; background:#ffffff; color:#0f172a; font-family:inherit; font-size:0.9rem; font-weight:800; line-height:1.65; cursor:pointer; box-shadow:0 2px 8px rgba(11,25,54,0.06);">' + t.lbl + '</button>';
+    }).join('');
+
+    // Insert right after live hero card (cards[1])
+    wrap.insertBefore(bar, cards[2]);
+    setTimeout(function(){ window.switchSaaatMainTabV29('hours'); }, 250);
+  }
+
+
+  // ---- 9. GLOBAL HIGH-CONTRAST BOLD URDU READABILITY + APP-WIDE URDU FONT SCALE (v2.1.29) ----
+  var K_UR_SCALE = 'al_raqi_global_urdu_scale_v29';
+
+  window.getGlobalUrduScaleV29 = function(){
+    try {
+      var v = parseInt(localStorage.getItem(K_UR_SCALE) || '108', 10);
+      if (isNaN(v) || v < 95 || v > 145) return 108;
+      return v;
+    } catch(e){ return 108; }
+  };
+
+  window.applyGlobalUrduScaleV29 = function(pct){
+    var clamped = Math.max(95, Math.min(145, parseInt(pct, 10) || 108));
+    try { localStorage.setItem(K_UR_SCALE, String(clamped)); } catch(e){}
+    var basePx = (16 * clamped / 100).toFixed(1);
+    var st = document.getElementById('arGlobalUrduReadabilityV29');
+    if (!st) {
+      st = document.createElement('style');
+      st.id = 'arGlobalUrduReadabilityV29';
+      document.head.appendChild(st);
+    }
+    st.textContent = [
+      'html { font-size: ' + basePx + 'px !important; }',
+      '#alRaqiV2Root .card p, #alRaqiV2Root .card div, #alRaqiV2Root .card li, #alRaqiV2Root .card span:not(.ar-saat-badge-v24):not(.ar-mz-pill-v29), #alRaqiV2Root .db-item, #alRaqiV2Root .ar-slim-row, #alRaqiV2Root label {',
+      '  font-weight: 600;',
+      '}',
+      '#alRaqiV2Root .card p, #alRaqiV2Root .card small, #alRaqiV2Root .db-item small, #alRaqiV2Root .ar-slim-row div {',
+      '  color: #0f172a !important;',
+      '  font-size: max(0.92rem, 1em);',
+      '  line-height: 1.95;',
+      '}',
+      '#alRaqiV2Root input, #alRaqiV2Root textarea, #alRaqiV2Root select {',
+      '  color: #09152e !important;',
+      '  font-weight: 700 !important;',
+      '  font-size: 0.98rem !important;',
+      '}',
+      '#alRaqiV2Root .card h3, #alRaqiV2Root .card h4 {',
+      '  font-weight: 800 !important;',
+      '}',
+      '/* Keep white/gold text crisp on dark navy headers & active buttons */',
+      '#alRaqiV2Root .ar-hero-header *, #alRaqiV2Root .ar-unibtn.active, #alRaqiV2Root .ar-unibtn.active *, #scr_saaat .card:nth-of-type(2) * {',
+      '  color: inherit;',
+      '}'
+    ].join('\n');
+
+    document.querySelectorAll('.v29-ur-font-pct').forEach(function(el){ el.textContent = clamped + '%'; });
+    document.querySelectorAll('.v29-ur-font-slider').forEach(function(sl){ sl.value = String(clamped); });
+  };
+
+  window.stepGlobalUrduScaleV29 = function(delta){
+    window.applyGlobalUrduScaleV29(window.getGlobalUrduScaleV29() + delta);
+  };
+
+  function injectGlobalUrduFontControlV29(){
+    window.applyGlobalUrduScaleV29(window.getGlobalUrduScaleV29());
+    var fontCard = document.getElementById('v25_settingsFontBar');
+    if (fontCard && !document.getElementById('v29_urduScaleBar')) {
+      var cur = window.getGlobalUrduScaleV29();
+      var div = document.createElement('div');
+      div.id = 'v29_urduScaleBar';
+      div.style.cssText = 'display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; background:linear-gradient(135deg,#f0fdf4,#ecfdf5); border:1.5px solid #6ee7b7; border-radius:12px; padding:8px 12px; margin-bottom:10px;';
+      div.innerHTML =
+        '<div style="font-weight:800; color:#065f46; font-size:0.9rem;">📝 پوری ایپ کی اردو تحریر کا سائز (<span class="v29-ur-font-pct">' + cur + '%</span>)</div>' +
+        '<div style="display:flex; align-items:center; gap:6px; flex:1; min-width:170px; max-width:260px;">' +
+          '<button type="button" onclick="stepGlobalUrduScaleV29(-8)" style="padding:4px 10px; border-radius:8px; border:1px solid #065f46; background:#fff; color:#065f46; font-weight:800; font-size:0.88rem; cursor:pointer;">A-</button>' +
+          '<input type="range" class="v29-ur-font-slider" min="95" max="145" step="5" value="' + cur + '" oninput="applyGlobalUrduScaleV29(this.value)" style="flex:1; accent-color:#065f46; cursor:pointer;">' +
+          '<button type="button" onclick="stepGlobalUrduScaleV29(8)" style="padding:4px 10px; border-radius:8px; border:1px solid #065f46; background:#065f46; color:#fff; font-weight:800; font-size:0.88rem; cursor:pointer;">A+</button>' +
+          '<button type="button" onclick="applyGlobalUrduScaleV29(108)" style="padding:4px 8px; border-radius:8px; border:1px solid #cbd5e1; background:#fff; color:#0f172a; font-family:inherit; font-size:0.78rem; cursor:pointer;">نارمل</button>' +
+        '</div>';
+      var h = fontCard.querySelector('h3');
+      if (h && h.nextSibling) fontCard.insertBefore(div, h.nextSibling);
+      else fontCard.appendChild(div);
+    }
+  }
+
   function bootMod17(){
+    injectGlobalUrduFontControlV29();
+    injectSaaatTabsBarV29();
     injectMonthlyHijriCalendarCardV27();
     startLiveHeroTickerV26();
     injectArabicFontControlsV25();
