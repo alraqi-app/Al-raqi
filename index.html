@@ -963,9 +963,12 @@ html, body, #alRaqiV2Root,
   src: url('https://verses.quran.foundation/fonts/quran/hafs/nastaleeq/indopak/indopak-nastaleeq-waqf-lazim-v4.2.1.woff2') format('woff2');
   font-display: swap;
 }
-#alRaqiV2Root .ar-arabic-text, #alRaqiV2Root .ar-arabic-text * {
-  font-family: 'IndoPakQuranMushaf', 'Scheherazade New', 'Amiri', 'Traditional Arabic', serif !important;
+#alRaqiV2Root .ar-arabic-text:not(h1):not(h2):not(h3), #alRaqiV2Root .ar-arabic-text:not(h1):not(h2):not(h3) * {
+  font-family: 'IndoPakQuranMushaf', 'Scheherazade New', 'Amiri', 'Jameel Noori Nastaleeq', serif !important;
   font-weight: 400 !important;
+}
+#alRaqiV2Root h1.ar-arabic-text, #alRaqiV2Root h2.ar-arabic-text, #alRaqiV2Root h3.ar-arabic-text {
+  font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', Tahoma, sans-serif !important;
 }
 /* Home Screen: 10-tile side-by-side icon + text, 100dvh exact mobile fit (zero dead space, zero overflow) */
 #alRaqiV2Root #scr_home.active {
@@ -7457,7 +7460,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
   // ================= MODULE 12: REFRESH-STAY + ADMIN 3 PRACTITIONERS + SAVE ADMIN PIN + HOME HEADER SHARE ICON (v2.1.15) =================
   (function() {
-    var BUILD_VER = 'v2.1.29';
+    var BUILD_VER = 'v2.1.30';
     try {
       var prevVer = localStorage.getItem('alraqi_app_build_ver');
       if (prevVer !== BUILD_VER) {
@@ -7503,7 +7506,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       sp.id = 'arBuildVerBadge';
       sp.style.cssText = 'opacity:0.78; font-size:0.74rem; margin-right:6px;';
       sp.setAttribute('dir', 'ltr');
-      sp.textContent = '• v2.1.29';
+      sp.textContent = '• v2.1.30';
       pill.appendChild(sp);
     }
 
@@ -7837,12 +7840,20 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     if (name) {
       try {
         sessionStorage.setItem('alraqi_active_screen_v15', name);
+        localStorage.setItem('alraqi_active_screen_v30', name);
         if (history && history.replaceState) history.replaceState(null, '', '#' + name);
       } catch (e) {}
     }
     if (name === 'home') ensureHomeHeaderSharePillB15();
     if (name === 'inapp_chat') window.loadInAppChatMessages();
     if (name === 'admin') setTimeout(fixAdminHeaderAndInboxReplyB15, 60);
+  };
+
+
+  var _origOpenF4V30 = window.openFolder4;
+  window.openFolder4 = function(tabName) {
+    if (tabName) { try { localStorage.setItem('alraqi_active_folder_v30', tabName); } catch(e){} }
+    if (_origOpenF4V30) return _origOpenF4V30.apply(this, arguments);
   };
 
   // Restore exact active screen on page reload / pull-to-refresh!
@@ -7853,11 +7864,18 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       var target = '';
       try {
         var h = (window.location.hash || '').replace(/^#/, '').trim();
-        var s = sessionStorage.getItem('alraqi_active_screen_v15') || '';
+        var s = sessionStorage.getItem('alraqi_active_screen_v15') || localStorage.getItem('alraqi_active_screen_v30') || '';
         target = h || s;
       } catch (e) {}
       if (target && target !== 'home' && $('scr_' + target)) {
         window.openScreen(target);
+        if (target === 'folders') {
+          var savedF = '';
+          try { savedF = localStorage.getItem('alraqi_active_folder_v30') || ''; } catch(e){}
+          if (savedF && typeof window.openFolder4 === 'function') {
+            setTimeout(function(){ window.openFolder4(savedF); }, 90);
+          }
+        }
       }
     }
     if (document.readyState === 'loading') {
@@ -7911,9 +7929,10 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       var st = document.createElement('style');
       st.id = 'arSurahBoldMizajCssV29';
       st.textContent = [
-        '.ar-surah-meta-v29 { font-size: 0.96rem !important; color: #09152e !important; font-weight: 700 !important; margin-top: 5px !important; display: flex !important; align-items: center !important; flex-wrap: wrap !important; gap: 8px !important; line-height: 1.8 !important; }',
+        '.ar-surah-meta-v29 { font-size: 0.88rem !important; color: #09152e !important; font-weight: 700 !important; margin-top: 4px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: nowrap !important; gap: 6px !important; line-height: 1.75 !important; width: 100% !important; }',
+        '.ar-surah-nums-v30 { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }',
         '.ar-surah-meta-v29 b { color: #09152e !important; font-weight: 800 !important; }',
-        '.ar-mz-pill-v29 { display: inline-flex; align-items: center; gap: 4px; padding: 1px 10px; border-radius: 999px; font-size: 0.88rem; font-weight: 800; border: 1.2px solid transparent; }',
+        '.ar-mz-pill-v29 { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px; font-size: 0.82rem; font-weight: 800; border: 1.2px solid transparent; white-space: nowrap; flex-shrink: 0; }',
         '.ar-mz-fire { background: #fef2f2; color: #991b1b; border-color: #fca5a5; }',
         '.ar-mz-water { background: #eff6ff; color: #1e40af; border-color: #93c5fd; }',
         '.ar-mz-air { background: #f0fdfa; color: #0f766e; border-color: #5eead4; }',
@@ -7942,10 +7961,8 @@ window.MASTER_THREE_BOOKS_DREAMS = [
               else if (mz.indexOf('بادی') !== -1) { cls = 'ar-mz-air'; ic = '💨'; }
               else if (mz.indexOf('خاکی') !== -1) { cls = 'ar-mz-earth'; ic = '🪨'; }
               d.innerHTML =
-                '<span>آیات: <b>' + ayahs + '</b></span>' +
-                '<span style="color:#94a3b8;">|</span>' +
-                '<span>اعداد: <b dir="ltr">' + abj + '</b></span>' +
-                '<span class="ar-mz-pill-v29 ' + cls + '">' + ic + ' مزاج: ' + mz + '</span>';
+                '<span class="ar-surah-nums-v30"><span>آیات: <b>' + ayahs + '</b></span><span style="color:#94a3b8;">|</span><span>اعداد: <b dir="ltr">' + abj + '</b></span></span>' +
+                '<span class="ar-mz-pill-v29 ' + cls + '">' + ic + ' ' + mz + '</span>';
             }
             break;
           }
@@ -7956,6 +7973,64 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     setInterval(polishSurahRows, 600);
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', polishSurahRows);
     else polishSurahRows();
+  })();
+
+
+  // Permanently enforce SINGLE clean Quran workspace (remove duplicate 'ٹیکسٹ قرآن' / 'قرآن' dual tabs & '۱۶ سطری' PDF pane!)
+  (function enforceSingleQuranWorkspaceV30(){
+    try { localStorage.removeItem('alraqi_pref_quran_submode'); } catch(e){}
+    function lockSingleQuran(){
+      var pdfPane = document.getElementById('qSub_pdf');
+      var txtPane = document.getElementById('qSub_text');
+      if (pdfPane) pdfPane.style.setProperty('display', 'none', 'important');
+      if (txtPane) txtPane.style.setProperty('display', 'block', 'important');
+
+      // Hide the dual sub-tab switcher bar ('ٹیکسٹ قرآن' | 'قرآن') cleanly
+      var qFolder = document.getElementById('f4_quran') || document.getElementById('scr_folders');
+      if (qFolder) {
+        qFolder.querySelectorAll('button').forEach(function(b){
+          var t = (b.textContent || '').trim();
+          if (t === 'ٹیکسٹ قرآن' || (b.getAttribute('onclick') || '').indexOf('switchQuranSubMode') !== -1) {
+            var bar = b.parentElement;
+            if (bar && bar.querySelectorAll('button').length === 2) {
+              bar.style.setProperty('display', 'none', 'important');
+            } else {
+              b.style.setProperty('display', 'none', 'important');
+            }
+          }
+        });
+      }
+    }
+    window.switchQuranSubMode = function(){ lockSingleQuran(); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', lockSingleQuran);
+    else lockSingleQuran();
+    setTimeout(lockSingleQuran, 150);
+    setTimeout(lockSingleQuran, 700);
+  })();
+
+
+  // Inject compact sticky A- / % / A+ font size bar right inside every opened Surah reader box (#qAcc_*) (v2.1.30)
+  (function injectInlineSurahFontBarV30(){
+    function addBars(){
+      document.querySelectorAll('.ar-inline-acc[id^="qAcc_"]').forEach(function(acc){
+        if (acc.style.display === 'none' || !acc.innerHTML.trim()) return;
+        if (acc.querySelector('.v30-inline-q-zoom')) return;
+        var cur = (typeof window.getArabicFontScaleV25 === 'function') ? window.getArabicFontScaleV25() : 115;
+        var bar = document.createElement('div');
+        bar.className = 'v30-inline-q-zoom no-print';
+        bar.style.cssText = 'position:sticky; top:0; z-index:4; display:flex; align-items:center; justify-content:space-between; gap:6px; background:#eff6ff; border:1px solid #93c5fd; border-radius:9px; padding:5px 9px; margin-bottom:8px;';
+        bar.onclick = function(e){ e.stopPropagation(); };
+        bar.innerHTML =
+          '<span style="font-size:0.82rem; font-weight:800; color:#1e3a8a;">📖 قرآنی فونٹ (<span class="v25-ar-font-pct">' + cur + '%</span>)</span>' +
+          '<span style="display:inline-flex; align-items:center; gap:5px;">' +
+            '<button type="button" onclick="event.stopPropagation(); if(window.stepArabicFontScaleV25) stepArabicFontScaleV25(-10)" style="padding:2px 9px; border-radius:7px; border:1px solid #1e3a8a; background:#fff; color:#1e3a8a; font-weight:800; font-size:0.84rem; cursor:pointer;">A-</button>' +
+            '<button type="button" onclick="event.stopPropagation(); if(window.stepArabicFontScaleV25) stepArabicFontScaleV25(10)" style="padding:2px 9px; border-radius:7px; border:1px solid #1e3a8a; background:#1e3a8a; color:#fff; font-weight:800; font-size:0.84rem; cursor:pointer;">A+</button>' +
+            '<button type="button" onclick="event.stopPropagation(); if(window.applyArabicFontScaleV25) applyArabicFontScaleV25(115)" style="padding:2px 7px; border-radius:7px; border:1px solid #cbd5e1; background:#fff; color:#0f172a; font-family:inherit; font-size:0.74rem; cursor:pointer;">نارمل</button>' +
+          '</span>';
+        acc.insertBefore(bar, acc.firstChild);
+      });
+    }
+    setInterval(addBars, 500);
   })();
 
 })();
@@ -9291,8 +9366,12 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     st.textContent = [
       '@font-face { font-family: "IndoPakQuranMushaf"; src: url("https://verses.quran.foundation/fonts/quran/hafs/nastaleeq/indopak/indopak-nastaleeq-waqf-lazim-v4.2.1.woff2") format("woff2"); font-display: swap; }',
       ':root { --ar-quran-scale: ' + clamped + '%; --ar-quran-size: ' + rem + 'rem; }',
-      'html body #alRaqiV2Root .ar-arabic-text, html body #alRaqiV2Root [data-ar-quran="1"], html body #alRaqiV2Root .quran-ayah, html body #alRaqiV2Root .quran-text, html body #alRaqiV2Root .mushaf-ayah, html body #alRaqiV2Root .ar-mushaf-line, html body #alRaqiV2Root #mushafTextBody, html body #alRaqiV2Root #mushafTextBody *, html body #alRaqiV2Root #mushafReaderArea, html body #alRaqiV2Root #mushafReaderArea *, html body #alRaqiV2Root #wazaifManzilList .ar-arabic-text, html body #alRaqiV2Root #activeGeneratedNaqshBox td {',
-      '  font-family: "IndoPakQuranMushaf", "Scheherazade New", "Amiri", "Traditional Arabic", serif !important;',
+      'html body #alRaqiV2Root [data-ar-quran="1"], html body #alRaqiV2Root .quran-ayah, html body #alRaqiV2Root .quran-text, html body #alRaqiV2Root .mushaf-ayah, html body #alRaqiV2Root .ar-mushaf-line, html body #alRaqiV2Root #mushafTextBody, html body #alRaqiV2Root #mushafTextBody *, html body #alRaqiV2Root #mushafReaderArea, html body #alRaqiV2Root #mushafReaderArea *, html body #alRaqiV2Root #wazaifManzilList .ar-arabic-text, html body #alRaqiV2Root #activeGeneratedNaqshBox td, html body #alRaqiV2Root .ar-arabic-text:not(h1):not(h2):not(h3) {',
+      '  font-family: "IndoPakQuranMushaf", "Scheherazade New", "Amiri", "Jameel Noori Nastaleeq", serif !important;',
+      '}',
+      'html body #alRaqiV2Root h1.ar-arabic-text, html body #alRaqiV2Root h2.ar-arabic-text, html body #alRaqiV2Root h3.ar-arabic-text, html body #alRaqiV2Root .ar-hero-header h1, html body #alRaqiV2Root #scr_report h2, html body #alRaqiV2Root #scr_report h3 {',
+      '  font-family: "Jameel Noori Nastaleeq", "Noto Nastaliq Urdu", Tahoma, sans-serif !important;',
+      '  font-weight: 700 !important;',
       '  font-weight: 400 !important;',
       '  line-height: 2.25 !important;',
       '  letter-spacing: 0 !important;',
@@ -9300,7 +9379,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       '.quran-ayah, .quran-text, .mushaf-ayah, .ar-mushaf-line, #mushafTextBody p, #mushafReaderArea .ar-ayah-txt, #wazaifManzilList .ar-arabic-text, [data-ar-quran="1"] {',
       '  font-size: ' + rem + 'rem !important;',
       '}',
-      '#scr_folders .ar-arabic-text, #scr_report .ar-arabic-text {',
+      '#scr_folders .ar-arabic-text:not(b), #scr_folders .ar-inline-acc .ar-arabic-text, #scr_folders .ar-inline-acc .ar-arabic-text *, #scr_report .ar-arabic-text:not(h1):not(h2):not(h3) {',
       '  font-size: ' + rem + 'rem !important;',
       '}'
     ].join('\n');
@@ -9677,14 +9756,14 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
   window.getGlobalUrduScaleV29 = function(){
     try {
-      var v = parseInt(localStorage.getItem(K_UR_SCALE) || '108', 10);
-      if (isNaN(v) || v < 95 || v > 145) return 108;
+      var v = parseInt(localStorage.getItem(K_UR_SCALE) || '100', 10);
+      if (isNaN(v) || v < 95 || v > 145) return 100;
       return v;
-    } catch(e){ return 108; }
+    } catch(e){ return 100; }
   };
 
   window.applyGlobalUrduScaleV29 = function(pct){
-    var clamped = Math.max(95, Math.min(145, parseInt(pct, 10) || 108));
+    var clamped = Math.max(95, Math.min(145, parseInt(pct, 10) || 100));
     try { localStorage.setItem(K_UR_SCALE, String(clamped)); } catch(e){}
     var basePx = (16 * clamped / 100).toFixed(1);
     var st = document.getElementById('arGlobalUrduReadabilityV29');
@@ -9695,12 +9774,13 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     }
     st.textContent = [
       'html { font-size: ' + basePx + 'px !important; }',
+      '#scr_report label, #scr_report .ar-eq-grid-3 > * { height: auto !important; min-height: 44px !important; overflow: visible !important; line-height: 1.75 !important; padding: 6px 6px !important; }',
       '#alRaqiV2Root .card p, #alRaqiV2Root .card div, #alRaqiV2Root .card li, #alRaqiV2Root .card span:not(.ar-saat-badge-v24):not(.ar-mz-pill-v29), #alRaqiV2Root .db-item, #alRaqiV2Root .ar-slim-row, #alRaqiV2Root label {',
       '  font-weight: 600;',
       '}',
       '#alRaqiV2Root .card p, #alRaqiV2Root .card small, #alRaqiV2Root .db-item small, #alRaqiV2Root .ar-slim-row div {',
       '  color: #0f172a !important;',
-      '  font-size: max(0.92rem, 1em);',
+      '  font-size: inherit;',
       '  line-height: 1.95;',
       '}',
       '#alRaqiV2Root input, #alRaqiV2Root textarea, #alRaqiV2Root select {',
@@ -9739,7 +9819,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
           '<button type="button" onclick="stepGlobalUrduScaleV29(-8)" style="padding:4px 10px; border-radius:8px; border:1px solid #065f46; background:#fff; color:#065f46; font-weight:800; font-size:0.88rem; cursor:pointer;">A-</button>' +
           '<input type="range" class="v29-ur-font-slider" min="95" max="145" step="5" value="' + cur + '" oninput="applyGlobalUrduScaleV29(this.value)" style="flex:1; accent-color:#065f46; cursor:pointer;">' +
           '<button type="button" onclick="stepGlobalUrduScaleV29(8)" style="padding:4px 10px; border-radius:8px; border:1px solid #065f46; background:#065f46; color:#fff; font-weight:800; font-size:0.88rem; cursor:pointer;">A+</button>' +
-          '<button type="button" onclick="applyGlobalUrduScaleV29(108)" style="padding:4px 8px; border-radius:8px; border:1px solid #cbd5e1; background:#fff; color:#0f172a; font-family:inherit; font-size:0.78rem; cursor:pointer;">نارمل</button>' +
+          '<button type="button" onclick="applyGlobalUrduScaleV29(100)" style="padding:4px 8px; border-radius:8px; border:1px solid #cbd5e1; background:#fff; color:#0f172a; font-family:inherit; font-size:0.78rem; cursor:pointer;">نارمل</button>' +
         '</div>';
       var h = fontCard.querySelector('h3');
       if (h && h.nextSibling) fontCard.insertBefore(div, h.nextSibling);
