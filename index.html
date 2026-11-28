@@ -7614,7 +7614,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
   // Auto-Purge Old PWA Caches & Force Service Worker Update on every new release (v2.1.33)
   (function autoBustOldPwaCacheV33(){
-    var LIVE_VER = 'v2.1.34';
+    var LIVE_VER = 'v2.1.35';
     try {
       var prev = localStorage.getItem('alraqi_live_build_ver_master');
       if (prev !== LIVE_VER) {
@@ -8216,6 +8216,95 @@ window.MASTER_THREE_BOOKS_DREAMS = [
   }, true);
 })();
 
+// === PRO UI/UX POLISH v2.1.35 (BACK PILL + FADE + ONLINE DOT + JSON BACKUP) ===
+(function initProPolishV35(){
+  if (!document.getElementById('arProPolishCssV35')) {
+    var st = document.createElement('style');
+    st.id = 'arProPolishCssV35';
+    st.textContent = [
+      '@keyframes arFadeInV35 { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }',
+      '.screen.active { animation: arFadeInV35 0.18s ease-out; }',
+      '.ar-hdr-corner-actions { display:flex !important; align-items:center !important; gap:6px !important; }',
+      '.ar-hdr-back-pill { padding:4px 10px; border-radius:999px; border:1px solid rgba(253,224,71,0.55); background:rgba(255,255,255,0.12); color:#fde047; font-family:inherit; font-size:0.78rem; font-weight:800; cursor:pointer; }'
+    ].join('\n');
+    document.head.appendChild(st);
+  }
+
+  function enhanceHeadersAndSettingsV35(){
+    // 1. Add sleek "← پیچھے" pill right beside "ہوم" on every inner screen header
+    document.querySelectorAll('.screen .ar-hdr-corner-actions').forEach(function(bar){
+      if (bar.closest('#scr_home') || bar.querySelector('.ar-hdr-back-pill')) return;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'ar-hdr-back-pill';
+      b.textContent = '← پیچھے';
+      b.onclick = function(){ if (typeof window.goBackOneScreen === 'function') window.goBackOneScreen(); };
+      bar.appendChild(b);
+    });
+
+    // 2. Add Online/Offline indicator + 1-Tap Local Cases JSON Backup/Restore in Settings
+    var setBox = document.getElementById('arHardRefreshBoxV33');
+    if (setBox && !document.getElementById('arLocalBackupRowV35')) {
+      var netBadge = document.createElement('div');
+      netBadge.id = 'arNetStatusPillV35';
+      netBadge.style.cssText = 'font-size:0.78rem; font-weight:800; margin-bottom:7px; color:' + (navigator.onLine ? '#065f46' : '#b45309') + ';';
+      netBadge.textContent = navigator.onLine ? '🟢 آن لائن (کلاؤڈ سنک اور ترجمہ فعال ہے)' : '🟠 آف لائن موڈ (محفوظ شدہ مواد دستیاب ہے)';
+      setBox.insertBefore(netBadge, setBox.firstChild);
+
+      var bRow = document.createElement('div');
+      bRow.id = 'arLocalBackupRowV35';
+      bRow.className = 'ar-eq-grid-2';
+      bRow.style.cssText = 'gap:6px; margin-top:8px;';
+      bRow.innerHTML =
+        '<button type="button" class="ar-unibtn" onclick="window.exportLocalCasesBackupV35()">💾 مقامی بیک اپ ڈاؤن لوڈ</button>' +
+        '<label class="ar-unibtn" style="cursor:pointer; margin:0; display:flex; align-items:center; justify-content:center;">📂 بیک اپ بحال کریں<input type="file" accept=".json" style="display:none;" onchange="window.importLocalCasesBackupV35(this)"></label>';
+      setBox.appendChild(bRow);
+    }
+  }
+
+  window.exportLocalCasesBackupV35 = function(){
+    try {
+      var dump = {};
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && (k.indexOf('alraqi') !== -1 || k.indexOf('al_mualij') !== -1 || k.indexOf('patient') !== -1)) {
+          dump[k] = localStorage.getItem(k);
+        }
+      }
+      var blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Al_Raqi_Backup_' + new Date().toISOString().slice(0,10) + '.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      if (window.showToast) window.showToast('✅ مقامی کیسز اور سیٹنگز کا بیک اپ ڈاؤن لوڈ ہو گیا');
+    } catch(e){}
+  };
+
+  window.importLocalCasesBackupV35 = function(inp){
+    var f = inp && inp.files && inp.files[0];
+    if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function(){
+      try {
+        var obj = JSON.parse(String(rd.result || '{}'));
+        Object.keys(obj).forEach(function(k){ localStorage.setItem(k, obj[k]); });
+        if (window.showToast) window.showToast('✅ بیک اپ بحال ہو گیا — ایپ تازہ ہو رہی ہے');
+        setTimeout(function(){ location.reload(); }, 600);
+      } catch(e){
+        if (window.showToast) window.showToast('❌ درست بیک اپ فائل منتخب کریں');
+      }
+    };
+    rd.readAsText(f);
+  };
+
+  window.addEventListener('online', function(){ var el = document.getElementById('arNetStatusPillV35'); if(el){ el.style.color='#065f46'; el.textContent='🟢 آن لائن (کلاؤڈ سنک اور ترجمہ فعال ہے)'; } });
+  window.addEventListener('offline', function(){ var el = document.getElementById('arNetStatusPillV35'); if(el){ el.style.color='#b45309'; el.textContent='🟠 آف لائن موڈ (محفوظ شدہ مواد دستیاب ہے)'; } });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhanceHeadersAndSettingsV35);
+  else enhanceHeadersAndSettingsV35();
+  setTimeout(enhanceHeadersAndSettingsV35, 700);
+})();
+
 // ================= MODULE 13: SINGLE CLEAN TEXT QURAN WORKSPACE (COPY, ZUL-KITABAT, AWFAQI NAQSH, REPORT CARD, TASBEEH) (v2.1.21) =================
   (function() {
     var BUILD_VER = 'v2.1.21';
@@ -8443,7 +8532,8 @@ window.MASTER_THREE_BOOKS_DREAMS = [
           '</div>' +
           '<div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">' +
             '<button type="button" onclick="if(window.stepArabicFontScaleV25) stepArabicFontScaleV25(-10); renderFullSurahPageV31();" style="width:36px; height:34px; border-radius:8px; border:1px solid #fde047; background:rgba(255,255,255,0.12); color:#fff; font-weight:800; font-size:0.9rem; cursor:pointer;">A-</button>' +
-            '<button type="button" onclick="if(window.stepArabicFontScaleV25) stepArabicFontScaleV25(10); renderFullSurahPageV31();" style="width:36px; height:34px; border-radius:8px; border:1px solid #fde047; background:#d4af37; color:#09152e; font-weight:800; font-size:0.9rem; cursor:pointer;">A+</button>' +
+            '<button type="button" onclick="if(window.stepArabicFontScaleV25) stepArabicFontScaleV25(10); renderFullSurahPageV31();" style="width:34px; height:34px; border-radius:8px; border:1px solid #fde047; background:#d4af37; color:#09152e; font-weight:800; font-size:0.86rem; cursor:pointer;">A+</button>' +
+            '<button type="button" id="v35_fsNightBtn" onclick="toggleQuranNightModeV35()" title="نائٹ موڈ" style="width:34px; height:34px; border-radius:8px; border:1px solid rgba(253,224,71,0.55); background:rgba(255,255,255,0.12); color:#fde047; font-size:0.95rem; cursor:pointer;">🌙</button>' +
           '</div>' +
         '</div>' +
         '<div id="v31_fsPageContent" style="flex:1; overflow-y:auto; padding:14px 14px 18px; -webkit-overflow-scrolling:touch; background:#fffdf7;"></div>' +
@@ -9950,7 +10040,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     if (!banner) {
       banner = document.createElement('div');
       banner.id = 'arSaaatDualDateBannerV34';
-      banner.style.cssText = 'display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:9px; direction:rtl;';
+      banner.style.cssText = 'grid-column:1 / -1; width:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:9px; direction:rtl;';
       firstCard.appendChild(banner);
     }
 
@@ -9991,6 +10081,23 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     if (scr && scr.contains(ev.target)) setTimeout(window.updateSaaatDualDateBannerV34, 120);
   });
 })();
+
+  // Fix Day/Night 12-Saaat tables overflowing their white .card container (zero white peeking edge!)
+  (function injectSaaatTableFitV35(){
+    if (document.getElementById('arSaaatTableFitV35')) return;
+    var st = document.createElement('style');
+    st.id = 'arSaaatTableFitV35';
+    st.textContent = [
+      '#scr_saaat .card { overflow: hidden !important; max-width: 100% !important; box-sizing: border-box !important; }',
+      '#scr_saaat table { width: 100% !important; max-width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; margin: 0 !important; }',
+      '#scr_saaat table th, #scr_saaat table td { padding: 6px 3px !important; font-size: 0.78rem !important; text-align: center !important; overflow: hidden !important; text-overflow: ellipsis !important; }',
+      '#scr_saaat table th:nth-child(1), #scr_saaat table td:nth-child(1) { width: 11% !important; }',
+      '#scr_saaat table th:nth-child(2), #scr_saaat table td:nth-child(2) { width: 18% !important; }',
+      '#scr_saaat table th:nth-child(3), #scr_saaat table td:nth-child(3) { width: 31% !important; }',
+      '#scr_saaat table th:nth-child(4), #scr_saaat table td:nth-child(4) { width: 40% !important; font-size: 0.73rem !important; white-space: nowrap !important; }'
+    ].join('\n');
+    document.head.appendChild(st);
+  })();
 
 /* =========================================================================
    MODULE 17: V2.1.23 FINAL POLISH — DIRECT GMAIL AUTH + CLASSIC RESTORE
