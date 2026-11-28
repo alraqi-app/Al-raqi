@@ -1312,7 +1312,7 @@ html, body, #alRaqiV2Root,
         </div>
 
         <div id="qSub_text">
-          <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:11px; padding:9px 10px; margin-bottom:10px;"><div style="font-size:0.84rem; font-weight:800; color:#0b1936; margin-bottom:6px;">سورت اور آیت منتخب کریں (کاپی یا نقشِ ذوالکتابت کے لیے):</div><div class="ar-eq-grid-2" style="margin-bottom:7px;"><select id="qPickerSurahSel" onchange="onQuranPickerSurahChange(this.value)"><option value="">-- سورت منتخب کریں --</option></select><select id="qPickerAyahSel" onchange="onQuranPickerAyahChange(this.value)"><option value="all">پوری سورت</option></select></div><div id="qSelectedAyahBox" style="display:none; background:#fffdf5; border:2px solid #d4af37; border-radius:10px; padding:10px; margin-top:6px;"><div id="qSelectedAyahMeta" style="font-size:0.82rem; font-weight:700; color:#065f46; margin-bottom:5px;"></div><div id="qSelectedAyahText" class="ar-arabic-text" style="font-size:1.42rem; line-height:2.2; color:#0f172a; background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:10px; text-align:center; margin-bottom:8px;"></div><div class="ar-eq-grid-3"><button type="button" class="ar-unibtn active" onclick="copyPickedAyahOnly()">آیت کاپی کریں</button><button type="button" class="ar-unibtn" onclick="sendPickedAyahToZulkitabat()">نقشِ ذوالکتابت</button><button type="button" class="ar-unibtn" onclick="sendPickedAyahToTasbeeh()">تسبیح میں لائیں</button></div></div></div><input type="text" id="quranSearchInp" placeholder="سورت کا نام یا نمبر تلاش کریں..." oninput="renderQuranFolder()" style="margin-bottom:10px;">
+          <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:11px; padding:9px 10px; margin-bottom:10px;"><div style="font-size:0.84rem; font-weight:800; color:#0b1936; margin-bottom:6px;">سورت اور آیت منتخب کریں (آیت کاپی کرنے کے لیے):</div><div class="ar-eq-grid-2" style="margin-bottom:7px;"><select id="qPickerSurahSel" onchange="onQuranPickerSurahChange(this.value)"><option value="">-- سورت منتخب کریں --</option></select><select id="qPickerAyahSel" onchange="onQuranPickerAyahChange(this.value)"><option value="all">پوری سورت</option></select></div><div id="qSelectedAyahBox" style="display:none; background:#fffdf5; border:2px solid #d4af37; border-radius:10px; padding:10px; margin-top:6px;"><div id="qSelectedAyahMeta" style="font-size:0.82rem; font-weight:700; color:#065f46; margin-bottom:5px;"></div><div id="qSelectedAyahText" class="ar-arabic-text" style="font-size:1.42rem; line-height:2.2; color:#0f172a; background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:10px; text-align:center; margin-bottom:8px;"></div><div style="display:flex; gap:8px;"><button type="button" class="ar-unibtn active" style="flex:1;" onclick="copyPickedAyahOnly()">📋 آیت کاپی کریں</button></div></div></div><input type="text" id="quranSearchInp" placeholder="سورت کا نام یا نمبر تلاش کریں..." oninput="renderQuranFolder()" style="margin-bottom:10px;">
           <div id="quranSurahReaderDrawer" style="display:none; background:#fffdf5; border:2px solid #d4af37; border-radius:12px; padding:12px; margin-bottom:10px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; border-bottom:1px dashed #cbd5e1; padding-bottom:6px; margin-bottom:8px;">
               <b id="qReaderTitle" class="ar-arabic-text" style="font-size:1.3rem; color:#1e3a8a;"></b>
@@ -4071,9 +4071,27 @@ html, body, #alRaqiV2Root,
       { id: 'cat_muj',    label: '۳. مجرباتِ کتب و عملیات', items: [] },
       { id: 'cat_quran',  label: '۴. قرآنی عملیات (شفا، رزق، شادی، بندش)', items: [] }
     ];
-    if (typeof MANZIL_33_ITEMS !== 'undefined') {
-      groups[0].items.push({
+    var _seenIds = {};
+    var _seenExactContent = {};
+    function pushValidWaz(grpIdx, item) {
+      var title = String(item.title || '').trim();
+      var ar = String(item.ar || '').trim();
+      var ur = String(item.ur || '').trim();
+      if (!title || (ar.length + ur.length) < 12) return;
+      title = title.replace(/^[\uFE0F\s]*[\d۰-۹]+[\.\-\)]\s*/, '').trim();
+      var idKey = String(item.rawId || '').trim().toLowerCase();
+      var cKey = (ar ? ar : (title + ur)).replace(/[\s\u064B-\u065F\u0670\d۰-۹\.\-—:()«»"']/g, '').slice(0, 36);
+      if (idKey && _seenIds[idKey]) return;
+      if (cKey && _seenExactContent[cKey]) return;
+      if (idKey) _seenIds[idKey] = 1;
+      if (cKey) _seenExactContent[cKey] = 1;
+      groups[grpIdx].items.push({ k: item.k, title: title, ar: ar, ur: ur });
+    }
+
+    if (typeof MANZIL_33_ITEMS !== 'undefined' && Array.isArray(MANZIL_33_ITEMS) && MANZIL_33_ITEMS.length) {
+      pushValidWaz(0, {
         k: 'm33_all',
+        rawId: 'manzil_full_33',
         title: 'منزل شریف مکمل (۳۳ آیاتِ قرآنی)',
         ar: MANZIL_33_ITEMS.map(function(m, i) {
           return (typeof m === 'string') ? ((i+1) + '. ' + m) : ((m.title ? '【' + m.title + '】\n' : '') + (m.arabic || m.ar || m.text || ''));
@@ -4086,8 +4104,9 @@ html, body, #alRaqiV2Root,
         if (k === 'manzil_full_33') return;
         var b = MANZIL_BOOK_DB[k];
         if (!b || !b.title) return;
-        groups[0].items.push({
+        pushValidWaz(0, {
           k: 'mb_' + k,
+          rawId: k,
           title: stripEmojis(b.title),
           ar: b.arabic || b.ar || '',
           ur: stripEmojis((b.shortName ? b.shortName + '\n' : '') + (b.defaultCount ? 'تعداد: ' + b.defaultCount + ' | ' : '') + (b.defaultTiming || '') + (b.refDetail ? '\n' + b.refDetail.replace(/<[^>]+>/g, ' ') : ''))
@@ -4096,8 +4115,9 @@ html, body, #alRaqiV2Root,
     }
     if (typeof AHZAB_OPEN_LIST_ITEMS !== 'undefined') {
       AHZAB_OPEN_LIST_ITEMS.forEach(function(h, i) {
-        groups[1].items.push({
+        pushValidWaz(1, {
           k: 'ah_' + i,
+          rawId: h.id || ('ah_' + i),
           title: stripEmojis(h.title || h.name || ''),
           ar: h.arabic || h.ar || '',
           ur: h.method || h.text || h.desc || h.details || h.fawaid || ''
@@ -4106,8 +4126,9 @@ html, body, #alRaqiV2Root,
     }
     if (typeof MUJARRAB_OPEN_LIST_ITEMS !== 'undefined') {
       MUJARRAB_OPEN_LIST_ITEMS.forEach(function(m, i) {
-        groups[2].items.push({
+        pushValidWaz(2, {
           k: 'mj_' + i,
+          rawId: m.id || ('mj_' + i),
           title: stripEmojis(m.title || m.name || ''),
           ar: m.arabic || m.ar || '',
           ur: m.method || m.text || m.desc || m.details || m.padhai || ''
@@ -4118,11 +4139,17 @@ html, body, #alRaqiV2Root,
       Object.keys(EXTRA_MUJARRAB_TREATMENTS).forEach(function(k) {
         var b = EXTRA_MUJARRAB_TREATMENTS[k];
         if (!b) return;
-        groups[2].items.push({
+        var urParts = [];
+        if (b.surah) urParts.push('حوالہ: ' + b.surah);
+        if (b.padhai) urParts.push('پڑھائی: ' + b.padhai);
+        if (b.tariqa) urParts.push('طریقہ: ' + b.tariqa);
+        if (b.fawaid) urParts.push('فوائد: ' + b.fawaid);
+        pushValidWaz(2, {
           k: 'ex_' + k,
+          rawId: b.id || k,
           title: stripEmojis(b.title || k),
-          ar: b.arabic || b.padhai || '',
-          ur: (b.tariqa || '') + (b.fawaid ? '\n' + b.fawaid : '') + (b.count ? '\nتعداد: ' + b.count : '')
+          ar: b.ayahText || b.arabic || '',
+          ur: urParts.join('\n')
         });
       });
     }
@@ -4130,11 +4157,17 @@ html, body, #alRaqiV2Root,
       Object.keys(QURANIC_BOOK_TREATMENTS).forEach(function(k) {
         var b = QURANIC_BOOK_TREATMENTS[k];
         if (!b) return;
-        groups[3].items.push({
+        var urParts = [];
+        if (b.surah) urParts.push('حوالہ: ' + b.surah);
+        if (b.padhai) urParts.push('پڑھائی: ' + b.padhai);
+        if (b.tariqa) urParts.push('طریقہ: ' + b.tariqa);
+        if (b.fawaid) urParts.push('فوائد: ' + b.fawaid);
+        pushValidWaz(3, {
           k: 'qb_' + k,
+          rawId: b.id || k,
           title: stripEmojis(b.title || k),
-          ar: b.arabic || b.padhai || '',
-          ur: (b.tariqa || '') + (b.fawaid ? '\n' + b.fawaid : '')
+          ar: b.ayahText || b.arabic || '',
+          ur: urParts.join('\n')
         });
       });
     }
@@ -4142,29 +4175,59 @@ html, body, #alRaqiV2Root,
       var arr6 = Array.isArray(SIX_CATEGORY_QURANIC_WAZAIF) ? SIX_CATEGORY_QURANIC_WAZAIF : Object.keys(SIX_CATEGORY_QURANIC_WAZAIF).map(function(k){ return SIX_CATEGORY_QURANIC_WAZAIF[k]; });
       arr6.forEach(function(c, i) {
         if (!c || !c.title) return;
-        groups[3].items.push({
+        var asmaAr = Array.isArray(c.asma) ? c.asma.map(function(a){ return typeof a === 'string' ? a : (a.ar || a.arabic || a.name || ''); }).filter(Boolean).join(' — ') : '';
+        pushValidWaz(3, {
           k: 's6_' + i,
+          rawId: c.naqshKey || ('s6_' + i),
           title: stripEmojis(c.title),
-          ar: c.arabic || c.ayat || c.padhai || '',
-          ur: c.method || c.desc || c.fawaid || c.text || ''
+          ar: c.arabic || c.ayat || asmaAr || '',
+          ur: stripEmojis(c.method || c.text || c.desc || c.fawaid || '')
         });
       });
     }
     if (_cloudAzkarItems.length) {
-      groups.push({
-        id: 'cat_cloud',
-        label: '۵. کلاؤڈ اذکار و اضافی وظائف',
-        items: _cloudAzkarItems.map(function(z, i) {
-          return { k: 'cz_' + i, title: stripEmojis(z.title || z.name || ('وظیفہ ' + (i+1))), ar: z.arabic || z.ar || '', ur: z.method || z.text || z.desc || '' };
-        })
+      var validCloud = [];
+      _cloudAzkarItems.forEach(function(z, i) {
+        var t = stripEmojis(z.title || z.name || '');
+        var ar = String(z.arabic || z.ar || '').trim();
+        var ur = String(z.method || z.text || z.desc || '').trim();
+        if (!t || (ar.length + ur.length) < 12) return;
+        validCloud.push({ k: 'cz_' + i, title: t, ar: ar, ur: ur });
+      });
+      if (validCloud.length) {
+        groups.push({ id: 'cat_cloud', label: '۵. کلاؤڈ اذکار و اضافی وظائف', items: validCloud });
+      }
+    }
+    if (typeof window.MASTER_BOOK_WAZAIF_V32 !== 'undefined' && Array.isArray(window.MASTER_BOOK_WAZAIF_V32)) {
+      window.MASTER_BOOK_WAZAIF_V32.forEach(function(mw) {
+        pushValidWaz(2, { k: mw.k, rawId: mw.k, title: mw.title, ar: mw.ar || '', ur: mw.ur || '' });
       });
     }
-    return groups;
+    return groups.filter(function(g) { return g.items && g.items.length > 0; });
   }
+
+  window.copyWazifaTextV32 = function(itemKey) {
+    var groups = collectAllBookWazaifGrouped();
+    var found = null;
+    groups.forEach(function(g) {
+      g.items.forEach(function(it) { if (it.k === itemKey) found = it; });
+    });
+    if (!found) return;
+    var txt = (found.ar ? (found.ar + '\n\n') : '') + (found.title || '') + (found.ur ? ('\n' + found.ur) : '');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).catch(function(){});
+    } else {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = txt; ta.style.cssText = 'position:fixed;opacity:0;left:-9999px;';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      } catch(e){}
+    }
+    if (typeof window.showToast === 'function') window.showToast('✅ وظیفہ کاپی ہو گیا — اب تعویذ یا رپورٹ میں پیسٹ کر لیں');
+  };
 
   window.toggleWazCat = function(catId) {
     _openWazCat = (_openWazCat === catId) ? '' : catId;
-    _openWazKey = '';
     window.renderUnifiedWazaifList();
   };
   window.toggleWazItem = function(itemKey) {
@@ -4175,37 +4238,69 @@ html, body, #alRaqiV2Root,
   window.renderUnifiedWazaifList = function() {
     var box = $('wazaifFolderList');
     if (!box) return;
+    if (typeof MANZIL_33_ITEMS === 'undefined' && typeof window.loadAlRaqiPack === 'function') {
+      box.innerHTML = '<div style="text-align:center; color:#1e3a8a; padding:14px; font-weight:700;">وظائف لوڈ ہو رہے ہیں...</div>';
+      window.loadAlRaqiPack('maktaba', function() { window.renderUnifiedWazaifList(); });
+      return;
+    }
     syncCloudLibraryOnce(function() { window.renderUnifiedWazaifList(); });
     var q = (($('wazaifUnifiedSearch') || {}).value || '').trim();
     var groups = collectAllBookWazaifGrouped();
-    var html = '';
+    var srcLabels = {
+      cat_manzil: 'منزل شریف',
+      cat_ahzab: 'اورادِ مشائخ',
+      cat_muj: 'مجرباتِ کتب',
+      cat_quran: 'قرآنی عملیات',
+      cat_cloud: 'کلاؤڈ وظائف'
+    };
+    var flatList = [];
     groups.forEach(function(g) {
-      var list = g.items.filter(function(it) { return !q || (it.title + ' ' + it.ar + ' ' + it.ur).indexOf(q) !== -1; });
-      if (!list.length) return;
-      var catOpen = q ? true : (_openWazCat === g.id);
-      html += '<div class="ar-cat-hdr ' + (catOpen ? 'open' : '') + '" onclick="toggleWazCat(\'' + g.id + '\')">' +
-        '<span>' + g.label + '</span><span style="font-size:0.80rem; opacity:0.9;">(' + list.length + ')</span></div>';
-      if (catOpen) {
-        html += '<div style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px; padding-right:4px;">' +
-          list.map(function(it) {
-            var isOpen = (_openWazKey === it.k);
-            return '<div class="ar-slim-row ' + (isOpen ? 'open' : '') + '" onclick="toggleWazItem(\'' + it.k + '\')">' +
-              '<div class="ar-slim-title"><span>' + it.title + '</span><span style="font-size:0.78rem; color:#64748b;">' + (isOpen ? '▲' : '▼') + '</span></div>' +
-              (isOpen ? (
-                '<div onclick="event.stopPropagation()">' +
-                  (it.ar ? '<div class="ar-arabic-text" style="font-size:1.34rem; line-height:2.25; color:#0f172a; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:9px; padding:11px; white-space:pre-line; margin-bottom:9px;">' + it.ar + '</div>' : '') +
-                  (it.ur ? '<div style="font-size:0.96rem; color:#1e293b; white-space:pre-line; line-height:1.9; margin-bottom:10px;">' + it.ur + '</div>' : '') +
-                  '<div class="ar-eq-grid-2">' +
-                    '<button type="button" class="ar-unibtn active" onclick="addItemToTasbeehPlaylist(\'' + it.title.replace(/'/g, '') + '\', 100)">تسبیح میں شامل کریں</button>' +
-                    '<button type="button" class="ar-unibtn" onclick="attachWazifaToReport(\'' + it.title.replace(/'/g, '') + '\')">رپورٹ کارڈ میں لگائیں</button>' +
-                  '</div>' +
-                '</div>'
-              ) : '') +
-            '</div>';
-          }).join('') + '</div>';
-      }
+      var badge = srcLabels[g.id] || 'مستند کتاب';
+      g.items.forEach(function(it) {
+        if (!q || (it.title + ' ' + it.ar + ' ' + it.ur + ' ' + badge).indexOf(q) !== -1) {
+          flatList.push({ k: it.k, title: it.title, ar: it.ar, ur: it.ur, src: badge });
+        }
+      });
     });
-    box.innerHTML = html || '<div style="color:#64748b; text-align:center; padding:12px;">کوئی وظیفہ نہیں ملا۔</div>';
+
+    if (!flatList.length) {
+      box.innerHTML = '<div style="color:#64748b; text-align:center; padding:14px;">کوئی وظیفہ نہیں ملا۔</div>';
+      return;
+    }
+
+    var hdrHtml = '<div style="display:flex; justify-content:space-between; align-items:center; padding:6px 10px; margin-bottom:8px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:9px; font-size:0.84rem; font-weight:800; color:#1e3a8a;">' +
+      '<span>📖 تمام وظائف و اعمال (خواص وار فہرست)</span>' +
+      '<span style="background:#1e3a8a; color:#fde047; padding:2px 9px; border-radius:999px; font-size:0.78rem;">کل: ' + flatList.length + '</span>' +
+    '</div>';
+
+    var rowsHtml = '<div style="display:flex; flex-direction:column; gap:6px;">' +
+      flatList.map(function(it, idx) {
+        var isOpen = (_openWazKey === it.k);
+        var safeTitle = it.title.replace(/'/g, '');
+        return '<div class="ar-slim-row ' + (isOpen ? 'open' : '') + '" style="border-right:4px solid #065f46;" onclick="toggleWazItem(\'' + it.k + '\')">' +
+          '<div class="ar-slim-title" style="gap:8px;">' +
+            '<span style="font-weight:800; color:#09152e; line-height:1.65;">' + (idx + 1) + '. ' + it.title + '</span>' +
+            '<span style="display:flex; align-items:center; gap:6px; flex-shrink:0;">' +
+              
+              '<span style="font-size:0.78rem; color:#64748b;">' + (isOpen ? '▲' : '▼') + '</span>' +
+            '</span>' +
+          '</div>' +
+          (isOpen ? (
+            '<div onclick="event.stopPropagation()" style="margin-top:8px;">' +
+              (it.ar ? '<div data-ar-quran="1" class="ar-arabic-text" style="font-size:1.34rem; line-height:2.25; color:#0f172a; background:#ffffff; border:1.5px solid #d4af37; border-radius:9px; padding:11px; white-space:pre-line; margin-bottom:9px;">' + it.ar + '</div>' : '') +
+              (it.ur ? '<div style="font-size:0.95rem; color:#1e293b; white-space:pre-line; line-height:1.9; margin-bottom:10px;">' + it.ur + '</div>' : '') +
+              '<div class="ar-eq-grid-3" style="gap:6px;">' +
+                '<button type="button" class="ar-unibtn active" onclick="copyWazifaTextV32(\'' + it.k + '\')">📋 کاپی کریں</button>' +
+                '<button type="button" class="ar-unibtn" onclick="attachWazifaToReport(\'' + safeTitle + '\')">📄 رپورٹ کارڈ</button>' +
+                '<button type="button" class="ar-unibtn" onclick="addItemToTasbeehPlaylist(\'' + safeTitle + '\', 100)">📿 تسبیح</button>' +
+              '</div>' +
+            '</div>'
+          ) : '') +
+        '</div>';
+      }).join('') +
+    '</div>';
+
+    box.innerHTML = hdrHtml + rowsHtml;
   };
 
   // Point #2: Cloud Naqsh (mahfoozat_list_v140) + Smart Urdu Synonym Topic Filters + Slim Exclusive Accordion
@@ -4243,10 +4338,23 @@ html, body, #alRaqiV2Root,
         });
       });
     }
+    if (typeof window.MASTER_BOOK_NAQSH_V32 !== 'undefined' && Array.isArray(window.MASTER_BOOK_NAQSH_V32)) {
+      window.MASTER_BOOK_NAQSH_V32.forEach(function(mn) {
+        allItems.push({
+          k: mn.k,
+          title: mn.title,
+          note: '',
+          hay: mn.title + ' ' + (mn.tags || ''),
+          render: mn.render
+        });
+      });
+    }
     _cloudMahfoozatItems.forEach(function(cm, i) {
       var t = stripEmojis(cm.title || cm.name || ('کلاؤڈ نقش ' + (i+1)));
       var cat = String(cm.category || cm.type || '').toLowerCase();
+      var _privCheck = (t + ' ' + cat + ' ' + (cm.note || cm.desc || '') + ' ' + (cm.tags || '')).toLowerCase();
       if (cat && cat.indexOf('book') !== -1 && cat.indexOf('naqsh') === -1) return;
+      if (_privCheck.indexOf('پرائیویٹ') !== -1 || _privCheck.indexOf('خواب') !== -1 || _privCheck.indexOf('تعبیر') !== -1 || _privCheck.indexOf('private') !== -1 || _privCheck.indexOf('dream') !== -1 || _privCheck.indexOf('tabeer') !== -1 || _privCheck.indexOf('مریض') !== -1 || _privCheck.indexOf('سائل') !== -1) return;
       allItems.push({
         k: 'c_' + i,
         title: t + ' (کلاؤڈ)',
@@ -4269,6 +4377,7 @@ html, body, #alRaqiV2Root,
       var base = b.getAttribute('data-base-lbl') || b.textContent.replace(/\s*\(\d+\)\s*$/, '').trim();
       b.setAttribute('data-base-lbl', base);
       b.textContent = base + ' (' + cnt + ')';
+      b.style.display = (tp !== 'all' && cnt === 0) ? 'none' : '';
     });
 
     var q = (($('naqshTopicSearchInp') || {}).value || '').trim();
@@ -4395,10 +4504,23 @@ html, body, #alRaqiV2Root,
         });
       });
     }
+    if (typeof window.MASTER_BOOK_NAQSH_V32 !== 'undefined' && Array.isArray(window.MASTER_BOOK_NAQSH_V32)) {
+      window.MASTER_BOOK_NAQSH_V32.forEach(function(mn) {
+        allItems.push({
+          k: mn.k,
+          title: mn.title,
+          note: '',
+          hay: mn.title + ' ' + (mn.tags || ''),
+          render: mn.render
+        });
+      });
+    }
     _cloudMahfoozatItems.forEach(function(cm, i) {
       var t = stripEmojis(cm.title || cm.name || ('کلاؤڈ نقش ' + (i+1)));
       var cat = String(cm.category || cm.type || '').toLowerCase();
+      var _privCheck = (t + ' ' + cat + ' ' + (cm.note || cm.desc || '') + ' ' + (cm.tags || '')).toLowerCase();
       if (cat && cat.indexOf('book') !== -1 && cat.indexOf('naqsh') === -1) return;
+      if (_privCheck.indexOf('پرائیویٹ') !== -1 || _privCheck.indexOf('خواب') !== -1 || _privCheck.indexOf('تعبیر') !== -1 || _privCheck.indexOf('private') !== -1 || _privCheck.indexOf('dream') !== -1 || _privCheck.indexOf('tabeer') !== -1 || _privCheck.indexOf('مریض') !== -1 || _privCheck.indexOf('سائل') !== -1) return;
       allItems.push({
         k: 'c_' + i,
         title: t + ' (کلاؤڈ)',
@@ -4421,6 +4543,7 @@ html, body, #alRaqiV2Root,
       var base = b.getAttribute('data-base-lbl') || b.textContent.replace(/\s*\(\d+\)\s*$/, '').trim();
       b.setAttribute('data-base-lbl', base);
       b.textContent = base + ' (' + cnt + ')';
+      b.style.display = (tp !== 'all' && cnt === 0) ? 'none' : '';
     });
 
     var q = (($('naqshTopicSearchInp') || {}).value || '').trim();
@@ -4479,6 +4602,8 @@ html, body, #alRaqiV2Root,
         }
       }).catch(function(){ cb([]); });
   }
+
+  window.getSurahAyahsList = getSurahAyahsList;
 
   function populateQuranSurahPicker() {
     var sel = $('qPickerSurahSel');
@@ -5778,7 +5903,23 @@ html, body, #alRaqiV2Root,
       };
     });
 
-    var allBooks = builtInBooks.concat(cloudBooks);
+    var _seenBookUrls = {};
+    var _seenBookTitles = {};
+    builtInBooks.forEach(function(b) {
+      if (b.pdfUrl) _seenBookUrls[b.pdfUrl] = 1;
+      _seenBookTitles[String(b.title || '').replace(/\s+/g, '').slice(0, 18)] = 1;
+    });
+    var cleanCloudBooks = cloudBooks.filter(function(cb) {
+      if (!cb.pdfUrl) return false;
+      var k = String(cb.title || '').replace(/\s+/g, '').slice(0, 18);
+      if (_seenBookUrls[cb.pdfUrl] || _seenBookTitles[k]) return false;
+      var low = (cb.title + ' ' + cb.line).toLowerCase();
+      if (low.indexOf('پرائیویٹ') !== -1 || low.indexOf('خواب (') !== -1) return false;
+      _seenBookUrls[cb.pdfUrl] = 1;
+      _seenBookTitles[k] = 1;
+      return true;
+    });
+    var allBooks = builtInBooks.concat(cleanCloudBooks);
     var filt = allBooks.filter(function(b) {
       var matchFolder = (_activeKutubFolder === 'all' || b.folder === _activeKutubFolder);
       var matchQ = !q || (b.title + ' ' + b.author + ' ' + b.line).indexOf(q) !== -1;
@@ -5835,8 +5976,13 @@ html, body, #alRaqiV2Root,
           inner = '<div class="ar-inline-acc" onclick="event.stopPropagation()">' +
             '<a href="' + b.url + '" target="_blank" rel="noopener" class="ar-unibtn active" style="text-decoration:none;">📖 پی ڈی ایف کتاب کھولیں</a>' +
           '</div>';
-        } else {
-          inner = '<div class="ar-inline-acc" onclick="event.stopPropagation()"><div style="color:#92400e; font-weight:700;">یہ کتاب ابھی پی ڈی ایف کی صورت میں اپ لوڈ نہیں ہوئی؛ نیچے «کتاب (PDF) اپلوڈ کریں» بٹن سے شامل کریں۔</div></div>';
+        } else if (b.type === 'digital_book') {
+          var targetAct = (b.key === 'bk_saaat') ? "openScreen('saaat')" : "openFolder4('naqsh')";
+          var targetLbl = (b.key === 'bk_saaat') ? '⏰ ساعاتِ کواکب اور جدول کھولیں' : '📖 قواعد و عملیات کا عملی ٹول باکس کھولیں';
+          inner = '<div class="ar-inline-acc" onclick="event.stopPropagation()">' +
+            '<div style="font-size:0.86rem; color:#0f172a; margin-bottom:7px; line-height:1.8;">اس کتاب کا مکمل عملی مواد ایپ کے اندر براہِ راست شامل کر دیا گیا ہے۔</div>' +
+            '<button type="button" class="ar-unibtn active" onclick="' + targetAct + '">' + targetLbl + '</button>' +
+          '</div>';
         }
       }
       return '<div class="ar-slim-row' + (isOpen ? ' open' : '') + '" style="border-right-color:' + (b.folder === 'tabeer' ? '#b45309' : (b.folder === 'amliyat' ? '#1e3a8a' : '#065f46')) + ';" onclick="toggleKutubBookB11(\'' + b.key + '\')">' +
@@ -6649,13 +6795,6 @@ window.MASTER_THREE_BOOKS_DREAMS = [
         line: 'قرآن و حدیث سے ماخوذ علاج کی دعائیں',
         available: true, type: 'drive_pdf',
         pdfUrl: 'https://drive.google.com/file/d/1VJe4Y3jy7WWsg1nfGxVN_UF6W_5WbSVZ/preview'
-      },
-      {
-        key: 'bk_mujarrab', folder: 'wazaif',
-        title: 'مجربات و قرآنی عملیات (انڈیکس)',
-        author: 'مستند کتب',
-        line: 'ایپ میں شامل تمام مجرب قرآنی وظائف کی فہرست',
-        available: true, type: 'mujarrab'
       }
     ];
 
@@ -6673,7 +6812,23 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       };
     });
 
-    var allBooks = builtInBooks.concat(cloudBooks);
+    var _seenBookUrls = {};
+    var _seenBookTitles = {};
+    builtInBooks.forEach(function(b) {
+      if (b.pdfUrl) _seenBookUrls[b.pdfUrl] = 1;
+      _seenBookTitles[String(b.title || '').replace(/\s+/g, '').slice(0, 18)] = 1;
+    });
+    var cleanCloudBooks = cloudBooks.filter(function(cb) {
+      if (!cb.pdfUrl) return false;
+      var k = String(cb.title || '').replace(/\s+/g, '').slice(0, 18);
+      if (_seenBookUrls[cb.pdfUrl] || _seenBookTitles[k]) return false;
+      var low = (cb.title + ' ' + cb.line).toLowerCase();
+      if (low.indexOf('پرائیویٹ') !== -1 || low.indexOf('خواب (') !== -1) return false;
+      _seenBookUrls[cb.pdfUrl] = 1;
+      _seenBookTitles[k] = 1;
+      return true;
+    });
+    var allBooks = builtInBooks.concat(cleanCloudBooks);
     var filt = allBooks.filter(function(b) {
       var matchFolder = (_activeKutubFolder === 'all' || b.folder === _activeKutubFolder);
       var matchQ = !q || (b.title + ' ' + b.author + ' ' + b.line).indexOf(q) !== -1;
@@ -7847,10 +8002,26 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     function restoreScreenAfterBoot() {
       ensureHomeHeaderSharePillB15();
       ensureSaveAdminPinCheckboxB15();
+      // ALWAYS open Home Page on fresh app launch! Only stay on previous page when user pulls-to-refresh (reload)!
+      var isReload = false;
+      try {
+        var navs = performance && performance.getEntriesByType ? performance.getEntriesByType('navigation') : [];
+        if (navs && navs[0] && navs[0].type === 'reload') isReload = true;
+        else if (performance && performance.navigation && performance.navigation.type === 1) isReload = true;
+      } catch (e) {}
+      if (!isReload) {
+        try {
+          sessionStorage.removeItem('alraqi_active_screen_v15');
+          localStorage.removeItem('alraqi_active_screen_v30');
+          if (history && history.replaceState) history.replaceState(null, '', '#home');
+        } catch(e){}
+        if (typeof window.openScreen === 'function') window.openScreen('home');
+        return;
+      }
       var target = '';
       try {
         var h = (window.location.hash || '').replace(/^#/, '').trim();
-        var s = sessionStorage.getItem('alraqi_active_screen_v15') || localStorage.getItem('alraqi_active_screen_v30') || '';
+        var s = sessionStorage.getItem('alraqi_active_screen_v15') || '';
         target = h || s;
       } catch (e) {}
       if (target && target !== 'home' && $('scr_' + target)) {
@@ -7896,7 +8067,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     });
   };
 
-  // ================= MODULE 13: SINGLE CLEAN TEXT QURAN WORKSPACE (COPY, ZUL-KITABAT, AWFAQI NAQSH, REPORT CARD, TASBEEH) (v2.1.21) =================
+// ================= MODULE 13: SINGLE CLEAN TEXT QURAN WORKSPACE (COPY, ZUL-KITABAT, AWFAQI NAQSH, REPORT CARD, TASBEEH) (v2.1.21) =================
   (function() {
     var BUILD_VER = 'v2.1.21';
     try {
@@ -7994,27 +8165,118 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     setTimeout(lockSingleQuran, 700);
   })();
 
-
-
-  // ================= FULL-SCREEN PAGE-WISE QURAN READER (ONLY A-/A+ + PAGE TURN + 1-TAP AYAH SELECT) (v2.1.31) =================
-  (function initFullScreenPageWiseQuranV31(){
+  // ================= FULL-SCREEN 16-LINE MUSHAF PAGE-WISE SURAH READER (v2.1.32) =================
+  (function(){
     var _fsState = { num: 1, name: '', ayahs: [], pages: [], pageIdx: 0, selectedAyah: null };
+    var _fsLocalCache = {};
 
-    function paginateAyahsV31(ayahs){
-      var pages = [];
-      var cur = [], curChars = 0;
-      var MAX_CHARS = 720;
-      ayahs.forEach(function(a){
-        var len = String(a.t || '').length + 8;
-        if (cur.length && (curChars + len > MAX_CHARS || cur.length >= 10)) {
-          pages.push(cur);
-          cur = []; curChars = 0;
+    function resolveSurahNameV32(num, labelEl){
+      if (labelEl) {
+        var b = labelEl.querySelector('b');
+        if (b && (b.textContent || '').trim()) return (b.textContent || '').trim();
+      }
+      if (typeof QURAN_114_SURAHS !== 'undefined' && Array.isArray(QURAN_114_SURAHS)) {
+        for (var i = 0; i < QURAN_114_SURAHS.length; i++) {
+          if (Number(QURAN_114_SURAHS[i].num) === Number(num)) {
+            return 'سورۃ ' + (QURAN_114_SURAHS[i].urdu || QURAN_114_SURAHS[i].name || num);
+          }
         }
-        cur.push(a);
+      }
+      return 'سورۃ ' + num;
+    }
+
+    function fetchSurahAyahsReliableV32(num, cb){
+      var k = String(num);
+      if (_fsLocalCache[k] && _fsLocalCache[k].length) { cb(_fsLocalCache[k]); return; }
+      try {
+        var cached = JSON.parse(localStorage.getItem('alraqi_surah_ayahs_' + k) || 'null');
+        if (Array.isArray(cached) && cached.length) {
+          _fsLocalCache[k] = cached;
+          cb(cached);
+          return;
+        }
+      } catch(e){}
+      if (typeof SURAH_AYAHS_OFFLINE_DB !== 'undefined' && Array.isArray(SURAH_AYAHS_OFFLINE_DB[k]) && SURAH_AYAHS_OFFLINE_DB[k].length) {
+        var arr = SURAH_AYAHS_OFFLINE_DB[k].map(function(a, idx){
+          return typeof a === 'string' ? { n: idx + 1, t: a } : { n: a.num || a.n || (idx + 1), t: a.text || a.ar || a.arabic || '' };
+        }).filter(function(x){ return x.t; });
+        if (arr.length) { _fsLocalCache[k] = arr; cb(arr); return; }
+      }
+      if (typeof window.getSurahAyahsList === 'function') {
+        var done = false;
+        window.getSurahAyahsList(num, function(res){
+          if (done) return;
+          done = true;
+          if (Array.isArray(res) && res.length) { _fsLocalCache[k] = res; cb(res); }
+          else fetchDirectApiV32(num, cb);
+        });
+        return;
+      }
+      fetchDirectApiV32(num, cb);
+    }
+
+    function fetchDirectApiV32(num, cb){
+      var k = String(num);
+      fetch('https://api.alquran.cloud/v1/surah/' + num + '/quran-uthmani')
+        .then(function(r){ return r.json(); })
+        .then(function(res){
+          if (res && res.data && Array.isArray(res.data.ayahs) && res.data.ayahs.length) {
+            var arr2 = res.data.ayahs.map(function(a){ return { n: a.numberInSurah, t: a.text }; });
+            _fsLocalCache[k] = arr2;
+            try { localStorage.setItem('alraqi_surah_ayahs_' + k, JSON.stringify(arr2)); } catch(e){}
+            cb(arr2);
+          } else {
+            cb([]);
+          }
+        })
+        .catch(function(){ cb([]); });
+    }
+
+    // Calibrated like a standard 16-line Quran Mushaf page (~740 Arabic characters per page)
+    function paginateAyahsV32(ayahs, surahNum){
+      var MAX_CHARS = 740;
+      var pages = [];
+      var cur = [];
+      var curChars = 0;
+      ayahs.forEach(function(a, idx){
+        var txt = String(a.t || '').trim();
+        // Strip leading Bismillah from Ayah 1 (except Surah 1 & 9) since Bismillah is printed cleanly at top
+        if (idx === 0 && Number(surahNum) !== 1 && Number(surahNum) !== 9) {
+          txt = txt.replace(/^بِسْمِ\s*اللَّهِ\s*الرَّحْمَٰنِ\s*الرَّحِيمِ\s*/u, '')
+                   .replace(/^بِسْمِ\s*اللّٰهِ\s*الرَّحْمٰنِ\s*الرَّحِیْمِ\s*/u, '')
+                   .replace(/^بسم\s*الله\s*الرحمن\s*الرحيم\s*/u, '').trim();
+        }
+        var cleanAyah = { n: a.n, t: txt || a.t };
+        var len = cleanAyah.t.length + 14;
+        if (cur.length && (curChars + len > MAX_CHARS)) {
+          pages.push(cur);
+          cur = [];
+          curChars = 0;
+        }
+        cur.push(cleanAyah);
         curChars += len;
       });
       if (cur.length) pages.push(cur);
       return pages.length ? pages : [ayahs];
+    }
+
+    function copyTextSafeV32(txt){
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).catch(function(){ fallbackCopyV32(txt); });
+      } else {
+        fallbackCopyV32(txt);
+      }
+    }
+    function fallbackCopyV32(txt){
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = txt;
+        ta.style.cssText = 'position:fixed; opacity:0; left:-9999px;';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      } catch(e){}
     }
 
     function ensureOverlayV31(){
@@ -8035,7 +8297,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
             '<button type="button" onclick="if(window.stepArabicFontScaleV25) stepArabicFontScaleV25(10); renderFullSurahPageV31();" style="width:36px; height:34px; border-radius:8px; border:1px solid #fde047; background:#d4af37; color:#09152e; font-weight:800; font-size:0.9rem; cursor:pointer;">A+</button>' +
           '</div>' +
         '</div>' +
-        '<div id="v31_fsPageContent" style="flex:1; overflow-y:auto; padding:16px 16px 20px; -webkit-overflow-scrolling:touch; background:#fffdf7;"></div>' +
+        '<div id="v31_fsPageContent" style="flex:1; overflow-y:auto; padding:14px 14px 18px; -webkit-overflow-scrolling:touch; background:#fffdf7;"></div>' +
         '<div id="v31_fsAyahBar" style="display:none; padding:9px 12px; background:#eff6ff; border-top:2px solid #1e3a8a; flex-shrink:0;"></div>' +
         '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 12px; background:#f8fafc; border-top:1.5px solid #cbd5e1; flex-shrink:0;">' +
           '<button type="button" id="v31_fsPrevBtn" onclick="turnFullSurahPageV31(-1)" style="flex:1; padding:9px 10px; border-radius:10px; border:1.5px solid #1e3a8a; background:#fff; color:#1e3a8a; font-family:inherit; font-size:0.9rem; font-weight:800; cursor:pointer;">▶ پچھلا صفحہ</button>' +
@@ -8043,6 +8305,24 @@ window.MASTER_THREE_BOOKS_DREAMS = [
           '<button type="button" id="v31_fsNextBtn" onclick="turnFullSurahPageV31(1)" style="flex:1; padding:9px 10px; border-radius:10px; border:none; background:#1e3a8a; color:#fde047; font-family:inherit; font-size:0.9rem; font-weight:800; cursor:pointer;">اگلا صفحہ ◀</button>' +
         '</div>';
       document.body.appendChild(ov);
+
+      // Smooth horizontal touch swipe for turning pages like a real Mushaf (RTL: swipe right -> next page, swipe left -> prev page)
+      var pgBox = ov.querySelector('#v31_fsPageContent');
+      var sx = 0, sy = 0;
+      if (pgBox) {
+        pgBox.addEventListener('touchstart', function(e){
+          if (e.touches && e.touches.length === 1) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }
+        }, { passive: true });
+        pgBox.addEventListener('touchend', function(e){
+          if (!e.changedTouches || !e.changedTouches.length) return;
+          var dx = e.changedTouches[0].clientX - sx;
+          var dy = e.changedTouches[0].clientY - sy;
+          if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+            if (dx > 0) window.turnFullSurahPageV31(1);
+            else window.turnFullSurahPageV31(-1);
+          }
+        }, { passive: true });
+      }
       return ov;
     }
 
@@ -8063,7 +8343,9 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     };
 
     window.selectFullSurahAyahV31 = function(ayahNum){
-      var found = _fsState.ayahs.filter(function(a){ return a.n === ayahNum; })[0];
+      var curPage = _fsState.pages[_fsState.pageIdx] || [];
+      var found = curPage.filter(function(a){ return Number(a.n) === Number(ayahNum); })[0]
+               || _fsState.ayahs.filter(function(a){ return Number(a.n) === Number(ayahNum); })[0];
       if (!found) return;
       _fsState.selectedAyah = found;
       window.renderFullSurahPageV31();
@@ -8071,15 +8353,12 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       if (bar) {
         bar.style.display = 'block';
         bar.innerHTML =
-          '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">' +
-            '<b style="color:#1e3a8a; font-size:0.86rem;">آیت نمبر ' + found.n + ' منتخب ہے:</b>' +
-            '<button type="button" onclick="document.getElementById(\'v31_fsAyahBar\').style.display=\'none\';" style="border:none; background:none; color:#64748b; font-weight:800; cursor:pointer;">✕</button>' +
-          '</div>' +
-          '<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px;">' +
-            '<button type="button" onclick="fsAyahActionV31(\'copy\')" style="padding:7px 4px; border-radius:8px; border:1px solid #1e3a8a; background:#fff; color:#1e3a8a; font-family:inherit; font-size:0.8rem; font-weight:800; cursor:pointer;">📋 کاپی</button>' +
-            '<button type="button" onclick="fsAyahActionV31(\'zul\')" style="padding:7px 4px; border-radius:8px; border:none; background:#1e3a8a; color:#fff; font-family:inherit; font-size:0.8rem; font-weight:800; cursor:pointer;">📐 ذوالکتابت</button>' +
-            '<button type="button" onclick="fsAyahActionV31(\'awfaq\')" style="padding:7px 4px; border-radius:8px; border:none; background:#065f46; color:#fff; font-family:inherit; font-size:0.8rem; font-weight:800; cursor:pointer;">🔢 اوفاقی</button>' +
-            '<button type="button" onclick="fsAyahActionV31(\'tasbeeh\')" style="padding:7px 4px; border-radius:8px; border:none; background:#b45309; color:#fff; font-family:inherit; font-size:0.8rem; font-weight:800; cursor:pointer;">📿 تسبیح</button>' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">' +
+            '<b style="color:#1e3a8a; font-size:0.88rem;">' + _fsState.name + ' — آیت نمبر ' + found.n + '</b>' +
+            '<div style="display:flex; align-items:center; gap:6px;">' +
+              '<button type="button" onclick="fsAyahActionV31(\'copy\')" style="padding:7px 14px; border-radius:9px; border:none; background:#1e3a8a; color:#fde047; font-family:inherit; font-size:0.86rem; font-weight:800; cursor:pointer;">📋 آیت کاپی کریں</button>' +
+              '<button type="button" onclick="document.getElementById(\'v31_fsAyahBar\').style.display=\'none\';" style="border:none; background:#e2e8f0; color:#334155; border-radius:7px; padding:5px 9px; font-weight:800; cursor:pointer;">✕</button>' +
+            '</div>' +
           '</div>';
       }
     };
@@ -8089,21 +8368,8 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       if (!a) return;
       var txt = String(a.t || '').trim();
       if (act === 'copy') {
-        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).catch(function(){});
-        if (typeof window.showToast === 'function') window.showToast('✅ آیت نمبر ' + a.n + ' کاپی ہو گئی');
-        return;
-      }
-      window.closeFullSurahReaderV31();
-      if (typeof window.pickSpecificAyah === 'function') {
-        try { window.pickSpecificAyah(_fsState.num, a.n); } catch(e){}
-      }
-      if (act === 'zul' && typeof window.sendWazifaToNaqshV15 === 'function') {
-        window.sendWazifaToNaqshV15(txt, 'zulkitabat');
-      } else if (act === 'awfaq' && typeof window.sendWazifaToNaqshV15 === 'function') {
-        window.sendWazifaToNaqshV15(txt, 'murabba');
-      } else if (act === 'tasbeeh' && typeof window.addItemToTasbeehPlaylist === 'function') {
-        window.addItemToTasbeehPlaylist(txt, 100);
-        if (typeof window.openScreen === 'function') window.openScreen('tasbeeh');
+        copyTextSafeV32(txt);
+        if (typeof window.showToast === 'function') window.showToast('✅ آیت نمبر ' + a.n + ' کاپی ہو گئی — اب کسی بھی نقش میں پیسٹ کر لیں');
       }
     };
 
@@ -8122,18 +8388,18 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       var scale = (typeof window.getArabicFontScaleV25 === 'function') ? window.getArabicFontScaleV25() : 120;
       var rem = (scale / 100 * 1.48).toFixed(2);
 
-      if (meta) meta.textContent = 'صفحہ ' + (idx + 1) + ' از ' + tot;
+      if (meta) meta.textContent = 'صفحہ ' + (idx + 1) + ' از ' + tot + ' (کل آیات: ' + _fsState.ayahs.length + ')';
       if (bCnt) bCnt.textContent = (idx + 1) + ' / ' + tot;
       if (pBtn) pBtn.style.opacity = (idx === 0) ? '0.45' : '1';
       if (nBtn) nBtn.style.opacity = (idx >= tot - 1) ? '0.45' : '1';
       if (aBar && !_fsState.selectedAyah) aBar.style.display = 'none';
 
-      var bismillahHtml = (idx === 0 && _fsState.num !== 1 && _fsState.num !== 9)
+      var bismillahHtml = (idx === 0 && Number(_fsState.num) !== 1 && Number(_fsState.num) !== 9)
         ? '<div data-ar-quran="1" class="ar-arabic-text" style="text-align:center; color:#065f46; font-size:' + rem + 'rem; margin-bottom:12px; padding-bottom:8px; border-bottom:1px dashed #d4af37;">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</div>'
         : '';
 
       var bodyHtml = curAyahs.map(function(a){
-        var isSel = _fsState.selectedAyah && _fsState.selectedAyah.n === a.n;
+        var isSel = _fsState.selectedAyah && Number(_fsState.selectedAyah.n) === Number(a.n);
         return '<span data-ar-quran="1" class="ar-arabic-text" onclick="selectFullSurahAyahV31(' + a.n + ')" style="font-size:' + rem + 'rem; line-height:2.4; color:#09152e; cursor:pointer; padding:2px 4px; border-radius:6px; background:' + (isSel ? '#fef08a' : 'transparent') + ';">' +
           a.t + ' <span style="color:#065f46; font-size:0.82em;">﴿' + a.n + '﴾</span> </span>';
       }).join('');
@@ -8149,31 +8415,26 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       var ov = ensureOverlayV31();
       ov.style.display = 'flex';
       var titleEl = document.getElementById('v31_fsSurahTitle');
+      var metaEl = document.getElementById('v31_fsPageMeta');
       var box = document.getElementById('v31_fsPageContent');
-      var sName = '';
-      if (labelEl) {
-        var b = labelEl.querySelector('b');
-        if (b) sName = (b.textContent || '').trim();
-      }
-      _fsState = { num: num, name: sName || ('سورت ' + num), ayahs: [], pages: [], pageIdx: 0, selectedAyah: null };
-      if (titleEl) titleEl.textContent = _fsState.name;
-      if (box) box.innerHTML = '<div style="text-align:center; padding:40px 12px; color:#1e3a8a; font-weight:700;">مکمل سورت لوڈ ہو رہی ہے...</div>';
+      var sName = resolveSurahNameV32(num, labelEl);
+      _fsState = { num: Number(num), name: sName, ayahs: [], pages: [], pageIdx: 0, selectedAyah: null };
+      if (titleEl) titleEl.textContent = sName;
+      if (metaEl) metaEl.textContent = 'لوڈ ہو رہی ہے...';
+      if (box) box.innerHTML = '<div style="text-align:center; padding:40px 12px; color:#1e3a8a; font-weight:700;">' + sName + ' کے صفحات تیار ہو رہے ہیں...</div>';
 
-      if (typeof window.getSurahAyahsList === 'function') {
-        window.getSurahAyahsList(num, function(ayahs){
-          if (!ayahs || !ayahs.length) {
-            if (box) box.innerHTML = '<div style="text-align:center; padding:40px 12px; color:#b91c1c; font-weight:700;">سورت لوڈ کرنے کے لیے انٹرنیٹ چیک کریں۔</div>';
-            return;
-          }
-          _fsState.ayahs = ayahs;
-          _fsState.pages = paginateAyahsV31(ayahs);
-          _fsState.pageIdx = 0;
-          window.renderFullSurahPageV31();
-        });
-      }
+      fetchSurahAyahsReliableV32(num, function(ayahs){
+        if (!ayahs || !ayahs.length) {
+          if (box) box.innerHTML = '<div style="text-align:center; padding:40px 12px; color:#b91c1c; font-weight:700;">سورت لوڈ کرنے کے لیے انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں۔</div>';
+          return;
+        }
+        _fsState.ayahs = ayahs;
+        _fsState.pages = paginateAyahsV32(ayahs, num);
+        _fsState.pageIdx = 0;
+        window.renderFullSurahPageV31();
+      });
     };
 
-    // Route every Surah tap straight into the clean Full-Screen Page-Wise Reader!
     function hookToggleSurahV31(){
       window.toggleInlineSurah = function(num, el){
         window.openFullScreenSurahV31(num, el);
@@ -8317,6 +8578,147 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     }
     if (!_dreamSpeechActive) window.toggleVoiceDreamDictation();
   };
+
+// === EXACT V1.89 DREAMER CONDITION SELECTOR (RESTORED VERBATIM) ===
+(function() {
+  var DREAM_CONDITIONS_V140 = [
+    { val: 'تندرست', icon: '💪' },
+    { val: 'بیمار', icon: '🩺' },
+    { val: 'شادی شدہ', icon: '💍' },
+    { val: 'غیر شادی شدہ', icon: '🌱' },
+    { val: 'حاملہ', icon: '🤰' },
+    { val: 'پریشان / غمزدہ', icon: '😔' },
+    { val: 'مالی تنگی / مقروض', icon: '💰' },
+    { val: 'مسافر', icon: '✈️' },
+    { val: 'کاروباری / طالبِ رزق', icon: '💼' }
+  ];
+  window._rqSelectedCondsV140 = [];
+
+  function escHtmlV140(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function injectV189DreamCondCss() {
+    if (document.getElementById('rqV189DreamCondCss')) return;
+    var st = document.createElement('style');
+    st.id = 'rqV189DreamCondCss';
+    st.textContent = [
+      '.rq-tabeer-ctx-bar-v116 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin-bottom:9px; direction:rtl; }',
+      '.rq-tabeer-ctx-bar-v116 select { width:100%; padding:6px 8px; border-radius:9px; border:1.5px solid #cbd5e1; background:#f8fafc; color:#0b1936; font-family:inherit; font-size:0.84rem; font-weight:800; direction:rtl; }',
+      '#rqDreamCondWrapV140 { background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:9px 10px; margin-bottom:10px; direction:rtl; text-align:right; }',
+      '.rq-cond-chip-v140 { background:#ffffff; color:#0f172a; border:1.5px solid #cbd5e1; border-radius:20px; padding:5px 12px; font-family:inherit; font-size:0.82rem; font-weight:800; cursor:pointer; transition:all 0.15s ease; }',
+      '.rq-cond-chip-v140.active { background:#065f46; color:#fef3c7; border-color:#d4af37; box-shadow:0 2px 8px rgba(6, 95, 70, 0.25); }'
+    ].join('\n');
+    document.head.appendChild(st);
+  }
+
+  function syncCondSummaryV140() {
+    var joined = window._rqSelectedCondsV140.length ? window._rqSelectedCondsV140.join('، ') : '';
+    var badge = document.getElementById('rqSelectedCondSummaryV140');
+    if (badge) {
+      badge.textContent = window._rqSelectedCondsV140.length
+        ? ('منتخب حالتیں: ' + joined)
+        : 'کوئی بھی ایک یا زائد حالتیں منتخب کریں (اختیاری)';
+    }
+  }
+
+  window.toggleDreamCondV140 = function(val, btn) {
+    var idx = window._rqSelectedCondsV140.indexOf(val);
+    if (idx === -1) {
+      window._rqSelectedCondsV140.push(val);
+      if (btn) btn.classList.add('active');
+    } else {
+      window._rqSelectedCondsV140.splice(idx, 1);
+      if (btn) btn.classList.remove('active');
+    }
+    syncCondSummaryV140();
+  };
+
+  window.getDreamerConditionLineV140 = function() {
+    var g = (document.getElementById('rqDreamGenderV116') || {}).value || 'عام';
+    var r = (document.getElementById('rqDreamRankV117') || {}).value || 'عام انسان';
+    var t = (document.getElementById('rqDreamTimeV116') || {}).value || 'غیر متعین';
+    var conds = window._rqSelectedCondsV140.length ? window._rqSelectedCondsV140.join('، ') : '';
+    var parts = [];
+    if (g && g !== 'عام') parts.push('جنس: ' + g);
+    if (r && r !== 'عام انسان') parts.push('حیثیت: ' + r);
+    if (t && t !== 'غیر متعین') parts.push('وقت: ' + t);
+    if (conds) parts.push('حالت: ' + conds);
+    return parts.join(' | ');
+  };
+
+  function mountV189DreamConditionsUI() {
+    var inp = document.getElementById('patientRawDreamTextInput');
+    if (!inp || !inp.parentNode) return;
+    injectV189DreamCondCss();
+
+    if (!document.getElementById('rqTabeerProToolsV116')) {
+      var tools = document.createElement('div');
+      tools.id = 'rqTabeerProToolsV116';
+      tools.innerHTML =
+        '<div class="rq-tabeer-ctx-bar-v116">' +
+          '<select id="rqDreamGenderV116" title="سائل کی جنس">' +
+            '<option value="عام">👤 سائل: عام</option>' +
+            '<option value="مرد">👨 مرد</option>' +
+            '<option value="عورت">👩 عورت</option>' +
+          '</select>' +
+          '<select id="rqDreamRankV117" title="علمی و دینی حیثیت">' +
+            '<option value="عام انسان">📚 عام انسان</option>' +
+            '<option value="عالمِ دین">🎓 عالمِ دین</option>' +
+            '<option value="عالمہ">🎓 عالمہ</option>' +
+            '<option value="طالبِ علم">📖 طالبِ علم</option>' +
+            '<option value="دیندار و صالح">🕌 دیندار و صالح</option>' +
+          '</select>' +
+          '<select id="rqDreamTimeV116" title="خواب کا وقت">' +
+            '<option value="غیر متعین">🕒 وقت: عام</option>' +
+            '<option value="سحر / تہجد کا وقت">🌙 سحر / تہجد</option>' +
+            '<option value="رات کا ابتدائی حصہ">🌃 رات</option>' +
+            '<option value="دن کا خواب">☀️ دن کا خواب</option>' +
+          '</select>' +
+        '</div>';
+      inp.parentNode.insertBefore(tools, inp);
+    }
+
+    if (!document.getElementById('rqDreamCondWrapV140')) {
+      var wrap = document.createElement('div');
+      wrap.id = 'rqDreamCondWrapV140';
+      wrap.innerHTML =
+        '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:7px;">' +
+          '<span style="font-weight:900; font-size:0.86rem; color:#0c5748;">👤 سائل کی حالت (بیک وقت دو یا زائد حالتیں منتخب کر سکتے ہیں):</span>' +
+          '<span id="rqSelectedCondSummaryV140" style="font-size:0.76rem; color:#64748b; font-weight:700;">کوئی بھی ایک یا زائد حالتیں منتخب کریں (اختیاری)</span>' +
+        '</div>' +
+        '<div style="display:flex; flex-wrap:wrap; gap:6px;">' +
+          DREAM_CONDITIONS_V140.map(function(c) {
+            return '<button type="button" class="rq-cond-chip-v140" data-val="' + escHtmlV140(c.val) + '" onclick="window.toggleDreamCondV140(\'' + escHtmlV140(c.val) + '\', this)">' + c.icon + ' ' + escHtmlV140(c.val) + '</button>';
+          }).join('') +
+        '</div>';
+      inp.parentNode.insertBefore(wrap, inp);
+    }
+
+    // Inject selected dreamer condition summary cleanly at top of #dreamSmartSummaryBox whenever updated
+    var sumBox = document.getElementById('dreamSmartSummaryBox');
+    if (sumBox && !sumBox._rqV140CondObs) {
+      sumBox._rqV140CondObs = true;
+      var obs = new MutationObserver(function() {
+        var line = window.getDreamerConditionLineV140();
+        if (!line || !sumBox.innerHTML.trim() || sumBox.querySelector('.rq-cond-badge-v140')) return;
+        var div = document.createElement('div');
+        div.className = 'rq-cond-badge-v140';
+        div.style.cssText = 'background:#ecfdf5; border:1px solid #6ee7b7; border-radius:8px; padding:6px 9px; margin-bottom:7px; font-size:0.82rem; font-weight:800; color:#065f46;';
+        div.textContent = '👤 خواب دیکھنے والے کی کیفیت: ' + line;
+        sumBox.insertBefore(div, sumBox.firstChild);
+      });
+      obs.observe(sumBox, { childList: true });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mountV189DreamConditionsUI);
+  } else {
+    mountV189DreamConditionsUI();
+  }
+  setTimeout(mountV189DreamConditionsUI, 500);
+})();
 
   // ================= MODULE 15: ZUL-KITABAT QURAN SYMBOL CLEANER + AWFAQ/ZUL-KITABAT CHAAL & MEEZAN VERIFIER =================
   function stripQuranicSignsForNaqsh(str) {
@@ -10504,6 +10906,57 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       '</div>';
   };
 
+
+  var PLANET_STONES_V32 = {
+    'شمس': 'یاقوت سرخ یا زرد پکھراج (سونے یا چاندی میں)',
+    'قمر': 'سفید موتی یا چاندی کا چھلہ',
+    'مریخ': 'لال مرجان (مونگا) یا عقیق سرخ',
+    'عطارد': 'زمرد (پنا) یا سبز عقیق',
+    'مشتری': 'زرد پکھراج یا زرد عقیق',
+    'زہرہ': 'سفید اوپل، فیروزہ یا ہیرا',
+    'زحل': 'نیلم یا کالا عقیق (سلیمانی)'
+  };
+
+  function getMinimumAuthenticCountV32(abjadVal){
+    // Authentic minimum count so patient reads happily without burden (Qawaid-e-Amliyat Ch 1 & 8)
+    if (abjadVal <= 150) return abjadVal + ' بار روزانہ (یا کم از کم ۴۱ بار — بعدِ نماز ۱۱ بار مداومت)';
+    var red = abjadVal % 9 || 9;
+    return '۴۱ بار روزانہ (کم از کم مسنون/مجرب تعداد — اصل عددی نصاب ' + abjadVal + ' ہے؛ آسانی کے لیے روزانہ ۴۱ بار اور ہر نماز کے بعد ۱۱ بار مداومت کافی ہے)';
+  }
+
+  window.runPlaceBizCompatV32 = function(){
+    var p1Nm = ((document.getElementById('v31_inP1') || {}).value || '').trim();
+    var p1Mo = ((document.getElementById('v31_inM1') || {}).value || '').trim();
+    var targetNm = ((document.getElementById('v32_bizCityInput') || {}).value || '').trim();
+    var kind = ((document.getElementById('v32_bizCityKind') || {}).value || 'کاروبار / پیشہ');
+    var out = document.getElementById('v32_bizCityResult');
+    if (!out) return;
+    if (!p1Nm || !targetNm) {
+      out.innerHTML = '<div style="color:#92400e;">اوپر سائل کا نام اور نیچے ' + escH(kind) + ' کا نام درج کریں۔</div>';
+      return;
+    }
+    var ab1 = calcAbjadDetailed(p1Nm), abM1 = calcAbjadDetailed(p1Mo);
+    var sum1 = ab1.total + abM1.total;
+    var b1 = BURJ_12[((sum1 % 12) || 12) - 1];
+
+    var abT = calcAbjadDetailed(targetNm);
+    var bT = BURJ_12[((abT.total % 12) || 12) - 1];
+    var rel = getElementRelation(b1.elem, bT.elem);
+    var n1 = (sum1 % 9) || 9, nT = (abT.total % 9) || 9;
+
+    out.innerHTML =
+      '<div style="background:#fff; border:1.5px solid #cbd5e1; border-right:4px solid ' + rel.color + '; border-radius:10px; padding:10px 12px; font-size:0.88rem; line-height:1.95;">' +
+        '<div><b>📌 ' + escH(kind) + ' («' + escH(targetNm) + '») سے مطابقت:</b> <b style="color:' + rel.color + ';">' + rel.label + '</b></div>' +
+        '<div>• سائل: برج ' + b1.name + ' (<b>' + b1.elem + '</b> | مفرد عدد: ' + n1 + ')</div>' +
+        '<div>• ' + escH(kind) + ': برج ' + bT.name + ' (<b>' + bT.elem + '</b> | مفرد عدد: ' + nT + ')</div>' +
+        '<div style="margin-top:4px; color:#334155;">' + rel.detail + '</div>' +
+        '<details style="margin-top:7px; background:#f8fafc; border:1px dashed #94a3b8; border-radius:7px; padding:5px 8px;">' +
+          '<summary style="cursor:pointer; font-size:0.78rem; font-weight:800; color:#1e3a8a;">📐 حساب اور قانون کی تصدیق (Verify)</summary>' +
+          '<div style="margin-top:4px; font-size:0.78rem; color:#334155;">سائل کل اعداد: ' + sum1 + ' (÷12 باقی ' + ((sum1 % 12) || 12) + ' = ' + b1.name + '/' + b1.elem + ') | ' + escH(kind) + ' اعداد: ' + abT.total + ' (÷12 باقی ' + ((abT.total % 12) || 12) + ' = ' + bT.name + '/' + bT.elem + ')</div>' +
+        '</details>' +
+      '</div>';
+  };
+
   function escH(s){
     return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -10584,7 +11037,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     if (!body) return;
     window._v31ActiveDiagAngle = angleKey;
 
-    ['sarharf','tala','compat','ghalib','jalali','planet','saat','istikhraj','imtizaj','counter'].forEach(function(k){
+    ['single','bizcity','sarharf','tala','compat','ghalib','jalali','planet','saat','istikhraj','imtizaj','counter'].forEach(function(k){
       var b = document.getElementById('v31_angBtn_' + k);
       if (b) {
         var act = (k === angleKey);
@@ -10622,7 +11075,60 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       '</div>';
     }
 
-    if (angleKey === 'sarharf') {
+    if (angleKey === 'single') {
+      var jalS = 0, jamS = 0;
+      for (var sIdx = 0; sIdx < ab1.clean.length; sIdx++) {
+        if (JALALI_L.indexOf(ab1.clean[sIdx]) !== -1) jalS++;
+        else if (JAMALI_L.indexOf(ab1.clean[sIdx]) !== -1) jamS++;
+      }
+      var prefTypeS = (jalS > jamS) ? 'جمالی' : 'جلالی';
+      var singleBest = findMatchingAsmaV31(ab1.total, prefTypeS).closest[0];
+      var minCntTxt = getMinimumAuthenticCountV32(singleBest.v);
+      var stoneTxt = PLANET_STONES_V32[burjObj.planet] || 'عقیق یا فیروزہ';
+      var pInfoS = PLANET_HEALTH_SADQA[burjObj.planet] || PLANET_HEALTH_SADQA['شمس'];
+      var curPlS = getCurrentHourPlanet();
+      var sInfoS = PLANET_HEALTH_SADQA[curPlS] || PLANET_HEALTH_SADQA['شمس'];
+      var sendOne = 'اسمِ اعظم (واحد ورد): ' + singleBest.n + ' — ' + minCntTxt + '\nہم مزاج پتھر: ' + stoneTxt + '\nصدقہ: ' + pInfoS.sadqa;
+
+      var res =
+        '<div style="font-weight:800; color:#065f46; font-size:0.96rem; margin-bottom:5px;">🩺 اکیلے فرد کی مکمل تشخیص (بغیر مطابقت — صرف مزاج، جادو/بندش، پتھر اور ایک اسمِ اعظم)</div>' +
+        '<div>• <b>طبعی مزاج و برج:</b> ' + burjObj.elem + ' — برج ' + burjObj.name + ' (حاکم سیارہ: <b>' + burjObj.planet + '</b> | سرِ حرف: ' + sar.saadStatus + ')</div>' +
+        '<div>• <b>ہم مزاج پتھر:</b> <b style="color:#1e3a8a;">' + stoneTxt + '</b></div>' +
+        '<div style="background:#f0fdf4; border-right:3px solid #065f46; padding:7px 9px; border-radius:7px; margin:6px 0;">' +
+          '<b>✨ واحد منتخب اسمِ اعظم (ہلکا اور پُراثر):</b> <span style="color:#065f46; font-weight:800; font-size:1.02rem;">' + singleBest.n + '</span><br>' +
+          '<b>کم از کم مستند تعداد:</b> ' + minCntTxt + '<br>' +
+          '<small style="color:#334155;">خاصیت: ' + singleBest.u + '</small>' +
+        '</div>' +
+        '<div style="background:#fffbeb; border-right:3px solid #d97706; padding:7px 9px; border-radius:7px; margin:6px 0; font-size:0.84rem;">' +
+          '<b>🔎 جادو، بندش اور آسیب کی کتابی علامات (عاملِ کامل و الساعات):</b><br>' +
+          '• <b>سحر / جادو:</b> اچانک مزاج بدلنا، گھر/کاروبار میں بے سبب رکاوٹ، برے خواب، سر یا کندھوں پر بوجھ اور عبادت سے وحشت۔<br>' +
+          '• <b>بندش (رزق/رشتہ):</b> آخری مرحلے پر کام کا ٹوٹ جانا، بلاوجہ انکار اور مالی تنگی۔<br>' +
+          '• <b>آسیب / نظرِ بد:</b> تیز حرارت یا ٹھنڈک، دل کی گھبراہٹ اور اچانک کمزوری۔<br>' +
+          '• <b>ساعتِ استفسار (' + curPlS + ') کا اشارہ:</b> ' + sInfoS.saatCond +
+        '</div>' +
+        '<div>• <b>مخصوص صدقہ:</b> ' + pInfoS.sadqa + '</div>' +
+        '<div style="margin-top:8px;">' +
+          '<button type="button" onclick="sendPractitionerSelectionToReportV31(\'' + sendOne.replace(/\n/g,'\\n').replace(/'/g,'') + '\')" style="width:100%; padding:8px 12px; border-radius:9px; border:none; background:#065f46; color:#fff; font-family:inherit; font-size:0.85rem; font-weight:800; cursor:pointer;">📤 واحد اسمِ اعظم، پتھر اور صدقہ رپورٹ کارڈ میں شامل کریں</button>' +
+        '</div>';
+      var ver = 'نام (' + ab1.total + ') + والدہ (' + abM1.total + ') = ' + sum1 + ' | ÷12 باقی ' + rem12 + ' (برج ' + burjObj.name + ' / سیارہ ' + burjObj.planet + ') | جلالی: ' + jalS + '، جمالی: ' + jamS + ' ← توازن کے لیے صرف ایک ' + prefTypeS + ' اسمِ اعظم (' + singleBest.n + '، عدد ' + singleBest.v + ') منتخب کیا گیا۔';
+      body.innerHTML = wrapWithVerify(res, ver);
+    } else if (angleKey === 'bizcity') {
+      body.innerHTML =
+        '<div style="background:#fff; border:1.5px solid #cbd5e1; border-radius:10px; padding:10px 12px;">' +
+          '<div style="font-weight:800; color:#1e3a8a; margin-bottom:6px; font-size:0.9rem;">🌍 کاروبار، شہر یا ملک بدلنے کی مطابقت (قواعدِ عملیات و الساعات)</div>' +
+          '<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">' +
+            '<select id="v32_bizCityKind" style="width:auto;" onchange="runPlaceBizCompatV32()">' +
+              '<option value="کاروبار / پیشہ">کاروبار / پیشہ</option>' +
+              '<option value="شہر">شہر تبدیل کرنا</option>' +
+              '<option value="ملک">ملک / بیرونِ ملک سفر</option>' +
+            '</select>' +
+            '<input type="text" id="v32_bizCityInput" autocomplete="off" placeholder="کاروبار، شہر یا ملک کا نام لکھیں (مثلاً: دبئی، لاہور، کپڑا)..." style="flex:1; min-width:150px;" oninput="runPlaceBizCompatV32()">' +
+            '<button type="button" onclick="runPlaceBizCompatV32()" style="padding:7px 12px; border-radius:8px; border:none; background:#1e3a8a; color:#fff; font-family:inherit; font-size:0.84rem; font-weight:700; cursor:pointer;">چیک کریں</button>' +
+          '</div>' +
+          '<div id="v32_bizCityResult"></div>' +
+        '</div>';
+      window.runPlaceBizCompatV32();
+    } else if (angleKey === 'sarharf') {
       var res = '<div><b>۱. سرِ حرف (پہلا حرف):</b> «' + escH(sar.first) + '» — عنصر: <b style="color:#1e3a8a;">' + sar.elem + '</b></div>' +
         '<div><b>حرف کی تاثیر:</b> <b style="color:' + (sar.saadStatus === 'سعد' ? '#065f46' : '#991b1b') + ';">' + sar.saadStatus + ' حرف</b></div>' +
         '<div style="margin-top:4px; color:#334155;">' + (sar.saadStatus === 'سعد' ? 'نام کا ابتدائی حرف سعد ہے؛ دعا، خیر کے اعمال اور روحانی علاج میں قبولیت و آسانی کا اشارہ ہے۔' : 'نام کا ابتدائی حرف نحس/تیز ہے؛ معاملات میں رکاوٹ یا حساسیت ممکن ہے، اس لیے صدقہ و حفاظتی اذکار ساتھ رکھیں۔') + '</div>';
@@ -10787,6 +11293,8 @@ window.MASTER_THREE_BOOKS_DREAMS = [
           '<input type="text" id="v31_inM2" autocomplete="off" placeholder="فریقِ دوم کی والدہ (اختیاری)" oninput="renderPractitionerAngleV31(window._v31ActiveDiagAngle || \'compat\')">' +
         '</div>' +
         '<div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:10px;">' +
+          '<button type="button" id="v31_angBtn_single" onclick="renderPractitionerAngleV31(\'single\')" style="padding:6px 10px; border-radius:8px; border:1.5px solid #065f46; background:#ecfdf5; color:#065f46; font-family:inherit; font-size:0.82rem; font-weight:800; cursor:pointer;">🩺 اکیلے فرد کی تشخیص (۱ اسمِ اعظم)</button>' +
+          '<button type="button" id="v31_angBtn_bizcity" onclick="renderPractitionerAngleV31(\'bizcity\')" style="padding:6px 10px; border-radius:8px; border:1.5px solid #1e3a8a; background:#eff6ff; color:#1e3a8a; font-family:inherit; font-size:0.82rem; font-weight:800; cursor:pointer;">🌍 کاروبار / شہر / ملک مطابقت</button>' +
           '<button type="button" id="v31_angBtn_tala" onclick="renderPractitionerAngleV31(\'tala\')" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-family:inherit; font-size:0.8rem; font-weight:700; cursor:pointer;">جفری طالع</button>' +
           '<button type="button" id="v31_angBtn_sarharf" onclick="renderPractitionerAngleV31(\'sarharf\')" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-family:inherit; font-size:0.8rem; font-weight:700; cursor:pointer;">سرِ حرف سعد/نحس</button>' +
           '<button type="button" id="v31_angBtn_compat" onclick="renderPractitionerAngleV31(\'compat\')" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-family:inherit; font-size:0.8rem; font-weight:700; cursor:pointer;">عنصری مطابقت</button>' +
@@ -10815,6 +11323,580 @@ window.MASTER_THREE_BOOKS_DREAMS = [
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectPractitioner7AnglesCardV31);
   else injectPractitioner7AnglesCardV31();
   setTimeout(injectPractitioner7AnglesCardV31, 900);
+})();
+
+/* =========================================================================
+   MODULE 20: KHAWAS-E-AADAD (1-9), ANASIR (4 ELEMENTS) & BUROOJ (12 SIGNS)
+              WITH AUTHENTIC BOOK-GROUNDED COMPATIBILITY, BALANCE & CONFLICT
+   Modular path: Al_Raqi_Modular_Sections_v1/14_Aadad_Anasir_Burooj/aadad_anasir_burooj_module.js
+   Sources: Kash Al-Barni — Al-Saaat (Vol 1 Ch 4,6,7), Qawaid-e-Amliyat (Ch 2,3,4,6,9,10), Aamil-e-Kamil (Vol 2 Ch 1)
+   Lives strictly inside Maktaba Al-Raqi (#scr_folders) — Home Page remains untouched!
+   ========================================================================= */
+(function(){
+  'use strict';
+
+  function escH(s){
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ---- 1. AUTHENTIC NUMBERS 1-9 (Al-Saaat Vol 1 Ch 6: Planetary Numbers + Friend/Enemy/Neutral Matrix) ----
+  var AADAD_1_9 = [
+    {
+      num:1, planet:'شمس (مثبت)', day:'اتوار', elem:'آتشی', stone:'یاقوت / پکھراج', color:'سنہرا / اورنج',
+      traits:'قیادت، عزت و وجاہت، خود اعتمادی، بلند حوصلہ، حکومت اور عرفان و اخلاقی ترقی (الساعات باب دوم و ششم)۔',
+      health:'زیادہ سوچنے اور ذہنی دباؤ سے ضعفِ قلب کا اندیشہ۔',
+      muwafiq:'۲، ۳، ۷، ۹ (قمر، مشتری اور مریخ — شمس کے دوست سیارے)',
+      mutawazin:'۵ (عطارد — غیر جانبدار اور علمی معاون) اور ہم عدد ۱، ۴',
+      mukhalif:'۶، ۸ (زہرہ اور زحل — شمس کے مخالف سیارے)',
+      src:'الساعات (حصہ اول، باب ۲، ۴، ۶، ۷ — کاش البرنی)'
+    },
+    {
+      num:2, planet:'قمر (منفی)', day:'پیر', elem:'آبی', stone:'موتی / چاندی', color:'سفید',
+      traits:'نرم مزاجی، حساسیت، حرکت و سفر، عوامی مقبولیت، گھریلو الفت اور تیز اثر پذیری (الساعات باب ۴ و ۶)۔',
+      health:'دست، معدے کی کمزوری اور بدہضمی کا فوری علاج کرائیں۔',
+      muwafiq:'۱، ۴، ۵ (شمس اور عطارد — قمر کے دوست سیارے) اور ہم کوکب ۷',
+      mutawazin:'۳، ۶، ۸، ۹ (مشتری، زہرہ، زحل اور مریخ — قمر کے غیر جانبدار)',
+      mukhalif:'قمر کا کوئی سیارہ مستقل دشمن نہیں (الساعات باب ششم)۔',
+      src:'الساعات (حصہ اول، باب ۴، ۶، ۷ — کاش البرنی)'
+    },
+    {
+      num:3, planet:'مشتری', day:'جمعرات', elem:'آتشی', stone:'زرد پکھراج / زرد عقیق', color:'زرد / سبز / سنہرا',
+      traits:'سعدِ اکبر — وجدان، علم و دانش، مرادوں کا بر آنا، کشائشِ رزق، دولت، لمبے سفر اور کاروباری ترقی۔',
+      health:'انجمادِ خون اور ثقیل غذا سے احتیاط کریں۔',
+      muwafiq:'۱، ۲، ۴، ۷، ۹ (شمس، قمر اور مریخ — مشتری کے دوست سیارے) اور ہم عدد ۳',
+      mutawazin:'۸ (زحل — مشتری کے لیے غیر جانبدار)',
+      mukhalif:'۵، ۶ (عطارد اور زہرہ — مشتری کے مخالف سیارے)',
+      src:'الساعات (حصہ اول، باب ۴، ۶، ۷ — کاش البرنی)'
+    },
+    {
+      num:4, planet:'شمس (منفی)', day:'اتوار', elem:'آتشی', stone:'یاقوت / گومید', color:'سنہرا / زعفرانی',
+      traits:'نظم و ضبط، محنت، غیر متوقع حالات کا سامنا اور مضبوط ارادہ؛ شمس کے منفی پہلو کی وجہ سے صبر و تدبیر لازم۔',
+      health:'ذہنی تناؤ اور ضعفِ قلب سے بچاؤ کی احتیاط۔',
+      muwafiq:'۲، ۳، ۷، ۹ (قمر، مشتری اور مریخ — شمس کے دوست)',
+      mutawazin:'۵ (عطارد — غیر جانبدار) اور ہم کوکب ۱',
+      mukhalif:'۶، ۸ (زہرہ اور زحل — شمس کے مخالف)',
+      src:'الساعات (حصہ اول، باب ۶ — کاش البرنی)'
+    },
+    {
+      num:5, planet:'عطارد', day:'بدھ', elem:'بادی', stone:'زمرد (پنا)', color:'سبز / فیروزی',
+      traits:'علم، حافظہ، ذہانت، تحریر و تقریر، تجارت، چھوٹے سفر اور کاروباری معاملات میں مہارت (الساعات باب ۴ و ۵)۔',
+      health:'غم، فکر اور خوف صحت کے لیے خطرہ ہیں؛ سکون اختیار کریں۔',
+      muwafiq:'۱، ۴، ۶ (شمس اور زہرہ — عطارد کے دوست سیارے) اور ہم عدد ۵',
+      mutawazin:'۳، ۸، ۹ (مشتری، زحل اور مریخ — غیر جانبدار)',
+      mukhalif:'۲، ۷ (قمر — عطارد کا مخالف سیارہ)',
+      src:'الساعات (حصہ اول، باب ۴، ۶، ۷ — کاش البرنی)'
+    },
+    {
+      num:6, planet:'زہرہ', day:'جمعہ', elem:'بادی', stone:'ہیرا / سفید اوپل', color:'سفید / نیلا',
+      traits:'سعدِ اصغر — محبت، دوستی، شادی، دلعزیزی، جذبات، فنونِ لطیفہ اور تفریحی سفر کے لیے سازگار۔',
+      health:'حلق کے امراض اور چوٹوں کا فوری علاج کرائیں۔',
+      muwafiq:'۵، ۸ (عطارد اور زحل — زہرہ کے دوست سیارے) اور ہم عدد ۶',
+      mutawazin:'۳، ۹ (مشتری اور مریخ — غیر جانبدار)',
+      mukhalif:'۱، ۲، ۴، ۷ (شمس اور قمر — زہرہ کے مخالف سیارے)',
+      src:'الساعات (حصہ اول، باب ۴، ۶، ۷ — کاش البرنی)'
+    },
+    {
+      num:7, planet:'قمر (مثبت)', day:'پیر', elem:'آبی', stone:'موتی / بلور', color:'سفید / ہلکا سبز',
+      traits:'روحانی بصیرت، گہرا تفکر، تیز الہام، عوامی رابطے اور پاکیزہ طبیعت (قمر کا مثبت عدد — الساعات باب ششم)۔',
+      health:'بدہضمی اور سرد رطوبت سے احتیاط کریں۔',
+      muwafiq:'۱، ۴، ۵ (شمس اور عطارد — قمر کے دوست) اور ہم کوکب ۲',
+      mutawazin:'۳، ۶، ۸، ۹ (مشتری، زہرہ، زحل اور مریخ — غیر جانبدار)',
+      mukhalif:'قمر کا کوئی سیارہ مستقل دشمن نہیں (الساعات باب ششم)۔',
+      src:'الساعات (حصہ اول، باب ۶ و ۷ — کاش البرنی)'
+    },
+    {
+      num:8, planet:'زحل', day:'ہفتہ', elem:'خاکی', stone:'نیلم / کالا عقیق', color:'کالا / گہرا نیلا',
+      traits:'نحسِ اکبر — زمین و جائیداد، استحکام، صبر، محنت اور دیرپا نتائج؛ جلد بازی سے گریز اور صدقہ لازم۔',
+      health:'ہڈی کے زخم، سردی اور خشکی زکام سے بچیں۔',
+      muwafiq:'۵، ۶ (عطارد اور زہرہ — زحل کے دوست سیارے) اور ہم عدد ۸',
+      mutawazin:'۳ (مشتری — زحل کے لیے غیر جانبدار)',
+      mukhalif:'۱، ۲، ۴، ۷، ۹ (شمس، قمر اور مریخ — زحل کے مخالف سیارے)',
+      src:'الساعات (حصہ اول، باب ۴، ۶، ۷ — کاش البرنی)'
+    },
+    {
+      num:9, planet:'مریخ', day:'منگل', elem:'آتشی', stone:'مرجان (مونگا)', color:'سرخ / قرمزی',
+      traits:'نحسِ اصغر — قوت، شجاعت، دشمن پر فتح اور جلالی ہمت؛ اخراجات اور غصے پر قابو رکھنا ضروری۔',
+      health:'آگ، گرمی، زخم اور حادثات سے بچاؤ کی احتیاط کریں۔',
+      muwafiq:'۱، ۲، ۳، ۴، ۷ (شمس، قمر اور مشتری — مریخ کے دوست سیارے) اور ہم عدد ۹',
+      mutawazin:'۶، ۸ (زہرہ اور زحل — غیر جانبدار)',
+      mukhalif:'۵ (عطارد — مریخ کا مخالف سیارہ)',
+      src:'الساعات (حصہ اول، باب ۴، ۶، ۷ — کاش البرنی)'
+    }
+  ];
+
+  // ---- 2. AUTHENTIC 4 ELEMENTS (Qawaid-e-Amliyat Ch 4 & Ch 6) ----
+  var ANASIR_4 = [
+    {
+      key:'آتشی', icon:'🔥', dir:'مشرق', letters:'ا، ہ، ط، م، ف، ش، ذ (اہطمفشذ)', saad:'ا، ہ، ط، م', nahs:'ف، ش، ذ',
+      nature:'نورانی، جلالی، گرم و خشک — تیز اثر، جوش، ہمت اور فوری حرکت۔',
+      taweez:'آتشی تعویذات آگ میں جلائے جاتے ہیں، آگ کے نیچے دفن کیے جاتے ہیں یا بتی بنا کر چراغ میں جلائے جاتے ہیں۔',
+      muwafiq:'بادی (دوست / موافق — ہوا کے بغیر آگ نہیں جل سکتی) اور ہم عنصر آتشی۔',
+      mutawazin:'خاکی (میمن / مصادق — آتش سینۂ خاک میں امان پاتی ہے)۔',
+      mukhalif:'آبی (دشمن / ناموافق — پانی آگ کو بجھا دیتا ہے)۔',
+      src:'قواعدِ عملیات (باب چہارم و ششم — کاش البرنی)'
+    },
+    {
+      key:'بادی', icon:'💨', dir:'مغرب', letters:'ب، و، ی، ن، ص، ت، ض (بوینصتض)', saad:'و، ی، ص، ت', nahs:'ب، ن، ض',
+      nature:'جلالی، گرم و تر — فتوحات، ترقی، ذہانت، گفتگو، سفر اور تیز پھیلاؤ۔',
+      taweez:'بادی تعویذات ہوا میں لٹکائے جاتے ہیں (خیر کے لیے پھل دار درخت انار/شہتوت؛ شر کے لیے کانٹے دار درخت کیکر/نیم)۔',
+      muwafiq:'آتشی (دوست / موافق) اور ہم عنصر بادی۔',
+      mutawazin:'آبی (میمن / مصادق — معتدل توازن)۔',
+      mukhalif:'خاکی (دشمن / ناموافق — مٹی اور ہوا میں تضاد ہے)۔',
+      src:'قواعدِ عملیات (باب چہارم و ششم — کاش البرنی)'
+    },
+    {
+      key:'آبی', icon:'💧', dir:'شمال', letters:'ج، ز، ک، س، ق، ث، ظ (جزکسقثظ)', saad:'ک، س، ق، ث', nahs:'ج، ز، ظ',
+      nature:'جمالی، سرد و تر — محبت، شفا، سکون، نرمی، رہائی اور قضائے حاجات۔',
+      taweez:'آبی تعویذات کاغذ یا چینی کی طشتری پر زعفران سے لکھ کر پلائے جاتے ہیں، پانی کنارے دفن یا جاری پانی میں بہائے جاتے ہیں۔',
+      muwafiq:'خاکی (دوست / موافق — پانی مٹی کو حیات دیتا ہے) اور ہم عنصر آبی۔',
+      mutawazin:'بادی (میمن / مصادق — معتدل توازن)۔',
+      mukhalif:'آتشی (دشمن / ناموافق)۔',
+      src:'قواعدِ عملیات (باب چہارم و ششم — کاش البرنی)'
+    },
+    {
+      key:'خاکی', icon:'🪨', dir:'جنوب', letters:'د، ح، ل، ع، ر، خ، غ (دحلعرخغ)', saad:'د، ح، ل، ع', nahs:'ر، خ، غ',
+      nature:'ظلمانی، جمالی، سرد و خشک — ثبات، قیام، بردباری، جائیداد، حفاظت اور زبان بندی۔',
+      taweez:'خاکی تعویذات زمین میں، بھاری پتھر کے نیچے یا مطلوب کی گزرگاہ/چوکھٹ میں دفن کیے جاتے ہیں۔',
+      muwafiq:'آبی (دوست / موافق) اور ہم عنصر خاکی۔',
+      mutawazin:'آتشی (میمن / مصادق — معتدل توازن)۔',
+      mukhalif:'بادی (دشمن / ناموافق)۔',
+      src:'قواعدِ عملیات (باب چہارم و ششم — کاش البرنی)'
+    }
+  ];
+
+  // ---- 3. AUTHENTIC 12 BUROOJ (Qawaid-e-Amliyat Ch 2, 3, 9, 10 + Aamil-e-Kamil Ch 1) ----
+  var BUROOJ_12 = [
+    { name:'حمل', dates:'۲۲ مارچ تا ۲۰ اپریل', elem:'آتشی', mahiyat:'منقلب', planet:'مریخ', dir:'مشرق', color:'زرد و سرخ', taste:'شیریں و تیز', letters:'ا، ع، ہ',
+      traits:'جوش، پہل کرنے کی قوت، شجاعت اور انقلابی مزاج (بروجِ منقلب — قواعدِ عملیات باب ۱۰)۔',
+      muwafiq:'اسد، قوس (ہم عنصر آتشی — شدید دوستی) اور جوزا، دلو (بادی دوست)',
+      mutawazin:'ثور، سنبلہ، حوت (معتدل / مصادق)',
+      mukhalif:'سرطان، میزان، جدی (تربیع و مقابلہ — آزمائش و مخالفت)' },
+    { name:'ثور', dates:'۲۱ اپریل تا ۲۱ مئی', elem:'خاکی', mahiyat:'ثابت', planet:'زہرہ', dir:'شمال', color:'سفید', taste:'شیریں', letters:'ج، م، ن',
+      traits:'ثبات و قیام، صبر، روزگار اور جائیداد کا استحکام، وفاداری اور الفت (قواعدِ عملیات باب ۱۰)۔',
+      muwafiq:'سنبلہ، جدی (ہم عنصر خاکی — شدید دوستی) اور سرطان، حوت (آبی دوست)',
+      mutawazin:'حمل، جوزا، میزان (معتدل / مصادق)',
+      mukhalif:'اسد، عقرب، دلو (تربیع و مقابلہ — مخالفت)' },
+    { name:'جوزا', dates:'۲۲ مئی تا ۲۱ جون', elem:'بادی', mahiyat:'ذوجسدین', planet:'عطارد', dir:'جنوب', color:'سفیدی مائل زرد', taste:'تلخ و تیز', letters:'ق، ب، ص',
+      traits:'ذہانت، گفتگو کا فن، حب و تسخیر، علمی شوق اور تیز فہمی (ذوجسدین — قواعدِ عملیات باب ۱۰)۔',
+      muwafiq:'میزان، دلو (ہم عنصر بادی — شدید دوستی) اور حمل، اسد (آتشی دوست)',
+      mutawazin:'ثور، سرطان، عقرب (معتدل / مصادق)',
+      mukhalif:'سنبلہ، قوس، حوت (تربیع و مقابلہ — مخالفت)' },
+    { name:'سرطان', dates:'۲۲ جون تا ۲۳ جولائی', elem:'آبی', mahiyat:'منقلب', planet:'قمر', dir:'مغرب', color:'سیاہ و سبز', taste:'ترش و شور', letters:'س، ل، ط، ح',
+      traits:'جذباتی گہرائی، ہمدردی، گھریلو لگاؤ، مستقیمۃ الطلوع (اعمالِ سعد کے لیے موزوں)۔',
+      muwafiq:'عقرب، حوت (ہم عنصر آبی — شدید دوستی) اور ثور، سنبلہ (خاکی دوست)',
+      mutawazin:'جوزا، اسد، قوس (معتدل / مصادق)',
+      mukhalif:'حمل، میزان، جدی (تربیع و مقابلہ — مخالفت)' },
+    { name:'اسد', dates:'۲۴ جولائی تا ۲۳ اگست', elem:'آتشی', mahiyat:'ثابت', planet:'شمس', dir:'مشرق', color:'زرد و سرخ', taste:'شیریں', letters:'ز، ب، خ',
+      traits:'وقار، قیادت، ثابت قدمی، فیاضی، عزت و مرتبہ اور مستقیمۃ الطلوع (اعمالِ سعد کے لیے موزوں)۔',
+      muwafiq:'حمل، قوس (ہم عنصر آتشی — شدید دوستی) اور جوزا، میزان (بادی دوست)',
+      mutawazin:'سرطان، سنبلہ، جدی (معتدل / مصادق)',
+      mukhalif:'ثور، عقرب، دلو (تربیع و مقابلہ — مخالفت)' },
+    { name:'سنبلہ', dates:'۲۴ اگست تا ۲۳ ستمبر', elem:'خاکی', mahiyat:'ذوجسدین', planet:'عطارد', dir:'شمال', color:'سفید زردی مائل', taste:'شیریں', letters:'ع، ی',
+      traits:'باریک بینی، علم و تدبیر، صفائی پسندی، خدمتِ خلق اور مستقیمۃ الطلوع (شرفِ عطارد ۱۵°)۔',
+      muwafiq:'ثور، جدی (ہم عنصر خاکی — شدید دوستی) اور سرطان، عقرب (آبی دوست)',
+      mutawazin:'اسد، میزان، دلو (معتدل / مصادق)',
+      mukhalif:'جوزا، قوس، حوت (تربیع و مقابلہ — مخالفت)' },
+    { name:'میزان', dates:'۲۴ ستمبر تا ۲۳ اکتوبر', elem:'بادی', mahiyat:'منقلب', planet:'زہرہ', dir:'مغرب', color:'سفید', taste:'ترش و شور', letters:'ط، ش',
+      traits:'عدل و توازن، صلح جوئی، خوش اخلاقی، شرفِ زحل ۲۱° اور مستقیمۃ الطلوع۔',
+      muwafiq:'جوزا، دلو (ہم عنصر بادی — شدید دوستی) اور اسد، قوس (آتشی دوست)',
+      mutawazin:'سنبلہ، عقرب، حوت (معتدل / مصادق)',
+      mukhalif:'حمل، سرطان، جدی (تربیع و مقابلہ — مخالفت)' },
+    { name:'عقرب', dates:'۲۴ اکتوبر تا ۲۲ نومبر', elem:'آبی', mahiyat:'ثابت', planet:'مریخ', dir:'جنوب', color:'سیاہ و سبز', taste:'تلخ و تیز', letters:'ر، س',
+      traits:'راز داری، مضبوط ارادہ، گہری بصیرت اور ثابت قدمی (نوٹ: قمر در عقرب میں نئے خیر کے اعمال سے احتیاط)۔',
+      muwafiq:'سرطان، حوت (ہم عنصر آبی — شدید دوستی) اور سنبلہ، جدی (خاکی دوست)',
+      mutawazin:'میزان، قوس، حمل (معتدل / مصادق)',
+      mukhalif:'ثور، اسد، دلو (تربیع و مقابلہ — مخالفت)' },
+    { name:'قوس', dates:'۲۳ نومبر تا ۲۲ دسمبر', elem:'آتشی', mahiyat:'ذوجسدین', planet:'مشتری', dir:'مشرق', color:'زرد و سرخ', taste:'شیریں', letters:'ح، ف، ش',
+      traits:'خوش مزاجی، دینی و علمی شوق، سفر، ترقی و کامیابی اور مستقیمۃ الطلوع۔',
+      muwafiq:'حمل، اسد (ہم عنصر آتشی — شدید دوستی) اور میزان، دلو (بادی دوست)',
+      mutawazin:'عقرب، جدی، ثور (معتدل / مصادق)',
+      mukhalif:'جوزا، سنبلہ، حوت (تربیع و مقابلہ — مخالفت)' },
+    { name:'جدی', dates:'۲۳ دسمبر تا ۲۰ جنوری', elem:'خاکی', mahiyat:'منقلب', planet:'زحل', dir:'شمال', color:'سفید و سبز', taste:'شیریں', letters:'ط، ض',
+      traits:'محنت، ذمہ داری، سنجیدگی، شرفِ مریخ ۲۸° اور معاملہ فہمی۔',
+      muwafiq:'ثور، سنبلہ (ہم عنصر خاکی — شدید دوستی) اور عقرب، حوت (آبی دوست)',
+      mutawazin:'قوس، دلو، اسد (معتدل / مصادق)',
+      mukhalif:'حمل، سرطان، میزان (تربیع و مقابلہ — مخالفت)' },
+    { name:'دلو', dates:'۲۱ جنوری تا ۱۹ فروری', elem:'بادی', mahiyat:'ثابت', planet:'زحل', dir:'مغرب', color:'سیاہ و سبز', taste:'شور و تلخ', letters:'ج، ب، ت',
+      traits:'آزاد خیالی، انسان دوستی، نئے خیالات، ثبات و قیام اور علمی گہرائی۔',
+      muwafiq:'جوزا، میزان (ہم عنصر بادی — شدید دوستی) اور حمل، قوس (آتشی دوست)',
+      mutawazin:'جدی، حوت، سنبلہ (معتدل / مصادق)',
+      mukhalif:'ثور، اسد، عقرب (تربیع و مقابلہ — مخالفت)' },
+    { name:'حوت', dates:'۲۰ فروری تا ۲۱ مارچ', elem:'آبی', mahiyat:'ذوجسدین', planet:'مشتری', dir:'جنوب', color:'سفید و سبز', taste:'ترش و تیز', letters:'ن، و، د',
+      traits:'روحانیت، رحم دلی، تخیل، شرفِ زہرہ ۲۷° اور محبت و کامیابی (ذوجسدین)۔',
+      muwafiq:'سرطان، عقرب (ہم عنصر آبی — شدید دوستی) اور ثور، جدی (خاکی دوست)',
+      mutawazin:'دلو، حمل، میزان (معتدل / مصادق)',
+      mukhalif:'جوزا، سنبلہ، قوس (تربیع و مقابلہ — مخالفت)' }
+  ];
+
+  var _m20Main = 'aadad'; // aadad | anasir | burooj
+  var _m20Sub  = 'all';   // all | muwafiq | mutawazin | mukhalif
+
+  window.switchKhawasMainTabV32 = function(mainKey){
+    _m20Main = mainKey || 'aadad';
+    renderKhawasContentV32();
+  };
+
+  window.switchKhawasSubFilterV32 = function(subKey){
+    _m20Sub = subKey || 'all';
+    renderKhawasContentV32();
+  };
+
+  function renderKhawasContentV32(){
+    var body = document.getElementById('v32_khawasBody');
+    if (!body) return;
+
+    ['aadad','anasir','burooj'].forEach(function(k){
+      var b = document.getElementById('v32_khMain_' + k);
+      if (b) {
+        var act = (k === _m20Main);
+        b.style.background = act ? '#1e3a8a' : '#f8fafc';
+        b.style.color = act ? '#fde047' : '#0f172a';
+        b.style.borderColor = act ? '#1e3a8a' : '#cbd5e1';
+      }
+    });
+    ['all','muwafiq','mutawazin','mukhalif'].forEach(function(k){
+      var b = document.getElementById('v32_khSub_' + k);
+      if (b) {
+        var act = (k === _m20Sub);
+        b.style.background = act ? '#065f46' : '#ffffff';
+        b.style.color = act ? '#ffffff' : '#0f172a';
+        b.style.borderColor = act ? '#065f46' : '#cbd5e1';
+      }
+    });
+
+    function buildRelationBlock(item){
+      var h = '';
+      if (_m20Sub === 'all' || _m20Sub === 'muwafiq') {
+        h += '<div style="background:#f0fdf4; border-right:3px solid #065f46; padding:5px 8px; border-radius:6px; margin-top:5px;"><b>✅ موافقت (دوست):</b> ' + escH(item.muwafiq) + '</div>';
+      }
+      if (_m20Sub === 'all' || _m20Sub === 'mutawazin') {
+        h += '<div style="background:#eff6ff; border-right:3px solid #1e40af; padding:5px 8px; border-radius:6px; margin-top:5px;"><b>⚖️ توازن (متوازن / مصادق):</b> ' + escH(item.mutawazin) + '</div>';
+      }
+      if (_m20Sub === 'all' || _m20Sub === 'mukhalif') {
+        h += '<div style="background:#fef2f2; border-right:3px solid #dc2626; padding:5px 8px; border-radius:6px; margin-top:5px;"><b>⚠️ مخالفت (دشمن / آزمائش):</b> ' + escH(item.mukhalif) + '</div>';
+      }
+      return h;
+    }
+
+    if (_m20Main === 'aadad') {
+      body.innerHTML = AADAD_1_9.map(function(a){
+        return '<div style="background:#fff; border:1.5px solid #cbd5e1; border-right:4px solid #1e3a8a; border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:0.88rem; line-height:1.9;">' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">' +
+            '<b style="color:#09152e; font-size:1.02rem;">عدد ' + a.num + ' — کوکب: ' + escH(a.planet) + '</b>' +
+            '<span style="background:#eff6ff; color:#1e3a8a; border:1px solid #93c5fd; border-radius:999px; padding:2px 10px; font-size:0.78rem; font-weight:800;">' + escH(a.elem) + ' | ' + escH(a.day) + '</span>' +
+          '</div>' +
+          (_m20Sub === 'all' ? ('<div style="margin-top:4px;"><b>خواص:</b> ' + escH(a.traits) + '</div><div><b>پتھر:</b> ' + escH(a.stone) + ' | <b>رنگ:</b> ' + escH(a.color) + '</div><div><b>صحت کی احتیاط:</b> ' + escH(a.health) + '</div>') : '') +
+          buildRelationBlock(a) +
+          '<div style="font-size:0.75rem; color:#475569; margin-top:4px;">📚 ماخذ: ' + escH(a.src) + '</div>' +
+        '</div>';
+      }).join('');
+    } else if (_m20Main === 'anasir') {
+      body.innerHTML = ANASIR_4.map(function(e){
+        return '<div style="background:#fff; border:1.5px solid #cbd5e1; border-right:4px solid #b45309; border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:0.88rem; line-height:1.9;">' +
+          '<div style="font-weight:800; color:#09152e; font-size:1.04rem;">' + e.icon + ' مزاج / عنصر: ' + escH(e.key) + ' (سمت: ' + escH(e.dir) + ')</div>' +
+          (_m20Sub === 'all' ? ('<div style="margin-top:4px;"><b>حروف:</b> ' + escH(e.letters) + ' | <b>سعد:</b> ' + escH(e.saad) + ' | <b>نحس:</b> ' + escH(e.nahs) + '</div><div><b>طبعی خواص:</b> ' + escH(e.nature) + '</div><div><b>تعویذ کا طریقہ:</b> ' + escH(e.taweez) + '</div>') : '') +
+          buildRelationBlock(e) +
+          '<div style="font-size:0.75rem; color:#475569; margin-top:4px;">📚 ماخذ: ' + escH(e.src) + '</div>' +
+        '</div>';
+      }).join('');
+    } else {
+      body.innerHTML = BUROOJ_12.map(function(b, idx){
+        return '<div style="background:#fff; border:1.5px solid #cbd5e1; border-right:4px solid #065f46; border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:0.88rem; line-height:1.9;">' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">' +
+            '<b style="color:#09152e; font-size:1.02rem;">' + (idx + 1) + '. برج ' + escH(b.name) + ' (' + escH(b.dates) + ')</b>' +
+            '<span style="background:#f0fdf4; color:#065f46; border:1px solid #6ee7b7; border-radius:999px; padding:2px 10px; font-size:0.78rem; font-weight:800;">' + escH(b.elem) + ' | ' + escH(b.mahiyat) + ' | ' + escH(b.planet) + '</span>' +
+          '</div>' +
+          (_m20Sub === 'all' ? ('<div style="margin-top:4px;"><b>حروف:</b> ' + escH(b.letters) + ' | <b>سمت:</b> ' + escH(b.dir) + ' | <b>رنگ:</b> ' + escH(b.color) + ' | <b>مزہ:</b> ' + escH(b.taste) + '</div><div><b>خواص:</b> ' + escH(b.traits) + '</div>') : '') +
+          buildRelationBlock(b) +
+          '<div style="font-size:0.75rem; color:#475569; margin-top:4px;">📚 ماخذ: قواعدِ عملیات (باب ۲، ۹، ۱۰) و عاملِ کامل — کاش البرنی</div>' +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  window.openKhawasModalV32 = function(){
+    var ov = document.getElementById('v32_khawasOverlay');
+    if (!ov) {
+      ov = document.createElement('div');
+      ov.id = 'v32_khawasOverlay';
+      ov.style.cssText = 'display:none; position:fixed; inset:0; z-index:96200; background:#f1f5f9; flex-direction:column; height:100dvh; width:100vw; overflow:hidden;';
+      ov.innerHTML =
+        '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 14px; background:linear-gradient(135deg,#09152e,#1e3a8a); color:#fff; border-bottom:2px solid #d4af37; flex-shrink:0;">' +
+          '<button type="button" onclick="document.getElementById(\'v32_khawasOverlay\').style.display=\'none\'" style="padding:6px 12px; border-radius:9px; border:1px solid rgba(253,224,71,0.55); background:rgba(255,255,255,0.12); color:#fde047; font-family:inherit; font-size:0.88rem; font-weight:800; cursor:pointer;">← مکتبہ</button>' +
+          '<div style="text-align:center; flex:1;"><div style="font-size:1.08rem; font-weight:800; color:#fde047;">خواصِ اعداد، مزاج و بروج</div><div style="font-size:0.74rem; color:#e2e8f0;">مستند از قواعدِ عملیات، عاملِ کامل و الساعات</div></div>' +
+          '<div style="width:54px;"></div>' +
+        '</div>' +
+        '<div style="padding:10px 12px 6px; background:#fff; border-bottom:1px solid #cbd5e1; flex-shrink:0;">' +
+          '<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:7px;">' +
+            '<button type="button" id="v32_khMain_aadad" onclick="switchKhawasMainTabV32(\'aadad\')" style="padding:8px 6px; border-radius:9px; border:1.5px solid #cbd5e1; font-family:inherit; font-size:0.86rem; font-weight:800; cursor:pointer;">🔢 اعداد (۱ تا ۹)</button>' +
+            '<button type="button" id="v32_khMain_anasir" onclick="switchKhawasMainTabV32(\'anasir\')" style="padding:8px 6px; border-radius:9px; border:1.5px solid #cbd5e1; font-family:inherit; font-size:0.86rem; font-weight:800; cursor:pointer;">🔥 مزاج (۴ عناصر)</button>' +
+            '<button type="button" id="v32_khMain_burooj" onclick="switchKhawasMainTabV32(\'burooj\')" style="padding:8px 6px; border-radius:9px; border:1.5px solid #cbd5e1; font-family:inherit; font-size:0.86rem; font-weight:800; cursor:pointer;">♈ بروج (۱۲)</button>' +
+          '</div>' +
+          '<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:5px;">' +
+            '<button type="button" id="v32_khSub_all" onclick="switchKhawasSubFilterV32(\'all\')" style="padding:5px 4px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-size:0.78rem; font-weight:700; cursor:pointer;">📖 مکمل خواص</button>' +
+            '<button type="button" id="v32_khSub_muwafiq" onclick="switchKhawasSubFilterV32(\'muwafiq\')" style="padding:5px 4px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-size:0.78rem; font-weight:700; cursor:pointer;">✅ موافقت</button>' +
+            '<button type="button" id="v32_khSub_mutawazin" onclick="switchKhawasSubFilterV32(\'mutawazin\')" style="padding:5px 4px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-size:0.78rem; font-weight:700; cursor:pointer;">⚖️ توازن</button>' +
+            '<button type="button" id="v32_khSub_mukhalif" onclick="switchKhawasSubFilterV32(\'mukhalif\')" style="padding:5px 4px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-size:0.78rem; font-weight:700; cursor:pointer;">⚠️ مخالفت</button>' +
+          '</div>' +
+        '</div>' +
+        '<div id="v32_khawasBody" style="flex:1; overflow-y:auto; padding:12px; -webkit-overflow-scrolling:touch;"></div>';
+      document.body.appendChild(ov);
+    }
+    ov.style.display = 'flex';
+    renderKhawasContentV32();
+  };
+
+  // Inject clean button inside Maktaba Al-Raqi (#scr_folders) without touching Home Page!
+  function injectMaktabaKhawasButtonV32(){
+    var scr = document.getElementById('scr_folders');
+    if (!scr || document.getElementById('v32_maktabaKhawasBtn')) return;
+    var wrap = scr.querySelector('.wrap') || scr;
+    var bar = document.createElement('div');
+    bar.id = 'v32_maktabaKhawasBtn';
+    bar.className = 'no-print';
+    bar.style.cssText = 'margin:6px 0 8px;';
+    bar.innerHTML = '<button type="button" onclick="openKhawasModalV32()" style="width:100%; padding:10px 14px; border-radius:12px; border:1.5px solid #d4af37; background:linear-gradient(135deg,#09152e,#1e3a8a); color:#fde047; font-family:inherit; font-size:0.95rem; font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(11,25,54,0.16);">📖 خواصِ اعداد (۱ تا ۹)، مزاج و بروج — موافقت، توازن و مخالفت</button>';
+    var fontBar = document.getElementById('v25_maktabaFontBar');
+    if (fontBar && fontBar.nextSibling) wrap.insertBefore(bar, fontBar.nextSibling);
+    else if (wrap.firstChild) wrap.insertBefore(bar, wrap.firstChild);
+    else wrap.appendChild(bar);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectMaktabaKhawasButtonV32);
+  else injectMaktabaKhawasButtonV32();
+  setTimeout(injectMaktabaKhawasButtonV32, 800);
+})();
+
+/* =========================================================================
+   MODULE 21: MASTER WAZAIF & AUTHENTIC NAQSH CATALOG (v2.1.32)
+   - Zero author names / zero phone numbers / zero book badges in live UI
+   - Keeps multiple distinct Wazaif for the same purpose; skips only exact duplicates
+   - Clean mathematical 3x3 (مثلث) & 4x4 (مربع) & Letter/Ayat Naqsh renderer
+   ========================================================================= */
+(function(){
+  'use strict';
+
+  function toUrduDigits(n){
+    var map = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+    return String(n).replace(/\d/g, function(d){ return map[Number(d)]; });
+  }
+
+  // Authentic Atishi (آتشی) 3x3 Musallas & 4x4 Murabba grid renderer (clean white-label, zero watermarks)
+  function renderGridNaqshHtml(title, total, type, note, extraTop, extraBottom){
+    var html = '<div style="text-align:center; background:#fff; border:2px solid #0f172a; border-radius:10px; padding:10px; max-width:340px; margin:0 auto;">';
+    if (extraTop) html += '<div data-ar-quran="1" class="ar-arabic-text" style="font-size:1.05rem; color:#09152e; margin-bottom:6px; font-weight:700;">' + extraTop + '</div>';
+    if (total) html += '<div style="font-size:0.78rem; color:#475569; margin-bottom:5px; font-weight:700;">کل عدد: ' + toUrduDigits(total) + '</div>';
+
+    var grid = [];
+    if (type === '3x3' && total) {
+      var base = Math.floor((total - 12) / 3);
+      var rem = (total - 12) % 3;
+      var seq = [];
+      for (var i = 0; i < 9; i++) {
+        var v = base + i;
+        if (rem === 1 && i >= 6) v += 1;
+        if (rem === 2 && i >= 3) v += 1;
+        seq.push(v);
+      }
+      // Standard Musallas Atishi chal:
+      // [5, 0, 7] -> indices [5,0,7], [2,4,6], [1,8,3] (RTL right-to-left: col0=right)
+      grid = [
+        [seq[7], seq[0], seq[5]],
+        [seq[2], seq[4], seq[6]],
+        [seq[3], seq[8], seq[1]]
+      ];
+    } else if (type === '4x4' && total) {
+      var b4 = Math.floor((total - 30) / 4);
+      var r4 = (total - 30) % 4;
+      var s4 = [];
+      for (var j = 0; j < 16; j++) {
+        var val = b4 + j;
+        if (r4 === 1 && j >= 12) val += 1;
+        if (r4 === 2 && j >= 8) val += 1;
+        if (r4 === 3 && j >= 4) val += 1;
+        s4.push(val);
+      }
+      // Standard Murabba Atishi chal (RTL)
+      grid = [
+        [s4[0],  s4[13], s4[10], s4[7]],
+        [s4[11], s4[6],  s4[1],  s4[12]],
+        [s4[5],  s4[8],  s4[15], s4[2]],
+        [s4[14], s4[3],  s4[4],  s4[9]]
+      ];
+    } else if (Array.isArray(type)) {
+      grid = type;
+    }
+
+    if (grid.length) {
+      html += '<table style="width:100%; border-collapse:collapse; direction:rtl; margin:0 auto; border:2px solid #0f172a;">';
+      grid.forEach(function(row){
+        html += '<tr>';
+        row.forEach(function(cell){
+          var txt = (typeof cell === 'number') ? toUrduDigits(cell) : String(cell);
+          html += '<td style="border:1.5px solid #0f172a; padding:7px 4px; text-align:center; font-size:1.12rem; font-weight:800; color:#09152e; background:#fff;">' + txt + '</td>';
+        });
+        html += '</tr>';
+      });
+      html += '</table>';
+    }
+    if (extraBottom) html += '<div data-ar-quran="1" class="ar-arabic-text" style="font-size:1.05rem; color:#09152e; margin-top:7px; font-weight:700; line-height:1.9;">' + extraBottom + '</div>';
+    html += '</div>';
+    if (note) html += '<div style="margin-top:8px; font-size:0.9rem; color:#1e293b; line-height:1.85; background:#f8fafc; border-right:3px solid #065f46; padding:7px 9px; border-radius:7px;"><b>طریقۂ استعمال:</b> ' + note + '</div>';
+    return html;
+  }
+
+  // =========================================================================
+  // 1. MASTER CLEAN WAZAIF LIST (Purpose-first, zero author/book clutter)
+  // =========================================================================
+  window.MASTER_BOOK_WAZAIF_V32 = [
+    // --- اولاد، حمل و تربیت ---
+    { k:'mbw_01', title:'حصولِ نرینہ اولاد کا قرآنی وظیفہ (سورہ رعد)', ar:'اَللّٰهُ يَعْلَمُ مَا تَحْمِلُ كُلُّ اُنْثٰى وَمَا تَغِيْضُ الْاَرْحَامُ وَمَا تَزْدَادُ وَكُلُّ شَيْءٍ عِنْدَهٗ بِمِقْدَارٍ', ur:'جو عورت نرینہ اولاد کی خواہشمند ہو وہ ۵ مہینے تک روزانہ ۳ مرتبہ یہ آیت پڑھ کر اپنے اوپر دم کرے۔' },
+    { k:'mbw_02', title:'راہِ راست پر لانے اور دینی استقامت کا عمل', ar:'اُولٰٓئِكَ عَلٰى هُدًى مِّنْ رَّبِّهِمْ وَاُولٰٓئِكَ هُمُ الْمُفْلِحُوْنَ', ur:'جو شخص دین سے غافل یا برے کاموں میں مبتلا ہو اسے یہ آیت ۱۰۱ مرتبہ روزانہ پانی پر دم کر کے ۴۱ دن تک پلائیں۔' },
+    { k:'mbw_03', title:'میاں بیوی میں محبت پیدا کرنے کا وظیفہ (سورہ روم)', ar:'وَمِنْ اٰيٰتِهٖٓ اَنْ خَلَقَ لَكُمْ مِّنْ اَنْفُسِكُمْ اَزْوَاجًا لِّتَسْكُنُوْٓا اِلَيْهَا وَجَعَلَ بَيْنَكُمْ مَّوَدَّةً وَّرَحْمَةً ط اِنَّ فِيْ ذٰلِكَ لَاٰيٰتٍ لِّقَوْمٍ يَّتَفَكَّرُوْنَ', ur:'میاں بیوی میں محبت کی کمی ہو تو یہ آیت ۹۹ مرتبہ پڑھ کر میٹھی چیز پر دم کر کے ۷ دن تک دونوں کو کھلائیں۔' },
+    { k:'mbw_04', title:'اولاد کا رشتہ نہ ہوتا ہو (عمل اول — سورہ فرقان)', ar:'وَهُوَ الَّذِيْ خَلَقَ مِنَ الْمَآءِ بَشَرًا فَجَعَلَهٗ نَسَبًا وَّصِهْرًا ط وَكَانَ رَبُّكَ قَدِيْرًا', ur:'والدین یا ان میں سے کوئی ایک یہ آیت روزانہ ۳۱۳ مرتبہ ۲۱ دن تک پڑھ کر دعا کریں۔' },
+    { k:'mbw_05', title:'اولاد کا رشتہ نہ ہوتا ہو (عمل دوم — دعائے قرآنی)', ar:'رَبَّنَا هَبْ لَنَا مِنْ اَزْوَاجِنَا وَذُرِّيّٰتِنَا قُرَّةَ اَعْيُنٍ وَّاجْعَلْنَا لِلْمُتَّقِيْنَ اِمَامًا', ur:'والدین ہر نماز میں حالتِ تشہد میں درود شریف کے بعد یہ آیت ۱ مرتبہ ۴۱ دن کی نیت سے پڑھیں۔' },
+    { k:'mbw_06', title:'من پسند اور نیک رشتہ کے لیے صلوٰۃ الحاجت کا عمل', ar:'سُبْحٰنَ الَّذِيْ خَلَقَ الْاَزْوَاجَ كُلَّهَا مِمَّا تُنْبِتُ الْاَرْضُ وَمِنْ اَنْفُسِهِمْ وَمِمَّا لَا يَعْلَمُوْنَ', ur:'دو رکعت صلوٰۃ الحاجت میں ہر رکعت میں سورہ فاتحہ کے بعد ۱۰۰ بار اور سلام کے بعد ۱۱۳ بار یہ آیت پڑھ کر دعا مانگیں (مرد ۴۱ دن، عورت پاکی کے ایام میں ۲۱ دن)۔' },
+    { k:'mbw_07', title:'نافرمان بچے کی اصلاح (عمل اول — اہدنا الصراط)', ar:'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ اِهْدِنَا الصِّرَاطَ الْمُسْتَقِيْمَ (۳ بار) بِحَقِّ يَا هَادِيْ يَا هَادِيْ يَا هَادِيْ', ur:'یہ آیات لکھ کر جاری پانی میں گھول کر پلائیں اور روزانہ رات کو ۷۰ بار پڑھ کر بچے پر دم کریں۔' },
+    { k:'mbw_08', title:'نافرمان بچے کی اصلاح (عمل دوم — واصلح لی فی ذریتی)', ar:'وَاَصْلِحْ لِيْ فِيْ ذُرِّيَّتِيْ ج اِنِّيْ تُبْتُ اِلَيْكَ وَاِنِّيْ مِنَ الْمُسْلِمِيْنَ', ur:'والدین ہر نماز کے بعد لفظ «ذریتی» پر بچے کے فرمانبردار ہونے کا تصور کرتے ہوئے یہ دعا پڑھیں۔' },
+    { k:'mbw_09', title:'نافرمان اولاد کو راہِ راست پر لانا (عمل سوم)', ar:'رَبِّ اَوْزِعْنِيْٓ اَنْ اَشْكُرَ نِعْمَتَكَ الَّتِيْٓ اَنْعَمْتَ عَلَيَّ وَعَلٰى وَالِدَيَّ وَاَنْ اَعْمَلَ صَالِحًا تَرْضٰهُ وَاَصْلِحْ لِيْ فِيْ ذُرِّيَّتِيْ ج اِنِّيْ تُبْتُ اِلَيْكَ وَاِنِّيْ مِنَ الْمُسْلِمِيْنَ', ur:'والدین یہ آیت روزانہ ۳ مرتبہ پڑھ کر دعا کریں۔' },
+    { k:'mbw_10', title:'عورت کا دودھ خشک ہو جائے یا کم ہو', ar:'وَاَوْحَيْنَآ اِلٰٓى اُمِّ مُوْسٰٓى اَنْ اَرْضِعِيْهِ فَاِذَا خِفْتِ عَلَيْهِ فَاَلْقِيْهِ فِي الْيَمِّ وَلَا تَخَافِيْ وَلَا تَحْزَنِيْ اِنَّا رَآدُّوْهُ اِلَيْكِ وَجَاعِلُوْهُ مِنَ الْمُرْسَلِيْنَ', ur:'یہ آیت روزانہ ۲۱ مرتبہ پڑھ کر پانی پر دم کر کے ۲۱ دن تک عورت کو پلائیں۔' },
+    { k:'mbw_11', title:'بچوں کے سوکھا پن اور کمزوری کا علاج', ar:'وَهُوَ الَّذِيْ يُرْسِلُ الرِّيٰحَ بُشْرًا بَيْنَ يَدَيْ رَحْمَتِهٖ حَتّٰٓى اِذَآ اَقَلَّتْ سَحَابًا ثِقَالًا سُقْنٰهُ لِبَلَدٍ مَّيِّتٍ فَاَنْزَلْنَا بِهِ الْمَآءَ فَاَخْرَجْنَا بِهٖ مِنْ كُلِّ الثَّمَرٰتِ كَذٰلِكَ نُخْرِجُ الْمَوْتٰى لَعَلَّكُمْ تَذَكَّرُوْنَ', ur:'یہ آیت روزانہ ۲۱ بار پڑھ کر شہد پر دم کر کے بچے کو چٹائیں، کانوں میں پھونک ماریں اور ہاتھوں پر دم کر کے جسم پر پھیریں (۴۱ دن)۔' },
+    { k:'mbw_12', title:'بچہ مٹی کھاتا ہو تو چھڑانے کا عمل', ar:'فَاصْبِرْ صَبْرًا جَمِيْلًا ۝ وَاصْبِرْ نَفْسَكَ مَعَ الَّذِيْنَ يَدْعُوْنَ رَبَّهُمْ بِالْغَدٰوةِ وَالْعَشِيِّ يُرِيْدُوْنَ وَجْهَهٗ ۝ يٰٓاَيُّهَا الَّذِيْنَ اٰمَنُوا اصْبِرُوْا وَصَابِرُوْا وَرَابِطُوْا وَاتَّقُوا اللّٰهَ لَعَلَّكُمْ تُفْلِحُوْنَ', ur:'یہ آیات خالص گندم کے آٹے کی روٹی پر لکھ کر بچے کو کھلائیں۔' },
+    { k:'mbw_13', title:'بچہ پڑھائی پر توجہ نہ دے اور کھیل کود میں وقت ضائع کرے', ar:'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ اَلَمْ نَشْرَحْ لَكَ صَدْرَكَ ... اِلٰى رَبِّكَ فَارْغَبْ', ur:'سورہ الم نشرح روزانہ ۷ مرتبہ پڑھ کر آدھے گلاس پانی پر دم کر کے پلائیں اور بچے پر دم کریں (۷۱ دن)۔' },
+    { k:'mbw_14', title:'بچہ کھانا نہ کھائے یا بھوک نہ لگتی ہو', ar:'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ — يَا رَحِيْمُ (۱۲ مرتبہ)', ur:'کھانے پر بسم اللہ اور ۱۲ مرتبہ «یا رحیم» پڑھ کر دم کر کے بچے کو کھلائیں۔' },
+    { k:'mbw_15', title:'کسی خاص وقت یا شام کو بچہ زیادہ روئے', ar:'اول و آخر ۱۱ بار درود شریف، سورہ فاتحہ ۱ یا ۳ بار، چاروں قل ۱-۱ بار', ur:'کسی بھی نماز کے بعد پڑھ کر پانی پر دم کر کے ۳-۳ دن تک بچے کو پلائیں (۲۱ یا ۴۱ دن)۔' },
+    // --- حفاظت، سحر، آسیب، نظرِ بد ---
+    { k:'mbw_16', title:'سخت نظرِ بد جو جھاڑ پھونک سے ختم نہ ہو (لوبان کی دھونی)', ar:'اِنْ هِيَ اِلَّآ اَسْمَآءٌ سَمَّيْتُمُوْهَآ اَنْتُمْ وَاٰبَآؤُكُمْ مَّآ اَنْزَلَ اللّٰهُ بِهَا مِنْ سُلْطٰنٍ اِنْ يَّتَّبِعُوْنَ اِلَّا الظَّنَّ وَمَا تَهْوَى الْاَنْفُسُ وَلَقَدْ جَآءَهُمْ مِّنْ رَّبِّهِمُ الْهُدٰى اَمْ لِلْاِنْسَانِ مَا تَمَنّٰى', ur:'عمدہ لوبان پر یہ آیت ۴۱ مرتبہ پڑھ کر دم کریں، مریض کو دھونی دیں اور فوراً نظرِ بد کا تعویذ باندھیں۔' },
+    { k:'mbw_17', title:'نظرِ بد کے لیے نبوی و جبریلی نسخہ (دعائے حسنینؓ)', ar:'اَللّٰهُمَّ ذَا السُّلْطَانِ الْعَظِيْمِ وَالْمَنِّ الْقَدِيْمِ ذَا الْوَجْهِ الْكَرِيْمِ وَلِيَّ الْكَلِمَاتِ التَّآمَّاتِ وَالدَّعَوَاتِ الْمُسْتَجَابَاتِ عَافِ (نام مریض) مِنْ اَنْفُسِ الْجِنِّ وَاَعْيُنِ الْاِنْسِ', ur:'جسے نظر لگ گئی ہو یہ دعا پڑھ کر دم کریں یا پانی پر دم کر کے پلائیں۔' },
+    { k:'mbw_18', title:'ہر قسم کے جادو سے حفاظت کی جامع دعا (حضرت کعب احبارؓ)', ar:'اَعُوْذُ بِوَجْهِ اللّٰهِ الْعَظِيْمِ الَّذِيْ لَيْسَ شَيْءٌ اَعْظَمَ مِنْهُ وَبِكَلِمَاتِ اللّٰهِ التَّآمَّاتِ الَّتِيْ لَا يُجَاوِزُهُنَّ بَرٌّ وَّلَا فَاجِرٌ وَبِاَسْمَآءِ اللّٰهِ الْحُسْنٰى كُلِّهَا مَا عَلِمْتُ مِنْهَا وَمَا لَمْ اَعْلَمْ مِنْ شَرِّ مَا خَلَقَ وَبَرَاَ وَذَرَاَ', ur:'صبح و شام ۱۱ مرتبہ اس دعا کو پڑھنے کا اہتمام کریں۔' },
+    { k:'mbw_19', title:'آیاتِ تحفظ (دشمنوں کی بدگوئی و شر سے مکمل حفاظت)', ar:'قُلْ لَّنْ يُّصِيْبَنَآ اِلَّا مَا كَتَبَ اللّٰهُ لَنَا هُوَ مَوْلٰىنَا وَعَلَى اللّٰهِ فَلْيَتَوَكَّلِ الْمُؤْمِنُوْنَ ... قُلْ حَسْبِيَ اللّٰهُ عَلَيْهِ يَتَوَكَّلُ الْمُتَوَكِّلُوْنَ (سات آیاتِ تحفظ)', ur:'ان ساتوں آیات کو ہر آیت بسم اللہ کے ساتھ صبح و شام ۳ مرتبہ پڑھیں اور لکھ کر پاس رکھیں۔' },
+    { k:'mbw_20', title:'آیاتِ حفظ (آسیب، جنات، بدروح اور نظرِ بد سے مکمل حصار)', ar:'وَلَا يَـُٔوْدُهٗ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيْمُ ... فَاللّٰهُ خَيْرٌ حٰفِظًا وَّهُوَ اَرْحَمُ الرّٰحِمِيْنَ ... اِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَاِنَّا لَهٗ لَحٰفِظُوْنَ ... وَاللّٰهُ مِنْ وَّرَآئِهِمْ مُّحِيْطٌ بَلْ هُوَ قُرْاٰنٌ مَّجِيْدٌ فِيْ لَوْحٍ مَّحْفُوْظٍ', ur:'یہ آیاتِ حفظ صبح و شام ۳ مرتبہ پڑھیں؛ دشمن، آسیب، جنات اور نظرِ بد سے مکمل حفاظت رہتی ہے۔' },
+    { k:'mbw_21', title:'گھر سے جنات بھگانے کا ۲۱ دن کا مجرب طریقہ', ar:'سورہ البقرہ کی بلند آواز سے تلاوت + گھر کے کونوں میں ۳-۳ بار اذان + منزل کا پانی', ur:'۲۱ دن تک چاشت یا مغرب کے بعد سورہ بقرہ بلند آواز سے پڑھیں، پھر گھر کے کونوں میں ۳-۳ بار درمیانی آواز سے اذان دے کر پھونک ماریں۔ بوجھ محسوس ہو تو منزل پڑھ کر پانی پئیں اور غسل کریں۔' },
+    { k:'mbw_22', title:'گھر میں جنات، آسیب و سفلی موکلات نہ ٹک سکیں (حرمل و لوبان)', ar:'سورہ البقرہ + منزل شریف (پانی، حرمل اور لوبان پر دم)', ur:'پانی، حرمل اور لوبان پر سورہ بقرہ و منزل دم کریں؛ صبح و شام تمام کمروں اور کونوں میں دھونی دے کر فوراً دم شدہ پانی کی چھینٹیں ماریں۔' },
+    { k:'mbw_23', title:'آسیب اور جنات کا علاج (چہل قاف ۱۱ بار)', ar:'قَادِرٌ رَّبٌّ قَدَّرَ قَضَآءً قَقَهْقَرَ اَقُوْلُ بِقَرْقَارٍ مَعَ قَرْقَشٍ فِيْ قَيْقُوْشٍ بِحَقِّ قَلَانِسِ قُطْبِ الْقَمْقَامِ الْقَنَاقِنِ قَقَرْقَرِيْ تَقَبَّلْ بِقَبُوْلِ قُرْبِ قُدْسٍ عَنِ الْقِرَامِ قَيَاقَيُّوْمُ بِقَوْقَمِهَا فِيْ قَيْتَاتٍ بِقَفْقَفَةٍ قَفْقَفَهْ فَقَهْرُ قِطَامِيْ وَاَقْسِمُ قُفْنَهْ يَا قَوِيُّ', ur:'آسیب مسلط ہو تو چہل قاف ۱۱ مرتبہ پڑھ کر ۳ دن تک مریض پر دم کریں۔' },
+    { k:'mbw_24', title:'جنات جلانے اور آسیب کے ازالہ کے لیے چہل کاف کا عمل', ar:'كَفَاكَ رَبُّكَ كَمْ يَكْفِيْكَ وَاكِفَةً ۝ كِفْكَافُهَا كَكَمِيْنٍ كَانَ مِنْ كَلَكٍ ۝ تَكِرُّ كَرًّا كَكَرِّ الْكَرِّ فِيْ كَبِدٍ ۝ تَحْكِيْ مُشَكْشَكَةً كَكُلُكِ الْكَلَكِ ۝ كَفَاكَ مَا بِيْ كَفَاكَ الْكَافُ كُرْبَةً ۝ وَيَا كَوْكَبًا كَانَ تَحْكِيْ كَوْكَبَ الْفَلَكِ', ur:'(۱) سرسوں کے تیل پر ۷ یا ۱۱ بار دم کر کے ۲-۲ قطرے کان میں ڈالیں۔ (۲) جادو و آسیب کا مریض ۲۱ یا ۴۱ بار پابندی سے پڑھے تو ہر طرح کا جادو و آسیب ختم ہو جائے گا۔' },
+    { k:'mbw_25', title:'آیتِ قطب کے ۵ مجرب فوائد (جنات، کام نکلوانا، بچھو، سر درد)', ar:'ثُمَّ اَنْزَلَ عَلَيْكُمْ مِّنْ بَعْدِ الْغَمِّ اَمَنَةً نُّعَاسًا ... وَاللّٰهُ عَلِيْمٌ بِذَاتِ الصُّدُوْرِ (آلِ عمران ۱۵۴)', ur:'(۱) مشکل کام کے لیے ۲ رکعت نفل کے بعد ۳ بار پڑھ کر چہرے پر دم کریں۔ (۲) جنات و آسیب پر ۴ بار داہنے کان میں دم کریں۔ (۳) بچھو کے کاٹے پر ۴ بار اونچی آواز سے کان میں دم کریں۔ (۴) سر درد پر ۷ بار دم کریں۔' },
+    { k:'mbw_26', title:'آیاتِ قاف (ہر مسئلہ، گھریلو ناچاقی، کاروبار و بندش کا حل)', ar:'پانچ قرآنی آیات جن میں ہر آیت میں ۱۰ قاف ہیں: سورہ بقرہ ۲۴۶، آلِ عمران ۱۸۱، نساء ۷۷، مائدہ ۲۷، رعد ۱۶', ur:'طلوع و غروبِ آفتاب سے پہلے روزانہ صبح و شام ۱-۱ مرتبہ پڑھیں؛ گھریلو جھگڑے، کاروباری بندش، نظرِ بد اور حاکم کے سامنے سرخروئی کے لیے نہایت مجرب ہے۔' },
+    { k:'mbw_27', title:'حرزِ ابی دجانہؓ (جنات و شیاطین سے مکمل تحفظ کا نبوی فرمان)', ar:'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ هٰذَا كِتَابٌ مِّنْ مُّحَمَّدٍ رَّسُوْلِ اللّٰهِ رَبِّ الْعٰلَمِيْنَ اِلٰى مَنْ يَّطْرُقُ الدَّارَ مِنَ الْعُمَّارِ وَالزُّوَّارِ ... فَسَيَكْفِيْكَهُمُ اللّٰهُ وَهُوَ السَّمِيْعُ الْعَلِيْمُ', ur:'گھر میں جنات یا آسیب کی شرارت ہو تو پڑھ کر دم کریں اور لکھ کر گھر میں آویزاں کریں۔' },
+    { k:'mbw_28', title:'دعائے محی الرفات (تمام آفات و بلیات سے جامع تحفظ)', ar:'اَللّٰهُمَّ يَا مُحْيِيَ الرُّفَاتِ يَا دَافِعَ الْاٰفَاتِ يَا وَاقِيَ الْمَخَافَاتِ وَيَا كَرِيْمَ الْمُكَافَاتِ وَيَا مَوْلَى الْعُفَاةِ وَيَا وَلِيَّ الْعَفْوِ وَالْمُعَافَاةِ صَلِّ عَلٰى مُحَمَّدٍ خَاتَمِ اَنْبِيَآئِكَ وَعَلٰى مَصَابِيْحِ اُسْرَتِهٖ وَمَفَاتِيْحِ نُصْرَتِهٖ وَاَعِذْنِي اللّٰهُمَّ مِنْ نَزَغَاتِ الشَّيَاطِيْنِ', ur:'ہر قسم کی آفت، خوف، جادو اور بلیات سے حفاظت کے لیے روزانہ صبح و شام پڑھیں۔' },
+    // --- رزق، قرض، ملازمت، فتوحات و حاجات ---
+    { k:'mbw_29', title:'آیاتِ فتح (مالی کشائش، کاروباری ترقی و ملازمت کا تحفظ)', ar:'فَعَسَى اللّٰهُ اَنْ يَّاْتِيَ بِالْفَتْحِ اَوْ اَمْرٍ مِّنْ عِنْدِهٖ ... رَبَّنَا افْتَحْ بَيْنَنَا وَبَيْنَ قَوْمِنَا بِالْحَقِّ وَاَنْتَ خَيْرُ الْفٰتِحِيْنَ ... اِنَّا فَتَحْنَا لَكَ فَتْحًا مُّبِيْنًا ... نَصْرٌ مِّنَ اللّٰهِ وَفَتْحٌ قَرِيْبٌ ... اِذَا جَآءَ نَصْرُ اللّٰهِ وَالْفَتْحُ', ur:'صبح و شام ۳ مرتبہ پڑھنا ہر طرح کی فتوحات، رزق کی فراوانی، کاروباری ترقی اور حاسدین سے حفاظت کے لیے مجرب ہے۔' },
+    { k:'mbw_30', title:'رشتے سمیت تمام مقاصد، جادو کی کاٹ اور عزت کی بحالی کی ۱۰۰ بار دعا', ar:'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ لَا اِلٰهَ اِلَّا اللّٰهُ مُحَمَّدٌ رَّسُوْلُ اللّٰهِ، بِسْمِ اللّٰهِ خَيْرِ الْاَسْمَآءِ، بِسْمِ اللّٰهِ رَبِّ الْاَرْضِ وَرَبِّ السَّمَآءِ، بِسْمِ اللّٰهِ الَّذِيْ لَا يَضُرُّ مَعَ اسْمِهٖ شَيْءٌ فِي الْاَرْضِ وَلَا فِي السَّمَآءِ وَهُوَ السَّمِيْعُ الْعَلِيْمُ، وَلَا حَوْلَ وَلَا قُوَّةَ اِلَّا بِاللّٰهِ الْعَلِيِّ الْعَظِيْمِ، نَصْرٌ مِّنَ اللّٰهِ وَفَتْحٌ قَرِيْبٌ وَّبَشِّرِ الْمُؤْمِنِيْنَ، فَاللّٰهُ خَيْرٌ حٰفِظًا وَّهُوَ اَرْحَمُ الرّٰحِمِيْنَ، وَاَنْزَلْنَا الْحَدِيْدَ فِيْهِ بَاْسٌ شَدِيْدٌ وَّمَنَافِعُ لِلنَّاسِ، وَاللّٰهُ غَالِبٌ عَلٰٓى اَمْرِهٖ، كَتَبَ اللّٰهُ لَاَغْلِبَنَّ اَنَا وَرُسُلِيْ اِنَّ اللّٰهَ قَوِيٌّ عَزِيْزٌ', ur:'صبح و شام ۱۰۰ مرتبہ ۴۰ دن تک پڑھیں؛ ہر طرح کا جادو، رشتے کی بندش، کاروباری نحوست اور دشمنی ختم ہو کر عزت و برکت حاصل ہو گی۔' },
+    { k:'mbw_31', title:'درودِ تنجینا کی ۴ خاص برکات (بیماری، پریشانی، بری عادت، شادی)', ar:'اَللّٰهُمَّ صَلِّ عَلٰى مُحَمَّدٍ صَلٰوةً تُنْجِيْنَا بِهَا مِنْ جَمِيْعِ الْاَهْوَالِ وَالْاٰفَاتِ وَتَقْضِيْ لَنَا بِهَا جَمِيْعَ الْحَاجَاتِ وَتُطَهِّرُنَا بِهَا مِنْ جَمِيْعِ السَّيِّاٰتِ وَتَرْفَعُنَا بِهَآ اَعْلَى الدَّرَجَاتِ وَتُبَلِّغُنَا بِهَآ اَقْصَى الْغَايَاتِ مِنْ جَمِيْعِ الْخَيْرَاتِ فِي الْحَيٰوةِ وَبَعْدَ الْمَمَاتِ اِنَّكَ عَلٰى كُلِّ شَيْءٍ قَدِيْرٌ', ur:'(۱) بیماری: کثرت سے پڑھیں۔ (۲) پریشانی: فجر کے بعد قبلہ رخ ۱۲۵ بار۔ (۳) بری عادت: فجر کی سنت و فرض کے درمیان ۲۱ بار۔ (۴) شادی: فجر و عشاء کے بعد بغیر بات کیے ۱۰۰ بار (۴۰ دن)۔' },
+    { k:'mbw_32', title:'حیرت انگیز وظیفہ (ناممکن کام، قرض اور ظالم سے خلاصی)', ar:'يَا سُبُّوْحُ يَا قُدُّوْسُ يَا غَفُوْرُ يَا وَدُوْدُ', ur:'یہ چار اسماء ۷ مرتبہ پڑھ کر دعا مانگیں؛ رکے ہوئے کام، قرض اور ظالم سے نجات کے لیے نہایت مجرب ہے۔' },
+    { k:'mbw_33', title:'تمام پریشانیوں، قرض اور دشمن سے نجات (یا لطیف ۱۰۰۰ بار)', ar:'يَا لَطِيْفُ (۱۰۰۰ مرتبہ) + ۱۰۰ مرتبہ درود شریف (ہدیہ بحضور ﷺ)', ur:'ہر نماز کے بعد یا صبح و شام ۱۰۰۰ بار «یا لطیف» اور ۱۰۰ بار درود شریف پڑھ کر ایصالِ ثواب کر کے دعا مانگیں، ساتھ کچھ صدقہ کریں۔' },
+    { k:'mbw_34', title:'قرض کی ادائیگی کا مجرب عمل (سورہ آلِ عمران آیات ۲۶-۲۷)', ar:'قُلِ اللّٰهُمَّ مٰلِكَ الْمُلْكِ تُؤْتِي الْمُلْكَ مَنْ تَشَآءُ ... وَتَرْزُقُ مَنْ تَشَآءُ بِغَيْرِ حِسَابٍ', ur:'ہر فرض نماز کے بعد اول و آخر ۳-۳ بار درود شریف کے ساتھ یہ آیات ۵ مرتبہ پڑھیں۔' },
+    { k:'mbw_35', title:'ملازمتِ خاصہ (متعدد امیدواروں میں کامیابی)', ar:'نَرْفَعُ دَرَجٰتٍ مَّنْ نَّشَآءُ وَفَوْقَ كُلِّ ذِيْ عِلْمٍ عَلِيْمٌ', ur:'تین دن تک روزانہ ۷۰۰ مرتبہ اسی نیت سے پڑھیں۔' },
+    { k:'mbw_36', title:'ملازمت کے حصول کا سورہ الضحیٰ اور «یا کریم» والا عمل', ar:'سورہ الضحیٰ مع ہر حرف «ک» پر ۹، ۱۸ یا ۲۷ بار «يَا كَرِيْمُ»', ur:'نمازِ فجر کے بعد جگہ سے اٹھے بغیر ۹ دن تک ہر «ک» پر ۹ بار «یا کریم» پڑھیں (کام نہ ہو تو ۱۸ دن ۱۸ بار، پھر ۲۷ دن ۲۷ بار)۔' },
+    { k:'mbw_37', title:'مالدار ہونے اور روزی کے بہترین انتظام کا عمل', ar:'سورہ الکہف (روزانہ ایک مجلس میں ۲ مرتبہ)', ur:'فجر سے مغرب کے درمیان کسی بھی وقت ۲۱ دن تک روزانہ ایک مجلس میں سورہ کہف ۲ بار پڑھیں۔' },
+    { k:'mbw_38', title:'رزق میں برکت کے لیے ہر نماز کے بعد سورہ قریش', ar:'لِاِيْلٰفِ قُرَيْشٍ ... وَاٰمَنَهُمْ مِّنْ خَوْفٍ', ur:'ہر فرض نماز کے بعد اول و آخر ۱-۱ بار درود شریف کے ساتھ ۷ مرتبہ سورہ قریش پڑھیں۔' },
+    { k:'mbw_39', title:'شعبان المعظم میں مالی فراوانی کا خاص عمل', ar:'سورہ القدر ۲۱ بار، «وَاللّٰهُ يَرْزُقُ مَنْ يَّشَآءُ بِغَيْرِ حِسَابٍ» ۱۰۱ بار، «يَا وَاسِعُ» ۷۰۰ بار', ur:'۱۴ شعبان کو ظہر کے بعد غسل کر کے اول و آخر ۱۱ بار درود شریف کے ساتھ پڑھیں، اور اگلے دن سے روزانہ ۱۰۰ بار «یا واسع» پڑھیں۔' },
+    { k:'mbw_40', title:'مارکیٹنگ، وکالت، طبابت اور انٹرویو میں کامیابی کا درود', ar:'اَللّٰهُمَّ صَلِّ عَلٰى مُحَمَّدٍ صَلٰوةً مَّقْرُوْنَةً بِذِكْرِهٖ، اَللّٰهُمَّ صَلِّ عَلٰى مُحَمَّدٍ صَلٰوةً جَامِعَةً بَيْنَ فَرَحِهٖ وَسُرُوْرِهٖ، اَللّٰهُمَّ صَلِّ عَلٰى مُحَمَّدٍ صَلٰوةً مُّحِيْطَةً بِطَوْرِهٖ وَصُوْرِهٖ، اَللّٰهُمَّ صَلِّ عَلٰى مُحَمَّدٍ صَلٰوةً مُّنَوِّرَةً لِّقُلُوْبِ اَصْحَابِ صُدُوْرِهٖ، اَللّٰهُمَّ صَلِّ عَلٰى مُحَمَّدٍ صَلٰوةً شَارِحَةً لِّمَنْقُوْحِهٖ فِيْ مَسْطُوْرِهٖ وَصَلِّ عَلٰى جَمِيْعِ اِخْوَانِهٖ مِنَ الْاَنْبِيَآءِ وَالْاَوْلِيَآءِ بِعَدَدِ عُبُوْرِهٖ وَمُرُوْرِهٖ بَيْنَ الْمَآءِ وَطُهُوْرِهٖ وَنُوْرِهٖ وَظُهُوْرِهٖ وَالْحَقِّ وَاُمُوْرِهٖ', ur:'ہر نماز کے بعد پڑھیں؛ انٹرویو سے قبل ۲ رکعت نفل پڑھ کر ۱۱ بار ہاتھوں پر دم کر کے چہرے پر پھیر لیں۔' },
+    { k:'mbw_41', title:'تسخیر اور ہر جگہ عزت و وقار کا عمل (سورہ صف)', ar:'سورہ الصف مکمل (۷۰ مرتبہ ایک مجلس میں)', ur:'گھر، سسرال، عملہ اور ہر شعبۂ زندگی میں عزت کے لیے ایک ہی مجلس میں ۷۰ مرتبہ سورہ صف پڑھیں۔' },
+    { k:'mbw_42', title:'بددماغ افسر یا حاکم سے کام نکلوانا', ar:'(۱) بسم اللہ الرحمن الرحیم ۲۱ بار (۲) بسم اللہ ۳ بار + «کٓہٰیٰعٓصٓ» مٹھی کھولتے ہوئے', ur:'افسر کے کمرے میں داخل ہوتے وقت ۲۱ بار بسم اللہ پڑھ کر دم کریں، یا ناراض حاکم کے سامنے ۳ بار بسم اللہ اور ہر انگلی پر «ک ہ ی ع ص» کا ایک حرف پڑھ کر رخ کی طرف دم کریں۔' },
+    { k:'mbw_43', title:'ٹرانسفر (تبادلہ) رکوانے کا مجرب عمل', ar:'يَا قَادِرُ يَا مُقْتَدِرُ يَا عَزِيْزُ يَا عَلِيْمُ يَا عَلِيُّ يَا عَظِيْمُ', ur:'فجر کی نماز کے بعد ۲۱ دن تک روزانہ ۳۰۰ مرتبہ یہ اسمائے الٰہی پڑھیں۔' },
+    { k:'mbw_44', title:'جھوٹی تہمت اور جھوٹے مقدمے سے چھٹکارا', ar:'وَيُحِقُّ اللّٰهُ الْحَقَّ بِكَلِمٰتِهٖ وَلَوْ كَرِهَ الْمُجْرِمُوْنَ', ur:'اٹھتے بیٹھتے کثرت سے اس آیت کا ورد کریں۔' },
+    { k:'mbw_45', title:'ظالم کے انتہائی ظلم اور لاعلاج بیماری سے نجات', ar:'فَدَعَا رَبَّهٗٓ اَنِّيْ مَغْلُوْبٌ فَانْتَصِرْ', ur:'ظالم سے نجات یا ڈاکٹر کی سمجھ سے باہر بیماری کے لیے روزانہ ۳۱۳ بار پڑھ کر آسمان کی طرف پھونکیں اور پانی پر دم کر کے ۲۱ دن پلائیں۔' },
+    { k:'mbw_46', title:'آپس کی ناچاقی (میاں بیوی، ساس بہو، بھائی) ختم کرنے کا عمل', ar:'اول و آخر ۳ بار درود ابراہیمی، ۲۱ بار معوذتین، درمیان میں ۳۱۳ بار «يَا لَطِيْفُ يَا وَدُوْدُ يَا رَءُوْفُ»', ur:'کسی میٹھی یا کھانے کی چیز پر دم کر کے گھر کے سب افراد کو کھلائیں۔' },
+    { k:'mbw_47', title:'گمشدہ اور چوری شدہ چیز کی واپسی (عمل اول — دعائے نبوی)', ar:'اَللّٰهُمَّ رَآدَّ الضَّآلَّةِ وَهَادِيَ الضَّآلَّةِ تَهْدِيْ مِنَ الضَّلَالَةِ اُرْدُدْ عَلَيَّ ضَآلَّتِيْ بِقُدْرَتِكَ وَسُلْطَانِكَ فَاِنَّهَا مِنْ عَطَآئِكَ وَفَضْلِكَ', ur:'اس دعا کا کثرت سے ورد کریں۔' },
+    { k:'mbw_48', title:'گمشدہ چیز کے لیے (عمل دوم — یا حفیظ ۱۱۹ بار)', ar:'يَا حَفِيْظُ (۱۱۹ بار) + يٰبُنَيَّ اِنَّهَآ اِنْ تَكُ مِثْقَالَ حَبَّةٍ مِّنْ خَرْدَلٍ فَتَكُنْ فِيْ صَخْرَةٍ اَوْ فِي السَّمٰوٰتِ اَوْ فِي الْاَرْضِ يَاْتِ بِهَا اللّٰهُ اِنَّ اللّٰهَ لَطِيْفٌ خَبِيْرٌ (۱۱۹ بار)', ur:'بغیر کمی بیشی کے ۱۱۹-۱۱۹ مرتبہ پڑھ کر دعا کریں۔' },
+    { k:'mbw_49', title:'دعائے استخارہ (مکمل مسنون دعا)', ar:'اَللّٰهُمَّ اِنِّيْٓ اَسْتَخِيْرُكَ بِعِلْمِكَ وَاَسْتَقْدِرُكَ بِقُدْرَتِكَ وَاَسْاَلُكَ مِنْ فَضْلِكَ الْعَظِيْمِ ... وَاقْدُرْ لِيَ الْخَيْرَ حَيْثُ كَانَ ثُمَّ اَرْضِنِيْ بِهٖ', ur:'دو رکعت نفل کے بعد پوری توجہ سے پڑھ کر خیر طلب کریں۔' },
+    { k:'mbw_50', title:'ساتوں دنوں کے مخصوص اسمائے حسنیٰ کے اوراد', ar:'اتوار: يَا حَيُّ يَا قَيُّوْمُ (۱۷۴) | پیر: يَا رَحْمٰنُ يَا رَحِيْمُ (۵۵۶) | منگل: يَا مَالِكُ يَا قُدُّوْسُ (۲۶۱) | بدھ: يَا عَلِيُّ يَا عَظِيْمُ (۱۱۳۰) | جمعرات: يَا كَبِيْرُ يَا مُتَعَالِ (۷۷۳) | جمعہ: يَا كَافِيْ يَا غَنِيُّ (۱۱۷۱) | ہفتہ: يَا فَتَّاحُ يَا رَزَّاقُ (۷۹۷)', ur:'ہر دن اپنے متعلقہ اسمِ الٰہی کا مقررہ تعداد کے مطابق ورد برکت، تسخیر اور دفعِ نحوست کے لیے مجرب ہے۔' },
+    // --- جسمانی امراض و شفاء ---
+    { k:'mbw_51', title:'لاعلاج مرض، کینسر اور شوگر کا درودِ شفاء والا عمل', ar:'اَللّٰهُمَّ صَلِّ عَلٰى سَيِّدِنَا مُحَمَّدٍ بِعَدَدِ كُلِّ دَآءٍ وَّدَوَآءٍ وَّبَارِكْ وَسَلِّمْ', ur:'اول و آخر ۳ (لاعلاج مرض میں ۱۰۰) بار یہ درود، درمیان میں ۷ بار سورہ فاتحہ مع بسم اللہ اور ۳ بار سورہ اخلاص پڑھ کر دم کریں۔' },
+    { k:'mbw_52', title:'لاعلاج امراض کے لیے تین اسمائے الٰہی (۳۱۳ بار)', ar:'يَا اَللّٰهُ يَا سَلَامُ يَا قَوِيُّ', ur:'اول و آخر ۳-۳ بار درود شریف کے ساتھ روزانہ ۳۱۳ مرتبہ پڑھ کر مریض اور پانی پر دم کریں۔' },
+    { k:'mbw_53', title:'موت کے سوا ہر بیماری کا علاج (سورہ فاتحہ ۴۱ بار بوصلِ میم)', ar:'اَعُوْذُ بِاللّٰهِ مِنَ الشَّيْطٰنِ الرَّجِيْمِ + بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ کی میم کو الْحَمْدُ کے لام سے ملا کر ۴۱ بار + آمین', ur:'ہر مرتبہ بسم اللہ ملا کر ۴۱ بار سورہ فاتحہ اور آخر میں آمین کہہ کر مریض اور پانی پر دم کریں۔' },
+    { k:'mbw_54', title:'کینسر کے لیے سورہ الم نشرح کا ۴۰ دن کا عمل', ar:'سورہ الم نشرح (۴۰ مرتبہ پانی پر دم)', ur:'کسی نیک باعمل شخص سے ۴۰ بار سورہ الم نشرح پانی پر دم کروا کر ۴۰ روز تک مریض کو پلائیں۔' },
+    { k:'mbw_55', title:'ہر طرح کے درد (کمر، جوڑ، سر، عرق النساء) کا دم شدہ تیل', ar:'اول و آخر درود، فاتحہ، آیت الکرسی، چاروں قل اور «وَتَمَّتْ كَلِمَتُ رَبِّكَ صِدْقًا وَّعَدْلًا لَا مُبَدِّلَ لِكَلِمٰتِهٖ وَهُوَ السَّمِيْعُ الْعَلِيْمُ» ۱۱ بار + درمیان میں «يَا شَهِيْدُ» ۷۸۶ بار', ur:'ایک پاؤ خالص سرسوں کے تیل میں تین پاؤ پانی پکا کر پانی خشک کر لیں، پھر اس تیل پر یہ عمل دم کر کے درد کی جگہ مالش کریں۔' },
+    { k:'mbw_56', title:'جوڑوں کے درد کا سجدہ والا مجرب عمل', ar:'سورہ العلق ۷ بار + سجدے میں «حَسْبِيَ اللّٰهُ وَنِعْمَ الْمَوْلٰى وَنِعْمَ النَّصِيْرُ» ۷ بار', ur:'فجر کے بعد طلوعِ آفتاب سے پہلے ۷ بار سورہ علق پڑھیں، پھر ایک سجدہ کر کے ۷ بار یہ کلمات پڑھیں۔' },
+    { k:'mbw_57', title:'دردِ سر (فوری دم — ایک سانس میں یا وہاب)', ar:'يَا وَهَّابُ (۱۴ مرتبہ ایک ہی سانس میں)', ur:'مریض کی پیشانی پکڑ کر ایک ہی سانس میں ۱۴ مرتبہ «یا وہاب» پڑھ کر دم کریں۔' },
+    { k:'mbw_58', title:'آدھے یا پورے سر کا شدید درد (طلوعِ آفتاب)', ar:'سورہ الشمس ۳ بار + سورہ القدر ۷ بار', ur:'طلوعِ آفتاب کے وقت کھلے آسمان تلے سورج کی طرف منہ کر کے ۳ بار سورہ شمس اور ۷ بار سورہ قدر پڑھیں۔' },
+    { k:'mbw_59', title:'داڑھ اور دانت کے درد کا علاج (عمل اول — یا شہید)', ar:'اول و آخر ۱ یا ۳ بار درود ابراہیمی، درمیان میں ۲۱ بار «يَا شَهِيْدُ»', ur:'درد کی جگہ پر دم کریں؛ یہ عمل ۳ بار ۳ دن تک کریں۔' },
+    { k:'mbw_60', title:'داڑھ اور کان کے درد سے مستقل نجات (چھینک کی دعا)', ar:'اَلْحَمْدُ لِلّٰهِ رَبِّ الْعٰلَمِيْنَ عَلٰى كُلِّ حَالٍ مَّا كَانَ', ur:'جو شخص ہر چھینک کے وقت یہ دعا اہتمام سے پڑھے گا اسے داڑھ اور کان کا درد کبھی نہ ہو گا۔' },
+    { k:'mbw_61', title:'جگر کے جملہ امراض (درد، زخم، پتھری)', ar:'تَبٰرَكَ اسْمُ رَبِّكَ ذِي الْجَلٰلِ وَالْاِكْرَامِ', ur:'یہ آیت ۲۱ بار پڑھ کر پانی پر دم کر کے مریض کو پلائیں۔' },
+    { k:'mbw_62', title:'گردے اور پتے کی پتھری کا پانی والا عمل', ar:'وَاِنَّ مِنَ الْحِجَارَةِ لَمَا يَتَفَجَّرُ مِنْهُ الْاَنْهٰرُ وَاِنَّ مِنْهَا لَمَا يَشَّقَّقُ فَيَخْرُجُ مِنْهُ الْمَآءُ وَاِنَّ مِنْهَا لَمَا يَهْبِطُ مِنْ خَشْيَةِ اللّٰهِ وَمَا اللّٰهُ بِغَافِلٍ عَمَّا تَعْمَلُوْنَ', ur:'یہ آیت ۴۱ بار پڑھ کر پانی پر دم کر کے پتھری ختم ہونے تک پلائیں۔' },
+    { k:'mbw_63', title:'معدہ کی کمزوری (۷ دن کا عمل)', ar:'سورہ القدر (۱۱ مرتبہ پانی پر دم)', ur:'۱۱ بار سورہ قدر پڑھ کر پانی پر دم کریں اور دن میں ۳ بار ۷ دن تک پلائیں۔' },
+    { k:'mbw_64', title:'یرقان (پیلیا) کا علاج', ar:'سورہ البینہ (پانی پر دم + تعویذ)', ur:'یرقان کے مریض کو سورہ بینہ پڑھ کر پانی پر دم کر کے پلائیں اور گلے میں باندھیں۔' },
+    { k:'mbw_65', title:'لقوہ کا علاج (تیل، شہد اور پانی کا دم)', ar:'اول و آخر ۴۱ بار درود ابراہیمی و فلق/ناس + ۱۲۱ بار فاتحہ، کافرون اور الم نشرح', ur:'پانی، شہد اور زیتون کے تیل پر دم کریں؛ تیل سے مالش کریں اور شہد کے ۲ چمچ پانی میں دن میں ۳ بار پلائیں (ہر تیسرے دن دم تازہ کریں)۔' },
+    { k:'mbw_66', title:'بواسیر، جنون اور جذام کا علاج', ar:'يَا مَالِكُ يَا قُدُّوْسُ يَا سَلَامُ', ur:'فجر و مغرب کے بعد ۱-۱ تسبیح اور باقی نمازوں کے بعد ۴۱ مرتبہ پڑھیں۔' },
+    { k:'mbw_67', title:'بواسیر کا سورہ رحمٰن کے ۷ دھاگوں والا عمل', ar:'اول و آخر درود ابراہیمی + سورہ الرحمٰن کی ہر «فَبِاَيِّ اٰلَآءِ رَبِّكُمَا تُكَذِّبٰنِ» پر ایک گرہ', ur:'سوا میٹر کے ۷ موٹے دھاگوں پر ہر آیت پر گرہ لگا کر دم کریں اور کمر میں باندھ دیں۔' },
+    { k:'mbw_68', title:'خشک و تر خارش کا علاج (عمل اول — سورہ قدر)', ar:'سورہ القدر (۷ بار مریض پر + ۷ بار پانی پر دم)', ur:'باوضو ۷ بار سورہ قدر پڑھ کر دم کریں اور ۷ بار پانی پر دم کر کے پلائیں۔' },
+    { k:'mbw_69', title:'خشک و تر خارش کا علاج (عمل دوم — ۲۱ دن)', ar:'ثُمَّ خَلَقْنَا النُّطْفَةَ عَلَقَةً ... فَتَبَارَكَ اللّٰهُ اَحْسَنُ الْخٰلِقِيْنَ', ur:'یہ آیت روزانہ ۲۱ مرتبہ پانی پر دم کر کے ۲۱ دن تک پلائیں۔' },
+    { k:'mbw_70', title:'منہ کے چھالوں کا علاج', ar:'سورہ الضحیٰ (۴۱ بار چینی پر دم)', ur:'۴۱ بار سورہ ضحیٰ چینی پر دم کریں اور مریض منہ میں ڈال کر چوسے۔' },
+    { k:'mbw_71', title:'ہچکی بند کرنے کا فوری عمل', ar:'يَا حَفِيْظُ (تین سانس میں پانی، ہر سانس پر ۷ بار)', ur:'تین سانس میں پانی پئے اور ہر سانس پر ۷ بار «یا حفیظ» کہے۔' },
+    { k:'mbw_72', title:'دفعِ بلغم (نمک کی ۷ ڈلیاں)', ar:'آیت الکرسی (نمک کی ۷ چھوٹی ڈلیوں پر ۷-۷ بار)', ur:'ہر ڈلی پر ۷ بار آیت الکرسی پڑھیں اور روزانہ ایک ڈلی نہار منہ کھائیں۔' },
+    { k:'mbw_73', title:'الٹیاں نہ رک رہی ہوں تو فوری علاج', ar:'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ (۱۹ مرتبہ پانی پر)', ur:'ایک گلاس پانی پر ۱۹ بار بسم اللہ پڑھ کر ۵-۵ منٹ کے وقفے سے پلائیں۔' },
+    { k:'mbw_74', title:'نکسیر روکنے کا مجرب عمل', ar:'اِنَّ اللّٰهَ يُمْسِكُ السَّمٰوٰتِ وَالْاَرْضَ اَنْ تَزُوْلَا وَلَئِنْ زَالَتَآ اِنْ اَمْسَكَهُمَا مِنْ اَحَدٍ مِّنْ بَعْدِهٖ اِنَّهٗ كَانَ حَلِيْمًا غَفُوْرًا', ur:'پیشانی پر شہادت کی انگلی سے لکھیں اور تھوڑی ہلدی پر ۳ بار پڑھ کر دم کریں کہ مریض سونگھتا رہے۔' },
+    { k:'mbw_75', title:'حیض (ماہواری) کی زیادتی کا علاج (عمل اول و دوم)', ar:'(۱) سورہ الکوثر ۳۱۳ بار بارش/عام پانی پر (۳ ماہ ایامِ حیض میں) | (۲) سورہ الدہر ۷ دن تک پانی پر دم', ur:'دونوں میں سے کوئی ایک عمل پابندی سے پلائیں۔' },
+    { k:'mbw_76', title:'جریان کا علاج', ar:'(۱) سورہ الحجرات ۳ بار پانی پر (۴۱ دن) | (۲) عصر کے بعد اول و آخر ۷ بار درود + ۱۰۰ بار «رَبَّنَآ اَتْمِمْ لَنَا نُوْرَنَا وَاغْفِرْ لَنَا اِنَّكَ عَلٰى كُلِّ شَيْءٍ قَدِيْرٌ»', ur:'دونوں معمولات ۴۱ دن تک جاری رکھیں۔' },
+    { k:'mbw_77', title:'نیند نہ آتی ہو تو پرسکون نیند کے ۳ مجرب اعمال', ar:'(۱) سر پر دایاں ہاتھ رکھ کر ۷ بار «فَضَرَبْنَا عَلٰٓى اٰذَانِهِمْ فِي الْكَهْفِ» | (۲) داہنی کروٹ ۷ بار «تَحْسَبُهُمْ اَيْقَاظًا وَّهُمْ رُقُوْدٌ» | (۳) اول و آخر ۱۱ بار درود + ۷-۷ بار سورہ اللیل، الشمس و آیت الکرسی', ur:'بستر پر باوضو لیٹ کر ان میں سے کوئی عمل پڑھیں، فوراً پرسکون نیند آئے گی۔' },
+    { k:'mbw_78', title:'بال لمبے اور مضبوط کرنے کا عمل', ar:'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ قُلْ هُوَ لِلَّذِيْنَ اٰمَنُوْا هُدًى وَّشِفَآءٌ', ur:'یہ آیت ۱۲۱ بار کسی بھی تیل پر دم کر کے ۲۱ دن تک بالوں میں لگائیں۔' },
+    { k:'mbw_79', title:'کالی کھانسی کا علاج', ar:'سورہ الم نشرح (۴۱ بار پانی پر دم + تعویذ)', ur:'۷ دن تک ۴۱ بار سورہ الم نشرح پانی پر دم کر کے پلائیں اور گلے میں باندھیں۔' },
+    { k:'mbw_80', title:'بورنگ / کنویں سے میٹھا پانی نکلنے کا عمل', ar:'اُرْكُضْ بِرِجْلِكَ هٰذَا مُغْتَسَلٌ بَارِدٌ وَّشَرَابٌ', ur:'اول و آخر ۱۱ بار درودِ تنجینا کے ساتھ ۲۱ بار یہ آیت پانی پر دم کر کے بور میں ڈال دیں۔' },
+    { k:'mbw_81', title:'مچھروں اور چیونٹیوں سے حفاظت کے اعمال', ar:'چیونٹیوں کے لیے: «يٰٓاَيُّهَا النَّمْلُ ادْخُلُوْا مَسٰكِنَكُمْ لَا يَحْطِمَنَّكُمْ سُلَيْمٰنُ وَجُنُوْدُهٗ وَهُمْ لَا يَشْعُرُوْنَ» | مچھروں کے لیے: «وَمَا لَنَآ اَلَّا نَتَوَكَّلَ عَلَى اللّٰهِ ...» ۷ بار پانی پر دم کر کے چھڑکیں', ur:'چیونٹیوں والی آیت لکھ کر سوراخ کے پاس رکھ دیں؛ مچھروں والا پانی چارپائی/کمرے کے اطراف چھڑکیں۔' }
+  ];
+
+  // =========================================================================
+  // 2. MASTER AUTHENTIC NAQSH & TAWEEZAT CATALOG (Clean White-Label, Print-Ready)
+  // =========================================================================
+  window.MASTER_BOOK_NAQSH_V32 = [
+    { k:'mbn_01', title:'نماز کی پابندی اور نیک اولاد کا نقش (مثلث و مربع — رب اجعلنی مقیم الصلوٰۃ)', tags:'نماز اولاد ہدایت حفاظت', render: function(){ return renderGridNaqshHtml('', 3396, '3x3', 'نماز میں سستی دور کرنے اور اولاد کو نمازی بنانے کے لیے لکھ کر گلے میں باندھیں یا پلائیں۔', 'رَبِّ اجْعَلْنِيْ مُقِيْمَ الصَّلٰوةِ وَمِنْ ذُرِّيَّتِيْ رَبَّنَا وَتَقَبَّلْ دُعَآءِ'); } },
+    { k:'mbn_02', title:'ہر بیماری اور تکلیف سے شفاء کا نقش (مربع — رب انی مسنی الضر)', tags:'شفاء بیماری درد تکلیف', render: function(){ return renderGridNaqshHtml('', 2500, '4x4', 'پرانی بیماری اور ہر جسمانی تکلیف سے شفاء کے لیے لکھ کر پلائیں اور بازو/گلے میں باندھیں۔', 'رَبِّ اَنِّيْ مَسَّنِيَ الضُّرُّ وَاَنْتَ اَرْحَمُ الرّٰحِمِيْنَ'); } },
+    { k:'mbn_03', title:'دشمن اور مصیبت سے تحفظ کا نقش (مربع — وافوض امری الی اللہ)', tags:'حفاظت دشمن مقدمہ پریشانی', render: function(){ return renderGridNaqshHtml('', 1780, '4x4', 'دشمن کے شر، خوف اور سخت پریشانی میں اللہ کی حفاظت کے لیے پاس رکھیں۔', 'وَاُفَوِّضُ اَمْرِيْٓ اِلَى اللّٰهِ اِنَّ اللّٰهَ بَصِيْرٌ بِالْعِبَادِ'); } },
+    { k:'mbn_04', title:'میاں بیوی اور خاندان میں الفت و محبت کا نقش (مربع — والف بین قلوبہم)', tags:'حب محبت شادی میاں بیوی الفت', render: function(){ return renderGridNaqshHtml('', 3731, '4x4', 'میاں بیوی یا گھر والوں کے درمیان ناچاقی ختم کر کے محبت پیدا کرنے کے لیے پلائیں اور پاس رکھیں۔', 'وَاَلَّفَ بَيْنَ قُلُوْبِهِمْ'); } },
+    { k:'mbn_05', title:'جائز محبت اور تسخیر کا نقش (مثلث — یحبونہم کحب اللہ)', tags:'حب محبت تسخیر شادی', render: function(){ return renderGridNaqshHtml('', 1493, '3x3', 'جائز محبت اور میاں بیوی میں موافقت کے لیے زعفران سے لکھ کر پلائیں یا پاس رکھیں۔', 'يُحِبُّوْنَهُمْ كَحُبِّ اللّٰهِ'); } },
+    { k:'mbn_06', title:'رزق کی کشائش اور غیبی مدد کا نقش (مثلث — اللہ لطیف بعبادہ)', tags:'رزق کاروبار برکت قرض', render: function(){ return renderGridNaqshHtml('', 1287, '3x3', 'رزق میں برکت، کاروباری کشائش اور روزی کے لیے پرس، دکان یا بازو پر باندھیں۔', 'اَللّٰهُ لَطِيْفٌ بِعِبَادِهٖ يَرْزُقُ مَنْ يَّشَآءُ وَهُوَ الْقَوِيُّ الْعَزِيْزُ'); } },
+    { k:'mbn_07', title:'مشکلات سے نجات اور غیبی رزق کا نقش (مربع — ومن یتق اللہ)', tags:'رزق قرض مشکل بندش کاروبار', render: function(){ return renderGridNaqshHtml('', 6380, '4x4', 'سخت مالی تنگی، بندش اور مشکلات سے نجات کے لیے لکھ کر پاس رکھیں۔', 'وَمَنْ يَّتَّقِ اللّٰهَ يَجْعَلْ لَّهٗ مَخْرَجًا وَّيَرْزُقْهُ مِنْ حَيْثُ لَا يَحْتَسِبُ'); } },
+    { k:'mbn_08', title:'سفر، نوکری اور نئے کام میں کامیابی کا نقش (مربع — وقل رب ادخلنی)', tags:'کاروبار سفر ملازمت کامیابی', render: function(){ return renderGridNaqshHtml('', 4653, '4x4', 'نیا کاروبار، ملازمت، مقدمہ یا سفر میں کامیابی و نصرتِ الٰہی کے لیے پاس رکھیں۔', 'وَقُلْ رَّبِّ اَدْخِلْنِيْ مُدْخَلَ صِدْقٍ وَّاَخْرِجْنِيْ مُخْرَجَ صِدْقٍ'); } },
+    { k:'mbn_09', title:'میاں بیوی میں مودت و رحمت کا نقش (مثلث — ومن آیاتہ ان خلق لکم)', tags:'حب محبت شادی رشتہ میاں بیوی', render: function(){ return renderGridNaqshHtml('', 2902, '3x3', 'شادی کی رکاوٹ دور کرنے اور میاں بیوی میں محبت و سکون کے لیے بازو پر باندھیں۔', 'وَمِنْ اٰيٰتِهٖٓ اَنْ خَلَقَ لَكُمْ مِّنْ اَنْفُسِكُمْ اَزْوَاجًا لِّتَسْكُنُوْٓا اِلَيْهَا وَجَعَلَ بَيْنَكُمْ مَّوَدَّةً وَّرَحْمَةً'); } },
+    { k:'mbn_10', title:'نظرِ بد اور حسد کی کاٹ کا نقش (مثلث و مربع — وان یکاد)', tags:'نظر حسد حفاظت بچوں', render: function(){ return renderGridNaqshHtml('', 4696, '3x3', 'سخت نظرِ بد، حسد اور بچوں کی حفاظت کے لیے گلے میں باندھیں یا گھر میں لگائیں۔', 'وَاِنْ يَّكَادُ الَّذِيْنَ كَفَرُوْا لَيُزْلِقُوْنَكَ بِاَبْصَارِهِمْ'); } },
+    { k:'mbn_11', title:'ہر بیماری سے شفاء کا قرآنی نقش (مربع — وننزل من القرآن)', tags:'شفاء بیماری علاج درد', render: function(){ return renderGridNaqshHtml('', 1564, '4x4', 'جسمانی و روحانی بیماریوں سے شفاء کے لیے پانی میں گھول کر پلائیں اور گلے میں ڈالیں۔', 'وَنُنَزِّلُ مِنَ الْقُرْاٰنِ مَا هُوَ شِفَآءٌ وَّرَحْمَةٌ لِّلْمُؤْمِنِيْنَ'); } },
+    { k:'mbn_12', title:'دشمن، ظالم اور جنات پر غلبہ کا نقش (مربع — یا جبار یا قہار)', tags:'جادو جنات دشمن ظالم غلبہ', render: function(){ return renderGridNaqshHtml('', 5115, '4x4', 'سرکش جنات، جادوگر اور ظالم دشمن سے حفاظت و غلبہ کے لیے بازو پر باندھیں۔', 'يَا جَبَّارُ يَا قَهَّارُ يَا ذَا الْبَطْشِ الشَّدِيْدِ'); } },
+    { k:'mbn_13', title:'آسیب، جنات اور مرگی کی کاٹ کا نقش (مربع — افحسبتم)', tags:'جادو آسیب جنات مرگی خوف', render: function(){ return renderGridNaqshHtml('', 11382, '4x4', 'جنات، آسیب اور ڈراؤنے خوابوں کے مستقل خاتمے کے لیے گلے میں باندھیں اور ۲۱ دن پلائیں۔', 'اَفَحَسِبْتُمْ اَنَّمَا خَلَقْنٰكُمْ عَبَثًا وَاَنَّكُمْ اِلَيْنَا لَا تُرْجَعُوْنَ'); } },
+    { k:'mbn_14', title:'دشمنوں اور حاسدین سے کفایت کا نقش (مربع — فسیکفیکہم اللہ)', tags:'حفاظت دشمن نظر حسد بندش', render: function(){ return renderGridNaqshHtml('', 800, '4x4', 'دشمنوں کی سازشوں، نظرِ بد اور شر سے مکمل حفاظت کے لیے پاس رکھیں۔', 'فَسَيَكْفِيْكَهُمُ اللّٰهُ وَهُوَ السَّمِيْعُ الْعَلِيْمُ'); } },
+    { k:'mbn_15', title:'آیتِ قطب کا عظیم نقش (مثلث — ہر مشکل، جنات و عزت)', tags:'جادو جنات حفاظت عزت مشکل', render: function(){ return renderGridNaqshHtml('', 20572, '3x3', 'ہر بڑی مشکل، جنات و آسیب سے تحفظ اور لوگوں میں عزت و وقار کے لیے پاس رکھیں۔', 'آیتِ قطب (ثُمَّ اَنْزَلَ عَلَيْكُمْ مِّنْ بَعْدِ الْغَمِّ اَمَنَةً نُّعَاسًا...)'); } },
+    { k:'mbn_16', title:'ہر آفت و حادثہ سے حفاظت کا نقش (مثلث — فاللہ خیر حافظا)', tags:'حفاظت سفر بچوں حمل آفت', render: function(){ return renderGridNaqshHtml('', 2550, '3x3', 'جان و مال، حمل، بچوں اور سفر میں ہر حادثہ و آفت سے حفاظت کے لیے باندھیں۔', 'فَاللّٰهُ خَيْرٌ حٰفِظًا وَّهُوَ اَرْحَمُ الرّٰحِمِيْنَ'); } },
+    { k:'mbn_17', title:'سحر و جادو کے مکمل ابطال کا نقش (مربع — فوقع الحق)', tags:'جادو سحر بندش کاٹ ابطال', render: function(){ return renderGridNaqshHtml('', 12460, '4x4', 'پرانے سے پرانے جادو اور بندش کے ابطال کے لیے ۲۱ دن پانی میں گھول کر پلائیں اور ایک گلے میں باندھیں۔', 'فَوَقَعَ الْحَقُّ وَبَطَلَ مَا كَانُوْا يَعْمَلُوْنَ — فَلَمَّآ اَلْقَوْا قَالَ مُوْسٰى مَا جِئْتُمْ بِهِ السِّحْرُ اِنَّ اللّٰهَ سَيُبْطِلُهٗ'); } },
+    { k:'mbn_18', title:'محبت اور تسخیرِ قلوب کا نقش (مربع — والقیت علیک محبۃ منی)', tags:'حب محبت تسخیر شادی عزت', render: function(){ return renderGridNaqshHtml('', 1227, '4x4', 'میاں بیوی میں محبت اور ہر دل عزیز بننے کے لیے زعفران سے لکھ کر پاس رکھیں (چاروں کونوں پر جبرائیل، میکائیل، اسرافیل، عزرائیل)۔', 'وَاَلْقَيْتُ عَلَيْكَ مَحَبَّةً مِّنِّيْ وَلِتُصْنَعَ عَلٰى عَيْنِيْ'); } },
+    { k:'mbn_19', title:'ستر العرش کا عظیم حفاظتی نقش (مربع — ۴۰۲۳)', tags:'حفاظت جادو آسیب دشمن حصار', render: function(){ return renderGridNaqshHtml('', 4023, '4x4', 'ہر ظالم، جادوگر، جنات اور ناگہانی آفت سے مکمل روحانی حصار کے لیے پاس رکھیں۔', 'سِتْرُ الْعَرْشِ مَسْبُوْلٌ عَلَيْنَا وَعَيْنُ اللّٰهِ نَاظِرَةٌ اِلَيْنَا بِحَوْلِ اللّٰهِ لَا يُقْدَرُ عَلَيْنَا'); } },
+    { k:'mbn_20', title:'ولایت و حفاظتِ الٰہی کا نقش (مثلث — ان ولیی اللہ)', tags:'حفاظت جادو نظر شفاء', render: function(){ return renderGridNaqshHtml('', 2146, '3x3', 'جادو، جنات اور ہر خوف سے نجات کے لیے گلے میں باندھیں یا گھر میں رکھیں۔', 'اِنَّ وَلِيِّيَ اللّٰهُ الَّذِيْ نَزَّلَ الْكِتٰبَ وَهُوَ يَتَوَلَّى الصّٰلِحِيْنَ'); } },
+    { k:'mbn_21', title:'حسبی اللہ کا جامع نقش (مربع — ۳۰۹۸)', tags:'حفاظت رزق مشکل پریشانی دشمن', render: function(){ return renderGridNaqshHtml('', 3098, '4x4', 'دین و دنیا کے ہر غم، قرض اور دشمن سے کفایت کے لیے بازو پر باندھیں۔', 'حَسْبِيَ اللّٰهُ لَآ اِلٰهَ اِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيْمِ'); } },
+    { k:'mbn_22', title:'سات سلام کا مجرب نقش (مثلث — ۵۷۹۸)', tags:'شفاء حفاظت جادو نظر امن', render: function(){ return renderGridNaqshHtml('', 5798, '3x3', 'ہر بیماری، جادو، نظرِ بد اور گھریلو بے سکونی سے سلامتی کے لیے پلائیں اور گھر میں لگائیں۔', 'سات قرآنی سلام (سَلٰمٌ قَوْلًا مِّنْ رَّبٍّ رَّحِيْمٍ...)'); } },
+    { k:'mbn_23', title:'یا رزاق کا خاص نقش (مربع — ۳۱۹)', tags:'رزق کاروبار دکان برکت', render: function(){ return renderGridNaqshHtml('', 319, '4x4', 'رزق کی فراوانی اور دکان/کاروبار میں برکت کے لیے گلے، پرس یا بازو میں رکھیں۔', 'يَا رَزَّاقُ'); } },
+    { k:'mbn_24', title:'یا قہار کا جلالی نقش (مربع — ۳۱۷)', tags:'جادو جنات دشمن قہار', render: function(){ return renderGridNaqshHtml('', 317, '4x4', 'سرکش جنات، جادو اور ظالم دشمن کو مغلوب کرنے کے لیے استعمال کریں۔', 'يَا قَهَّارُ'); } },
+    { k:'mbn_25', title:'چہل کاف کا طاقتور نقش (مربع — ۶۶۱۷)', tags:'جادو آسیب جنات حفاظت بندش', render: function(){ return renderGridNaqshHtml('', 6617, '4x4', 'سخت جادو، آسیب، بندش اور دشمن سے حفاظت کے لیے لکھ کر پاس رکھیں یا پلائیں۔', 'چہل کاف شریف'); } },
+    { k:'mbn_26', title:'نادِ علی شریف کا نقش (مثلث — ۶۲۳۶)', tags:'جادو بندش مشکل حفاظت غلبہ', render: function(){ return renderGridNaqshHtml('', 6236, '3x3', 'سخت مہمات، جادو، بندش اور مشکلات کے حل کے لیے بازو پر باندھیں۔', 'نَادِ عَلِيًّا مُظْهِرَ الْعَجَآئِبِ...'); } },
+    { k:'mbn_27', title:'حزب النصر کا عظیم نقش (مربع — ۸۹۶۶۱)', tags:'دشمن مقدمہ غلبہ حفاظت جادو', render: function(){ return renderGridNaqshHtml('', 89661, '4x4', 'دشمن پر غلبہ، جھوٹے مقدمے میں فتح اور سخت سحر سے تحفظ کے لیے بازو پر باندھیں۔', 'حزب النصر شریف'); } },
+    { k:'mbn_28', title:'حروفِ صوامت کا نقش (مربع — ۵۴۳)', tags:'حفاظت زبان بندی جادو', render: function(){ return renderGridNaqshHtml('', 543, '4x4', 'دشمن کی زبان بندی، حفاظت اور تسخیر کے لیے پاس رکھیں۔', 'حروفِ صوامت (بے نقطہ حروف)'); } },
+    { k:'mbn_29', title:'بدوح کا عددی و لفظی نقش (۴×۴)', tags:'حب رزق حفاظت مشکل کشا', render: function(){ return renderGridNaqshHtml('', 0, [['ب / ۲','د / ۴','و / ۶','ح / ۸'],['ح / ۸','و / ۶','د / ۴','ب / ۲'],['د / ۴','ب / ۲','ح / ۸','و / ۶'],['و / ۶','ح / ۸','ب / ۲','د / ۴']], 'ہر نیک مقصد، محبت، کشائشِ رزق اور آسانیِ کار کے لیے لکھ کر پاس رکھیں۔', 'نقشِ بدوح (عددی و لفظی)'); } },
+    { k:'mbn_30', title:'یا ہادی، یا سلام، یا بدیع کا لفظی مثلث نقش', tags:'شفاء ہدایت سکون حفاظت', render: function(){ return renderGridNaqshHtml('', 0, [['یا ہادی','یا سلام','یا بدیع'],['یا بدیع','یا ہادی','یا سلام'],['یا سلام','یا بدیع','یا ہادی']], 'ذہنی سکون، ہدایت، سلامتی اور نافرمان کی اصلاح کے لیے پلائیں یا گلے میں باندھیں۔', 'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ'); } },
+    { k:'mbn_31', title:'چلتا کاروبار رک جائے یا بندش ہو (فتاح لفظی + عددی مربع)', tags:'کاروبار رزق بندش دکان فتح', render: function(){ return renderGridNaqshHtml('', 489, [['ف','ت','ا','ح'],['ح','ا','ت','ف'],['ت','ف','ح','ا'],['ا','ح','ف','ت']], 'گلاب و زعفران سے لکھ کر دائیں بازو پر باندھیں اور روزانہ ۴۸۹ بار «یا فتاح» ۴۱ دن تک بلا ناغہ پڑھیں۔', '۷۸۶ — نقشِ فتاح (بندشِ کاروبار)'); } },
+    { k:'mbn_32', title:'جادو اور جنات جلانے کا مربع نقش (مع کراس و احرق الشیاطین)', tags:'جادو جنات آسیب جلانا سحر', render: function(){ return renderGridNaqshHtml('', 0, [['۱۶','۲','۳','۱۳'],['۵','۱۱','۱۰','۸'],['۹','۷','۶','۱۲'],['۴','۱۴','۱۵','۱']], 'جادو اور جنات کے جملہ امراض کے لیے سرخ روشنائی سے لکھ کر مریض کو دیں کہ رات تکیے کے نیچے رکھے اور صبح جسم پر پھیر کر جلائے، راکھ بہتے پانی میں ڈالے۔', 'اَحْرِقِ الشَّيَاطِيْنَ — اَظْهِرْ — كُلُّهُمْ بِحَقِّ هٰذِهِ التَّكْسِيْرِ', 'جادو بر سرِ جادوگر'); } },
+    { k:'mbn_33', title:'ناف ٹل جائے تو باندھنے کا نقش (مثلث ۱۵)', tags:'شفاء ناف پیٹ درد', render: function(){ return renderGridNaqshHtml('', 0, [['۸','۱','۶'],['۳','۵','۷'],['۴','۹','۲']], 'لکھ کر ناف کے اوپر باندھیں؛ اگر بار بار ٹلتی ہو تو ایک ماہ تک باندھے رکھیں۔', '۷۸۶', 'ذٰلِكَ تَخْفِيْفٌ مِّنْ رَّبِّكُمْ وَرَحْمَةٌ'); } },
+    { k:'mbn_34', title:'سہلِ ولادت (ولادت میں آسانی کا مثلث نقش)', tags:'ولادت حمل شفاء اولاد', render: function(){ return renderGridNaqshHtml('', 0, [['۸','۱','۶'],['۳','۵','۷'],['۴','۹','۲']], 'دردِ زہ شروع ہوتے ہی لکھ کر کپڑے میں لپیٹ کر عورت کی ناف/بائیں ران پر باندھیں اور ولادت کے فوراً بعد اتار دیں۔', '۷۸۶', 'اِذَا السَّمَآءُ انْشَقَّتْ وَاَذِنَتْ لِرَبِّهَا وَحُقَّتْ ... اَللّٰهُمَّ يَا مُخْرِجَ النَّفْسِ مِنَ النَّفْسِ سَهِّلْ عَلَيْهَا الْوِلَادَةَ'); } },
+    { k:'mbn_35', title:'بچہ خواب میں ڈر جائے یا ضد کرے (مثلث مع دعائے رقیہ)', tags:'بچوں خوف خواب نظر حفاظت', render: function(){ return renderGridNaqshHtml('', 0, [['۶','۷','۲'],['۱','۵','۹'],['۸','۳','۴']], 'لکھ کر بچے کے گلے میں باندھ دیں؛ ڈراؤنے خواب، خوف اور چڑچڑاپن ختم ہو گا۔', 'بِسْمِ اللّٰهِ اَرْقِيْكَ مِنْ كُلِّ دَآءٍ يُّؤْذِيْكَ وَمِنْ شَرِّ كُلِّ حَاسِدٍ وَّعَيْنٍ اللّٰهُ يَشْفِيْكَ', 'وَقُلِ الْحَمْدُ لِلّٰهِ الَّذِيْ لَمْ يَتَّخِذْ وَلَدًا ... وَكَبِّرْهُ تَكْبِيْرًا'); } },
+    { k:'mbn_36', title:'حب و تسخیر اور ناراض شخص کی واپسی کا نقش (مربع)', tags:'حب محبت تسخیر ناراض واپسی', render: function(){ return renderGridNaqshHtml('', 0, [['۶۰۰۲','۶۰۱۶','۶۰۱۳','۶۰۰۹'],['۶۰۱۴','۶۰۰۸','۶۰۰۳','۶۰۱۵'],['۶۰۰۷','۶۰۱۱','۶۰۱۸','۶۰۰۴'],['۶۰۱۷','۶۰۰۵','۶۰۰۶','۶۰۱۲']], 'نیچے مقصد اور نام لکھ کر پھلدار درخت یا پنکھے پر باندھیں یا وزن کے نیچے رکھیں۔', '۷۸۶'); } },
+    { k:'mbn_37', title:'رعشہ (ہاتھ پیر کانپنا) کے علاج کا مربع نقش', tags:'شفاء رعشہ اعصاب بیماری', render: function(){ return renderGridNaqshHtml('', 0, [['۳۱۷','۳۳۱','۳۲۸','۳۲۴'],['۳۲۹','۳۲۳','۳۱۸','۳۳۰'],['۳۲۲','۳۲۶','۳۳۳','۳۱۹'],['۳۳۲','۳۲۰','۳۲۱','۳۲۷']], 'اس طرح کے دو نقش بنائیں: ایک مریض گلے میں باندھے اور دوسرا روزانہ صبح و شام دیکھتا رہے۔', '۷۸۶'); } },
+    { k:'mbn_38', title:'کثرتِ احتلام کے علاج کا مربع نقش', tags:'شفاء احتلام بیماری', render: function(){ return renderGridNaqshHtml('', 0, [['۲۴۶','۲۶۰','۲۵۷','۲۵۳'],['۲۵۸','۲۵۴','۲۴۷','۲۵۹'],['۲۵۲','۲۵۵','۲۶۲','۲۴۸'],['۲۶۱','۲۴۹','۲۵۱','۲۵۶']], 'ایک تعویذ گلے میں باندھیں (کم از کم ۱ سال) اور دوسرا رات سونے سے پہلے پانی میں ڈال کر پلائیں۔', '۷۸۶'); } },
+    { k:'mbn_39', title:'زبان بندی کا مجرب لفظی مربع نقش (ختم اللہ)', tags:'زبان بندی دشمن حفاظت بندش', render: function(){ return renderGridNaqshHtml('', 0, [['ختم اللہ علی قلوبہم ۱۶','وعلی سمعہم ۱۷','وعلی ابصارہم ۱۸','غشاوۃ ۱۹'],['غشاوۃ ۱۹','وعلی ابصارہم ۱۸','وعلی سمعہم ۱۷','ختم اللہ علی قلوبہم ۱۶'],['وعلی سمعہم ۱۷','ختم اللہ علی قلوبہم ۱۶','غشاوۃ ۱۹','وعلی ابصارہم ۱۸'],['وعلی ابصارہم ۱۸','غشاوۃ ۱۹','ختم اللہ علی قلوبہم ۱۶','وعلی سمعہم ۱۷']], 'ہفتہ یا منگل کے دن لکھ کر نیچے «بستم عقل و ہوش و چشم و گوش و زبان فلاں بن فلاں» لکھیں اور مطلوب کے دروازے کی چوکھٹ تلے رکھیں۔', '۷۸۶'); } },
+    { k:'mbn_40', title:'بچہ بولنے میں ہکلائے (۶۰ مرتبہ حرف «ب»)', tags:'بچوں ہکلانا شفاء زبان', render: function(){ return renderGridNaqshHtml('', 0, [], 'باوضو زعفران سے ۶۰ مرتبہ حرف «ب» لکھ کر بچے کے گلے میں باندھیں۔', '۷۸۶', 'ب ب ب ب ب ب ب ب ب ب ب ب<br>ب ب ب ب ب ب ب ب ب ب ب ب<br>ب ب ب ب ب ب ب ب ب ب ب ب<br>ب ب ب ب ب ب ب ب ب ب ب ب<br>ب ب ب ب ب ب ب ب ب ب ب ب'); } },
+    { k:'mbn_41', title:'اصحابِ کہف کے اسماء کا دائرہ (جنات، چوری، آگ، سفر، ولادت، بچہ روئے)', tags:'حفاظت جنات چوری آگ سفر ولادت بچوں', render: function(){ return renderGridNaqshHtml('', 0, [], 'گلے میں باندھنے سے جنات سے تحفظ؛ گھر میں لٹکانے سے پتھراؤ و جنات کا خاتمہ؛ مال میں رکھنے سے چوری و آگ سے حفاظت؛ بچے کے سرہانے رکھنے سے رونا بند؛ ولادت میں بائیں ران پر باندھیں۔', 'يَمْلِيْخَا — مَكْسَلْمِيْنَا — مَثْلِيْنَا — مَرْنُوْش — دَبَرْنُوْش — شَاذَنُوْش — كَفَشْطَطْيُوْش — وَكَلْبُهُمْ قِطْمِيْر', 'وَعَلَى اللّٰهِ قَصْدُ السَّبِيْلِ وَمِنْهَا جَآئِرٌ وَلَوْ شَآءَ لَهَدٰىكُمْ اَجْمَعِيْنَ'); } },
+    // --- خواصِ سورِ قرآنی کے کلیدی نقوش ---
+    { k:'mbn_42', title:'سورہ فاتحہ کا نقش (۹۳۵۹ — فقر، درد، جلدی امراض و حفاظت)', tags:'شفاء رزق حفاظت درد فقر', render: function(){ return renderGridNaqshHtml('', 9359, '3x3', 'فقر و فاقہ، دردِ سر/پیٹ/گردہ، جلدی امراض اور ہر چیز کی حفاظت کے لیے لکھ کر پلائیں، غسل کرائیں یا پاس رکھیں۔', 'سُوْرَةُ الْفَاتِحَةِ'); } },
+    { k:'mbn_43', title:'سورہ البقرہ کا نقش (۹۴۷۶۰۹ — جنات، مرگی و تمام آفات سے حفاظت)', tags:'جنات آسیب مرگی حفاظت جادو', render: function(){ return renderGridNaqshHtml('', 947609, '3x3', 'جس گھر میں جنات ہوں یا آفات سے حفاظت مقصود ہو، گھر میں لگائیں یا پاس رکھیں۔', 'سُوْرَةُ الْبَقَرَةِ'); } },
+    { k:'mbn_44', title:'سورہ آلِ عمران کا نقش (۱۸۴۹۵۶ — قرض سے نجات و محتاجی کا خاتمہ)', tags:'قرض رزق محتاجی برکت', render: function(){ return renderGridNaqshHtml('', 184956, '3x3', 'قرض سے نجات اور محتاجی سے بچنے کے لیے لکھ کر پاس رکھیں۔', 'سُوْرَةُ اٰلِ عِمْرٰنَ'); } },
+    { k:'mbn_45', title:'سورہ یٰسین کا نقش (۲۷۶۷۵۳ — جادو، جنات، بانجھ پن و تمام مقاصد)', tags:'جادو جنات اولاد رزق شفاء حاجت', render: function(){ return renderGridNaqshHtml('', 276753, '3x3', 'جادو، جنات، بانجھ پن، محتاجی اور ہر جائز مقصد کے لیے پانی میں گھول کر پلائیں اور پاس رکھیں۔', 'سُوْرَةُ يٰسٓ'); } },
+    { k:'mbn_46', title:'سورہ الرحمٰن کا نقش (۱۲۰۴۵۰ — ذہنی، دل، گردے، جادو و گھریلو سکون)', tags:'شفاء دل گردے جادو سکون', render: function(){ return renderGridNaqshHtml('', 120450, '3x3', 'گھر میں لگانے سے جادو، جنات اور بدروحوں سے حفاظت؛ دل، گردے اور گھریلو بے چینی میں پانی میں ڈال کر پلائیں۔', 'سُوْرَةُ الرَّحْمٰنِ'); } },
+    { k:'mbn_47', title:'سورہ الواقعہ کا نقش (۱۰۲۹۶۵ — غنا اور فاقہ سے مکمل تحفظ)', tags:'رزق غنا کاروبار برکت', render: function(){ return renderGridNaqshHtml('', 102965, '3x3', 'حصولِ غنا، رزق میں برکت اور فاقہ سے حفاظت کے لیے پاس رکھیں۔', 'سُوْرَةُ الْوَاقِعَةِ'); } },
+    { k:'mbn_48', title:'سورہ الملک کا نقش (۹۹۵۹۴ — تمام آفات و پریشانیوں سے ماہانہ حفاظت)', tags:'حفاظت آفت پریشانی اولاد', render: function(){ return renderGridNaqshHtml('', 99594, '3x3', 'چاند نظر آنے پر یا ہر پریشانی میں لکھ کر پاس رکھیں؛ پورا مہینہ تمام آفات سے حفاظت رہتی ہے۔', 'سُوْرَةُ الْمُلْكِ'); } },
+    { k:'mbn_49', title:'سورہ الجن کا نقش (۶۰۶۳۳ — جنات، آسیب، سحر و نظرِ بد کا مکمل علاج)', tags:'جنات آسیب جادو نظر قرض', render: function(){ return renderGridNaqshHtml('', 60633, '3x3', 'ایک نقش ۳ دن تک پانی میں ڈال کر پلائیں (۲۱ یا ۴۱ دن) اور غسل کرائیں؛ جنات و جادو سے پیدا شدہ تمام امراض ختم ہوں گے۔', 'سُوْرَةُ الْجِنِّ'); } },
+    { k:'mbn_50', title:'سورہ المزمل کا نقش (۶۸۴۶۶ — افلاس، جلدی امراض و میاں بیوی کا اختلاف)', tags:'رزق شفاء خارش میاں بیوی', render: function(){ return renderGridNaqshHtml('', 68466, '3x3', 'جلدی امراض (برص، خارش) میں پانی سے غسل کرائیں اور میاں بیوی کے اختلاف میں پلائیں۔', 'سُوْرَةُ الْمُزَّمِّلِ'); } },
+    { k:'mbn_51', title:'سورہ قریش کا نقش (۶۰۵۰ — زہر، معدہ، یرقان، امن و سفر کی حفاظت)', tags:'شفاء معدہ یرقان سفر حفاظت', render: function(){ return renderGridNaqshHtml('', 6050, '3x3', 'معدہ، یرقان، جلد کے امراض اور سفر میں حفاظت کے لیے پانی میں ڈال کر پلائیں یا پاس رکھیں۔', 'سُوْرَةُ قُرَيْشٍ'); } },
+    { k:'mbn_52', title:'سورہ الکوثر کا نقش (۲۷۶۴ — کاروبار، شادی، بلڈ پریشر و اولاد)', tags:'رزق شادی بلڈ پریشر اولاد محبت', render: function(){ return renderGridNaqshHtml('', 2764, '3x3', 'بلڈ پریشر کے مریض کو ۱۰۱ بار دم کر کے پلائیں؛ نرینہ اولاد و کاروبار کے لیے پاس رکھیں۔', 'سُوْرَةُ الْكَوْثَرِ'); } },
+    { k:'mbn_53', title:'سورہ الاخلاص کا نقش (۱۰۰۲ — تسخیرِ مخلوق، دکان میں برکت و محبت)', tags:'رزق کاروبار دکان حب محبت', render: function(){ return renderGridNaqshHtml('', 1002, '4x4', 'دکان پر لگانے سے خریداروں کی توجہ و برکت؛ میاں بیوی میں محبت کے لیے دو نقش بنا کر طالب و مطلوب کو دیں۔', 'سُوْرَةُ الْاِخْلَاصِ'); } },
+    { k:'mbn_54', title:'معوذتین (سورہ فلق و ناس) کا مشترکہ نقش (۱۳۹۷۱ — جادو، جنات، وساوس، بندش)', tags:'جادو جنات نظر بندش وساوس', render: function(){ return renderGridNaqshHtml('', 13971, '4x4', 'جادو، جنات، نظرِ بد، وساوس اور شادی/کاروبار کی ہر بندش کے لیے گلے میں باندھیں اور ۲۱ یا ۴۱ دن پلائیں۔', 'سُوْرَةُ الْفَلَقِ وَالنَّاسِ'); } },
+    { k:'mbn_55', title:'پورے قرآنِ مجید کا جامع نقش (۴۱۹۹۲۴۸۸۶ — ہر مقصد، شفاء و کامل حفاظت)', tags:'حفاظت شفاء جادو رزق برکت', render: function(){ return renderGridNaqshHtml('', 419924886, '4x4', 'پورے قرآنِ مجید کے کل اعداد کا جامع نقش؛ ہر جائز مقصد، حفاظتِ گھر و جان و مال اور شفاء کے لیے پاس رکھیں یا گھر میں آویزاں کریں۔', 'نَقْشُ الْقُرْاٰنِ الْكَرِيْمِ الْكَامِلِ'); } }
+  ];
 })();
 
   function bootAlRaqiV2() {
