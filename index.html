@@ -798,10 +798,14 @@ html, body {
   margin: calc(env(safe-area-inset-top, 0px) + 8px) 10px 8px 10px !important;
   padding: 10px 12px 9px !important;
 }
+#alRaqiV2Root .ar-hero-header img,
 #alRaqiV2Root #scr_home .ar-hero-header img {
-  width: 54px !important;
-  height: auto !important;
-  margin-bottom: 2px !important;
+  width: 78px !important;
+  height: 78px !important;
+  max-width: 78px !important;
+  object-fit: contain !important;
+  margin-top: 10px !important;
+  margin-bottom: 4px !important;
 }
 #alRaqiV2Root #scr_home .ar-hero-header h1 {
   font-size: 1.24rem !important;
@@ -972,7 +976,7 @@ html, body, #alRaqiV2Root,
 #alRaqiV2Root h1.ar-arabic-text, #alRaqiV2Root h2.ar-arabic-text, #alRaqiV2Root h3.ar-arabic-text {
   font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', Tahoma, sans-serif !important;
 }
-/* v2.1.40 Point 1: Header Brand Title below Monogram strictly in Arabic Mushaf/Amiri script */
+/* v2.1.42 Point 1: Header Brand Title below Monogram strictly in Arabic Mushaf/Amiri script */
 #alRaqiV2Root .ar-hero-header h1.ar-arabic-text {
   font-family: 'Amiri', 'IndoPakQuranMushaf', 'Scheherazade New', serif !important;
   font-weight: 700 !important;
@@ -1047,7 +1051,7 @@ html, body, #alRaqiV2Root,
 }
 
 
-/* === AL-RAQI v2.1.40 UNIFIED DESIGN TOKENS & MOBILE RTL POLISH === */
+/* === AL-RAQI v2.1.42 UNIFIED DESIGN TOKENS & MOBILE RTL POLISH === */
 :root {
   --ar-navy: #0b1936;
   --ar-navy-mid: #162b56;
@@ -1474,7 +1478,7 @@ html, body, #alRaqiV2Root,
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; align-items:center;">
               <button type="button" class="ar-unibtn active" onclick="renderClassicGridNaqshPreview()">نقش دکھائیں</button>
-              <select id="naqshPrintCountSel" style="height:40px; padding:0 8px;">
+              <select id="naqshA4ModeSelV41" style="height:40px; padding:0 8px; grid-column:1 / -1; margin-bottom:2px; border:1.5px solid #1e3a8a; font-weight:700;"><option value="only_naqsh" selected>A4 لے آؤٹ: صرف نقش (بغیر آیت و اعداد)</option><option value="full_details">A4 لے آؤٹ: آیت + کل اعداد + نقش (مکمل تفصیل)</option></select><select id="naqshPrintCountSel" style="height:40px; padding:0 8px;">
                 <option value="1">A4 پرنٹ: ۱ نقش (کونے میں)</option>
                 <option value="4" selected>A4 پرنٹ: ۴ نقوش (۱ قطار)</option>
                 <option value="8">A4 پرنٹ: ۸ نقوش (۲ قطاریں)</option>
@@ -2547,18 +2551,31 @@ html, body, #alRaqiV2Root,
     return sum;
   };
 
+  var FULL_99_ASMA_CORE_V41 = [{n:'یَا اللّٰهُ',a:66},{n:'یَا رَحْمٰنُ',a:298},{n:'یَا رَحِیْمُ',a:258},{n:'یَا مَلِکُ',a:90},{n:'یَا قُدُّوْسُ',a:170},{n:'یَا سَلَامُ',a:131},{n:'یَا مُؤْمِنُ',a:136},{n:'یَا مُہَیْمِنُ',a:145},{n:'یَا عَزِیْزُ',a:94},{n:'یَا جَبَّارُ',a:206},{n:'یَا مُتَکَبِّرُ',a:662},{n:'یَا خَالِقُ',a:731},{n:'یَا بَارِئُ',a:213},{n:'یَا مُصَوِّرُ',a:336},{n:'یَا غَفَّارُ',a:1281},{n:'یَا قَہَّارُ',a:306},{n:'یَا وَہَّابُ',a:14},{n:'یَا رَزَّاقُ',a:308},{n:'یَا فَتَّاحُ',a:489},{n:'یَا عَلِیْمُ',a:150},{n:'یَا قَابِضُ',a:903},{n:'یَا بَاسِطُ',a:72},{n:'یَا خَافِضُ',a:1481},{n:'یَا رَافِعُ',a:351},{n:'یَا مُعِزُّ',a:117},{n:'یَا مُذِلُّ',a:770},{n:'یَا سَمِیْعُ',a:180},{n:'یَا بَصِیْرُ',a:302},{n:'یَا حَکَمُ',a:68},{n:'یَا عَدْلُ',a:104},{n:'یَا لَطِیْفُ',a:129},{n:'یَا خَبِیْرُ',a:812},{n:'یَا حَلِیْمُ',a:88},{n:'یَا عَظِیْمُ',a:1020},{n:'یَا غَفُوْرُ',a:1286},{n:'یَا شَکُوْرُ',a:526},{n:'یَا عَلِیُّ',a:110},{n:'یَا کَبِیْرُ',a:232},{n:'یَا حَفِیْظُ',a:998},{n:'یَا مُقِیْتُ',a:550},{n:'یَا حَسِیْبُ',a:80},{n:'یَا جَلِیْلُ',a:73},{n:'یَا کَرِیْمُ',a:270},{n:'یَا رَقِیْبُ',a:312},{n:'یَا مُجِیْبُ',a:55},{n:'یَا وَاسِعُ',a:137},{n:'یَا حَکِیْمُ',a:78},{n:'یَا وَدُوْدُ',a:20},{n:'یَا مَجِیْدُ',a:57},{n:'یَا بَاعِثُ',a:573},{n:'یَا شَہِیْدُ',a:319},{n:'یَا حَقُّ',a:108},{n:'یَا وَکِیْلُ',a:66},{n:'یَا قَوِیُّ',a:116},{n:'یَا مَتِیْنُ',a:500},{n:'یَا وَلِیُّ',a:46},{n:'یَا حَمِیْدُ',a:62},{n:'یَا مُحْصِیُ',a:148},{n:'یَا مُبْدِئُ',a:56},{n:'یَا مُعِیْدُ',a:124},{n:'یَا مُحْیِیُ',a:68},{n:'یَا مُمِیْتُ',a:490},{n:'یَا حَیُّ',a:18},{n:'یَا قَیُّوْمُ',a:156},{n:'یَا وَاجِدُ',a:14},{n:'یَا مَاجِدُ',a:48},{n:'یَا وَاحِدُ',a:19},{n:'یَا أَحَدُ',a:13},{n:'یَا صَمَدُ',a:134},{n:'یَا قَادِرُ',a:305},{n:'یَا مُقْتَدِرُ',a:744},{n:'یَا مُقَدِّمُ',a:184},{n:'یَا مُؤَخِّرُ',a:846},{n:'یَا أَوَّلُ',a:37},{n:'یَا آخِرُ',a:801},{n:'یَا ظَاہِرُ',a:1106},{n:'یَا بَاطِنُ',a:62},{n:'یَا وَالِیُ',a:47},{n:'یَا مُتَعَالِیُ',a:551},{n:'یَا بَرُّ',a:202},{n:'یَا تَوَّابُ',a:409},{n:'یَا مُنْتَقِمُ',a:630},{n:'یَا عَفُوُّ',a:156},{n:'یَا رَؤُوْفُ',a:286},{n:'یَا مَالِکَ الْمُلْکِ',a:212},{n:'یَا ذَا الْجَلَالِ وَالْإِکْرَامِ',a:1100},{n:'یَا مُقْسِطُ',a:209},{n:'یَا جَامِعُ',a:114},{n:'یَا غَنِیُّ',a:1060},{n:'یَا مُغْنِیُ',a:1100},{n:'یَا مَانِعُ',a:161},{n:'یَا ضَارُّ',a:1001},{n:'یَا نَافِعُ',a:201},{n:'یَا نُوْرُ',a:256},{n:'یَا ہَادِیُ',a:20},{n:'یَا بَدِیْعُ',a:86},{n:'یَا بَاقِیُ',a:113},{n:'یَا وَارِثُ',a:707},{n:'یَا رَشِیْدُ',a:514}];
+  window.FULL_99_ASMA_CORE_V41 = FULL_99_ASMA_CORE_V41;
   window.computeSpiritualProfile = function(name, mother) {
-    var a1 = window.calculatePureAbjadTotal(name);
-    var a2 = window.calculatePureAbjadTotal(mother);
+    var cleanName = String(name || '').trim();
+    var cleanMother = String(mother || '').trim();
+    var a1 = window.calculatePureAbjadTotal(cleanName);
+    var a2 = window.calculatePureAbjadTotal(cleanMother);
     var total = a1 + a2;
-    if (!total) return { totalAbjad: 0, burj: '—', mufrad: '—', ismAzam: '—' };
-    var m = total;
-    while (m > 9) { m = String(m).split('').reduce(function(x, y) { return x + (+y); }, 0); }
-    var bIdx = (total % 12 === 0) ? 11 : (total % 12) - 1;
-    var ism = (typeof FULL_ASMA_LIST !== 'undefined' && FULL_ASMA_LIST.length)
-      ? (FULL_ASMA_LIST[total % FULL_ASMA_LIST.length].ar || CORE_ASMA[total % CORE_ASMA.length])
-      : CORE_ASMA[total % CORE_ASMA.length];
-    return { totalAbjad: total, burj: BURJ_12[bIdx], mufrad: String(m), ismAzam: ism };
+    if (!total) return null;
+    var bIdx = (total - 1) % 12;
+    if (bIdx < 0) bIdx = 0;
+    var m = total % 9;
+    if (m === 0) m = 9;
+    var list99 = FULL_99_ASMA_CORE_V41;
+    var exact = null;
+    for (var i = 0; i < list99.length; i++) {
+      if (list99[i].a === total || list99[i].a === a1) { exact = list99[i]; break; }
+    }
+    var ismObj = exact;
+    if (!ismObj) {
+      var seed = (total * 7) + (a1 * 13) + (a2 * 19) + (cleanName.length * 3) + (cleanMother.length * 5);
+      ismObj = list99[Math.abs(seed) % list99.length];
+    }
+    var ism = ismObj ? ismObj.n : 'یَا اللّٰهُ';
+    return { totalAbjad: total, abjName: a1, abjMother: a2, burj: BURJ_12[bIdx], mufrad: String(m), ismAzam: ism, ismAbjad: ismObj ? ismObj.a : 66 };
   };
 
   // ===== 3. On-Demand Lazy Loader for Maktaba (198 KB) & Tabeer (844 KB) =====
@@ -2635,7 +2652,7 @@ html, body, #alRaqiV2Root,
     var file = (packName === 'maktaba') ? 'alraqi_pack_maktaba.js' : 'alraqi_pack_tabeer.js';
     _packPromises[packName] = new Promise(function(resolve) {
       var sc = document.createElement('script');
-      sc.src = './' + file + '?v=2140';
+      sc.src = './' + file + '?v=2142';
       sc.async = true;
       sc.onload = function() { resolve(true); };
       sc.onerror = function() {
@@ -4725,7 +4742,19 @@ html, body, #alRaqiV2Root,
       }
       if (ayahs.length) {
         window.pickSpecificAyah(num, 1);
-        window.toggleInlineSurah(num);
+        var host = $('qSurahModeChoiceBarV41');
+        if (!host && $('qPickerAyahSel') && $('qPickerAyahSel').parentElement) {
+          host = document.createElement('div');
+          host.id = 'qSurahModeChoiceBarV41';
+          host.style.cssText = 'display:grid; grid-template-columns:1fr 1fr; gap:7px; margin:6px 0 9px 0;';
+          $('qPickerAyahSel').parentElement.insertAdjacentElement('afterend', host);
+        }
+        if (host) {
+          host.style.display = 'grid';
+          host.innerHTML =
+            '<button type="button" class="ar-unibtn active" onclick="window.toggleInlineSurah(' + num + ')">📖 مکمل سورۃ کھولیں</button>' +
+            '<button type="button" class="ar-unibtn" onclick="var a=document.getElementById(\'qPickerAyahSel\'); if(a){a.focus(); a.style.borderColor=\'#d4af37\';} if(window.showToast) window.showToast(\'اب اوپر سے مطلوبہ آیت منتخب کریں\');">🎯 صرف آیت منتخب کریں</button>';
+        }
       } else {
         window.showToast('سورت لوڈ کرنے کے لیے انٹرنیٹ چیک کریں');
       }
@@ -11979,6 +12008,336 @@ setTimeout(window.syncAhkamQamariDateV39, 900);
     bootAlRaqiV2();
   }
 })();
+
+  // === AL-RAQI v2.1.42 UNIFIED RUNTIME (Points #1, #4, #5, #6, #8) ===
+  (function() {
+    if (window._alRaqiV2141RuntimeLoaded) return;
+    window._alRaqiV2141RuntimeLoaded = true;
+
+    // Point #1: Ensure uniform 78px header logo moved slightly down on EVERY page
+    var st = document.createElement('style');
+    st.id = 'alRaqiV2141LogoUniformCSS';
+    st.textContent = '#alRaqiV2Root .ar-hero-header img, #alRaqiV2Root #scr_home .ar-hero-header img { width:78px !important; height:78px !important; max-width:78px !important; object-fit:contain !important; margin-top:10px !important; margin-bottom:4px !important; }';
+    document.head.appendChild(st);
+
+    // Point #4: A4 Print Layout Mode («صرف نقش» vs «آیت + کل اعداد + نقش»)
+    function getA4ModeV41() {
+      var sel = document.getElementById('naqshA4ModeSelV41');
+      return sel ? sel.value : 'only_naqsh';
+    }
+    function wrapCellV41(rawHtml, metaTitle, metaTotal) {
+      if (getA4ModeV41() === 'only_naqsh') {
+        var tmp = document.createElement('div');
+        tmp.innerHTML = rawHtml;
+        tmp.querySelectorAll('.ar-naqsh-meta-outside, .ar-naqsh-title-hdr, .ar-naqsh-abjad-hdr').forEach(function(n){ n.remove(); });
+        return tmp.innerHTML;
+      }
+      var hdr = '';
+      if (metaTitle || metaTotal) {
+        hdr = '<div style="font-size:10px; line-height:1.45; color:#0f172a; border-bottom:1px solid #cbd5e1; padding-bottom:3px; margin-bottom:4px; text-align:center;">' +
+          (metaTitle ? '<div style="font-weight:700;">' + metaTitle + '</div>' : '') +
+          (metaTotal ? '<div style="font-size:9px; color:#334155;">کل اعداد: ' + metaTotal + '</div>' : '') +
+          '</div>';
+      }
+      return hdr + rawHtml;
+    }
+    window.printNaqshA4Grid = function() {
+      var box = document.getElementById('activeGeneratedNaqshBox');
+      if (!box && typeof window.renderClassicGridNaqshPreview === 'function') {
+        window.renderClassicGridNaqshPreview();
+        box = document.getElementById('activeGeneratedNaqshBox');
+      }
+      if (!box) return;
+      var kind = (document.getElementById('naqshTypeSel') || {}).value || 'musallas';
+      var cnt = parseInt(((document.getElementById('naqshPrintCountSel') || {}).value || '4'), 10);
+      var maxCols = (kind === 'mukhammas' || kind === 'musaddas' || kind === 'khali_5') ? 2 : 4;
+      var cols = Math.min(cnt, maxCols);
+      var txtInp = ((document.getElementById('naqshSourceTextInp') || document.getElementById('naqshCustomText') || {}).value || '').trim();
+      var numInp = ((document.getElementById('naqshTotalNumInp') || document.getElementById('naqshAbjadVal') || {}).value || '').trim();
+      var cellHtml = wrapCellV41(box.innerHTML, txtInp, numInp);
+      var sheet = document.getElementById('alRaqiA4PrintSheet');
+      if (!sheet) {
+        sheet = document.createElement('div');
+        sheet.id = 'alRaqiA4PrintSheet';
+        sheet.style.display = 'none';
+        document.body.appendChild(sheet);
+      }
+      sheet.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+      var cells = '';
+      for (var i = 0; i < cnt; i++) {
+        cells += '<div style="border:1px dashed #cbd5e1; padding:4px; text-align:center; page-break-inside:avoid;">' + cellHtml + '</div>';
+      }
+      sheet.innerHTML = cells;
+      window.print();
+    };
+    window.printSingleVaultNaqsh = function(targetId, cnt) {
+      var el = document.getElementById(targetId);
+      if (!el) return;
+      var card = el.closest('.db-item');
+      var titleEl = card ? card.querySelector('b, strong') : null;
+      var metaTitle = titleEl ? titleEl.textContent.trim() : '';
+      var cellHtml = wrapCellV41(el.innerHTML, metaTitle, '');
+      var sheet = document.getElementById('alRaqiA4PrintSheet');
+      if (!sheet) {
+        sheet = document.createElement('div');
+        sheet.id = 'alRaqiA4PrintSheet';
+        sheet.style.display = 'none';
+        document.body.appendChild(sheet);
+      }
+      var n = cnt || 4;
+      sheet.style.gridTemplateColumns = 'repeat(' + Math.min(n, 4) + ', 1fr)';
+      var cells = '';
+      for (var i = 0; i < n; i++) {
+        cells += '<div style="border:1px dashed #cbd5e1; padding:4px; text-align:center; page-break-inside:avoid;">' + cellHtml + '</div>';
+      }
+      sheet.innerHTML = cells;
+      window.print();
+    };
+
+    // Point #6: Report Card Wazifa Full Text Insertion
+    function lookupFullWazifaV41(title) {
+      var t = String(title || '').trim();
+      if (!t) return '';
+      var pools = [];
+      ['MASTER_WAZAIF_CATALOG_V25','MANZIL_33_AYAAT','SPECIAL_DISEASE_WAZAIF','AL_RAQI_WAZAIF_DB','AHZAB_WAZAIF_LIST'].forEach(function(k){
+        if (Array.isArray(window[k])) pools = pools.concat(window[k]);
+      });
+      for (var i = 0; i < pools.length; i++) {
+        var it = pools[i];
+        if (!it) continue;
+        var itTitle = String(it.title || it.name || '').trim();
+        if (itTitle && (itTitle === t || itTitle.indexOf(t) !== -1 || t.indexOf(itTitle) !== -1)) {
+          var parts = [itTitle];
+          var ar = it.arabic || it.ar || '';
+          var ur = it.ur || it.method || it.text || it.benefit || '';
+          if (ar) parts.push(ar);
+          if (ur) parts.push('طریقہ / ترکیب: ' + ur);
+          return parts.join('\n');
+        }
+      }
+      return t;
+    }
+    window.attachWazifaToReport = function(title, explicitFullText) {
+      var fullBlock = explicitFullText ? (title + '\n' + explicitFullText) : lookupFullWazifaV41(title);
+      var ta = document.getElementById('repWazifaTxt');
+      if (ta) {
+        ta.value = ta.value ? (ta.value + '\n\n' + fullBlock) : fullBlock;
+        ta.rows = Math.max(6, Math.min(14, (ta.value.split('\n').length || 6) + 1));
+      }
+      var cb = document.getElementById('rChk_wazifa');
+      if (cb) cb.checked = true;
+      if (typeof window.showToast === 'function') window.showToast('✅ مکمل وظیفہ رپورٹ کارڈ میں شامل ہو گیا');
+      if (typeof _returnToReportAfterWazifa !== 'undefined' && _returnToReportAfterWazifa) {
+        _returnToReportAfterWazifa = false;
+        if (typeof window.openScreen === 'function') window.openScreen('report');
+        if (typeof window.syncRepCardVis === 'function') window.syncRepCardVis();
+      }
+    };
+
+    // Point #5: Dream Tabeer Permanent Relevance & Quranic Surah Engine
+    var QURAN_SURAH_TABEER_V41 = [
+      { re: /احزاب|الاحزاب|الْأَحْزَاب|ومن\s*يقنت|وَمَنْ\s*يَقْنُتْ|يقنت/, title: 'خواب میں سورۃ الاحزاب (یا اس کا ربع «وَمَنْ يَقْنُتْ») تلاوت کرنا', body: 'علامہ ابن سیرینؒ اور حضرت جعفر صادقؒ کی کتبِ تعبیر کے مطابق خواب میں سورۃ الاحزاب یا اس کے کسی ربع (خصوصاً «وَمَنْ يَقْنُتْ») کی تلاوت کرنا تقویٰ، اطاعتِ الٰہی، سنتِ نبوی ﷺ کی پیروی، اہلِ حق کی صحبت، حاسدین و منافقین کے شر سے حفاظت اور دینی و اخلاقی بلندی کی نہایت مبارک علامت ہے۔', src: 'تعبیر الرؤیا کلاں (بابِ تلاوتِ قرآن — امام ابن سیرینؒ و جعفر صادقؒ)' },
+      { re: /فاتحہ|الفاتحہ|الحمد/, title: 'خواب میں سورۃ الفاتحہ پڑھنا', body: 'خیر و برکت کے دروازے کھلنے، دعا کی قبولیت، شفاء، حج یا عمرہ کی سعادت اور ہر مشکل میں آسانی کی بشارت ہے۔', src: 'تعبیر الرؤیا (امام ابن سیرینؒ)' },
+      { re: /بقرہ|البقرہ|آیت\s*الکرسی/, title: 'خواب میں سورۃ البقرہ یا آیت الکرسی تلاوت کرنا', body: 'لمبی عمر، دین میں پختگی، جادو و شیاطین سے مکمل حفاظت، اور علم و برکت میں اضافے کی دلیل ہے۔', src: 'تعبیر الرؤیا (امام ابن سیرینؒ)' },
+      { re: /یس|یاسین|یٰسین/, title: 'خواب میں سورۃ یٰسین تلاوت کرنا', body: 'محبتِ رسول ﷺ، دل کے اطمینان، حاجت روائی اور خاتمہ بالخیر کی بشارت ہے۔', src: 'تعبیر الرؤیا (امام ابن سیرینؒ)' },
+      { re: /ملک|تبارک/, title: 'خواب میں سورۃ الملک تلاوت کرنا', body: 'عذابِ قبر سے نجات، عزت و وقار اور غیبی حفاظت کی علامت ہے۔', src: 'تعبیر الرؤیا (امام ابن سیرینؒ)' },
+      { re: /رحمن|الرحمن/, title: 'خواب میں سورۃ الرحمن پڑھنا', body: 'دنیا و آخرت میں اللہ کی خاص رحمت، نعمتوں کی فراوانی اور دل کی کشادگی کی دلیل ہے۔', src: 'تعبیر الرؤیا (امام ابن سیرینؒ)' },
+      { re: /کہف|الکہف/, title: 'خواب میں سورۃ الکہف پڑھنا', body: 'فتنوں سے حفاظت، لمبی عمر، دشمنوں سے امان اور نیک انجام کی بشارت ہے۔', src: 'تعبیر الرؤیا (امام ابن سیرینؒ)' },
+      { re: /واقعہ|الواقعہ/, title: 'خواب میں سورۃ الواقعہ تلاوت کرنا', body: 'رزق میں برکت، فقر و تنگدستی سے نجات اور نیکیوں میں سبقت کی علامت ہے۔', src: 'تعبیر الرؤیا (امام ابن سیرینؒ)' },
+      { re: /یوسف/, title: 'خواب میں سورۃ یوسف پڑھنا', body: 'شروع میں کسی آزمائش کے بعد عظیم عزت، سرخروئی، سفر میں کامیابی اور بچھڑوں سے ملاپ کی بشارت ہے۔', src: 'تعبیر الرؤیا (امام ابن سیرینؒ)' },
+      { re: /اخلاص|قل\s*ھو|قل\s*هو/, title: 'خواب میں سورۃ الاخلاص تلاوت کرنا', body: 'عقیدۂ توحید کی پختگی، گناہوں کی مغفرت اور نیک نامی کی دلیل ہے۔', src: 'تعبیر الرؤیا (امام ابن سیرینؒ)' },
+      { re: /فلق|ناس|معوذتین/, title: 'خواب میں سورۃ الفلق یا سورۃ الناس پڑھنا', body: 'جادو، حسد، نظرِ بد اور وسوسوں سے اللہ کی خاص پناہ اور نجات کی بشارت ہے۔', src: 'تعبیر الرؤیا (امام ابن سیرینؒ)' }
+    ];
+    window.QURAN_SURAH_TABEER_V41 = QURAN_SURAH_TABEER_V41;
+
+    var _origExtractDreamV41 = window.extractAndSearchFromRawDream;
+    function runOfflineDreamEngineV42(raw) {
+      var normRaw = raw.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '').replace(/[أإآ]/g, 'ا').replace(/ي/g, 'ی').replace(/ك/g, 'ک').replace(/ة/g, 'ہ');
+      var qHits = [];
+      QURAN_SURAH_TABEER_V41.forEach(function(item) {
+        if (item.re.test(raw) || item.re.test(normRaw)) qHits.push(item);
+      });
+      var isRecitation = /تلاوت|قرآن|قرات|قراءت|سورہ|سورۃ|سورت|ربع|پارہ|آیت/.test(normRaw);
+      var isChild = /بچہ|بچے|لڑکا|بیٹا|14\s*سال|۱۴\s*سال|کم\s*عمر/.test(normRaw);
+      if (qHits.length || isRecitation) {
+        if (!qHits.length) {
+          qHits.push({
+            title: 'خواب میں قرآنِ مجید کی تلاوت کرنا',
+            body: 'خواب میں قرآن کریم کی تلاوت کرنا عزت، ہدایت، دل کی پاکیزگی، امانت داری، علم و عمل میں ترقی اور اللہ کی خاص رحمت کی علامت ہے۔',
+            src: 'تعبیر الرؤیا کلاں (امام ابن سیرینؒ)'
+          });
+        }
+        if (isChild) {
+          qHits.push({
+            title: 'کم عمر بچے یا نوجوان کا خواب میں تلاوتِ قرآن کرنا',
+            body: 'بچے یا نوعمر لڑکے کا خواب میں خشوع و خضوع سے قرآنِ کریم کی تلاوت کرنا اس کی نیک تربیت، دینی ذوق، روشن مستقبل، والدین کے لیے آنکھوں کی ٹھنڈک اور گھر میں خیر و برکت کی نہایت عمدہ بشارت ہے۔',
+            src: 'تعبیر الرؤیا (اصولِ تعبیر — امام نابلسیؒ)'
+          });
+        }
+        var resBox = document.getElementById('tabeerOfflineResult') || document.getElementById('dreamAnalysisResultBox');
+        var html = '<div style="background:#f0fdf4; border:1.5px solid #16a34a; border-radius:12px; padding:12px; margin-bottom:10px;">' +
+          '<div style="font-weight:800; color:#166534; font-size:0.98rem; margin-bottom:6px;">✨ خواب کے مطابق درست تعبیر (تلاوتِ قرآن)</div>' +
+          '<div style="font-size:0.86rem; color:#1e293b; margin-bottom:8px;"><b>درج شدہ خواب:</b> ' + raw.replace(/</g, '&lt;') + '</div>';
+        var plainLines = [];
+        qHits.forEach(function(h) {
+          html += '<div class="db-item" style="background:#ffffff; border-right:4px solid #1e3a8a; margin-bottom:7px; padding:9px;">' +
+            '<div style="font-weight:800; color:#1e3a8a;">' + h.title + '</div>' +
+            '<div style="font-size:0.9rem; line-height:1.9; color:#0f172a; margin-top:4px;">' + h.body + '</div>' +
+            '<div style="font-size:0.78rem; color:#64748b; margin-top:4px;">حوالہ: ' + h.src + '</div>' +
+            '</div>';
+          plainLines.push('• ' + h.title + ': ' + h.body);
+        });
+        html += '</div>';
+        if (resBox) { resBox.innerHTML = html; resBox.style.display = 'block'; }
+        var tabeerTa = document.getElementById('dreamSummaryTextarea') || document.getElementById('repTabeerTxt');
+        if (tabeerTa) tabeerTa.value = plainLines.join('\n');
+        if (typeof window.showToast === 'function') window.showToast('✅ خواب کے عین مطابق تعبیر نکل آئی');
+        return;
+      }
+      if (typeof _origExtractDreamV41 === 'function') _origExtractDreamV41();
+    }
+
+    window.extractAndSearchFromRawDream = function() {
+      var raw = ((document.getElementById('patientRawDreamTextInput') || {}).value || '').trim();
+      if (!raw) { if (window.showToast) window.showToast('پہلے خواب درج کریں'); return; }
+      var resBox = document.getElementById('tabeerOfflineResult') || document.getElementById('dreamAnalysisResultBox');
+      if (navigator.onLine && window.APPS_SCRIPT_URL) {
+        if (resBox) {
+          resBox.style.display = 'block';
+          resBox.innerHTML = '<div style="background:#eff6ff; border:1.5px solid #93c5fd; border-radius:12px; padding:12px; text-align:center; color:#1e3a8a; font-weight:700;">⏳ خواب کی جامع تعبیر تیار کی جا رہی ہے...</div>';
+        }
+        fetch(window.APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'tabeer_dream_classical_v44', dreamText: raw })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(resp) {
+          if (resp && resp.ok && resp.tabeer) {
+            var safeRaw = raw.replace(/</g, '&lt;');
+            var formatted = String(resp.tabeer).replace(/</g, '&lt;').replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+            var html = '<div style="background:#f0fdf4; border:1.5px solid #16a34a; border-radius:12px; padding:12px; margin-bottom:10px;">' +
+              '<div style="font-weight:800; color:#166534; font-size:0.98rem; margin-bottom:6px;">✨ جامع تعبیر الرؤیا (کتبِ تعبیر کی روشنی میں)</div>' +
+              '<div style="font-size:0.85rem; color:#334155; background:#ffffff; border-radius:8px; padding:7px 9px; margin-bottom:8px; border:1px solid #dcfce7;"><b>درج شدہ خواب:</b> ' + safeRaw + '</div>' +
+              '<div style="font-size:0.92rem; line-height:2.0; color:#0f172a; background:#ffffff; border-right:4px solid #1e3a8a; border-radius:8px; padding:10px 12px;">' + formatted + '</div>' +
+              '</div>';
+            if (resBox) { resBox.innerHTML = html; resBox.style.display = 'block'; }
+            var tabeerTa = document.getElementById('dreamSummaryTextarea') || document.getElementById('repTabeerTxt');
+            if (tabeerTa) tabeerTa.value = String(resp.tabeer).replace(/\*\*/g, '');
+            if (typeof window.showToast === 'function') window.showToast('✅ خواب کے مطابق جامع تعبیر تیار ہو گئی');
+          } else {
+            runOfflineDreamEngineV42(raw);
+          }
+        })
+        .catch(function() {
+          runOfflineDreamEngineV42(raw);
+        });
+      } else {
+        runOfflineDreamEngineV42(raw);
+      }
+    };
+
+    // Point #8: Practitioner-Only 3 Traditional Numerical Indicators + Respectful Note
+    var DAYS_URDU_V41 = [
+      { name:'اتوار', abj:407 }, { name:'پیر', abj:212 }, { name:'منگل', abj:120 },
+      { name:'بدھ', abj:11 }, { name:'جمعرات', abj:713 }, { name:'جمعہ', abj:118 }, { name:'ہفتہ', abj:490 }
+    ];
+    var _activeIndTabV41 = 'urdu4';
+    window.selectTradIndTabV41 = function(tab) {
+      _activeIndTabV41 = tab || 'urdu4';
+      window.renderTraditionalNumIndicatorsV41();
+    };
+    window.renderTraditionalNumIndicatorsV41 = function() {
+      var host = document.getElementById('arTraditionalNumIndicatorsV41');
+      if (!host) return;
+      var pName = ((document.getElementById('pName') || document.getElementById('patientName') || {}).value || '').trim();
+      var mName = ((document.getElementById('mName') || document.getElementById('motherName') || {}).value || '').trim();
+      if (!pName) {
+        host.innerHTML = '<div style="font-size:0.84rem; color:#475569; text-align:center; padding:8px;">مریض کا نام درج کرتے ہی تینوں روایتی عددی اشارے یہاں خودکار ظاہر ہو جائیں گے۔</div>';
+        return;
+      }
+      var abjName = typeof window.calculatePureAbjadTotal === 'function' ? window.calculatePureAbjadTotal(pName) : 0;
+      var abjMother = typeof window.calculatePureAbjadTotal === 'function' ? window.calculatePureAbjadTotal(mName) : 0;
+      var now = new Date();
+      var dayObj = DAYS_URDU_V41[now.getDay()] || DAYS_URDU_V41[0];
+      var dayNum1to7 = now.getDay() + 1;
+      var lunarDay = 15;
+      try {
+        var hParts = new Intl.DateTimeFormat('en-u-ca-islamic', { day:'numeric' }).format(now);
+        var parsedH = parseInt(hParts.replace(/\D/g, ''), 10);
+        if (parsedH >= 1 && parsedH <= 30) lunarDay = parsedH;
+      } catch(e) {}
+      var rUrdu4 = (abjName + dayObj.abj) % 4;
+      var mapUrdu4 = {
+        1: 'باقی ۱ — بخار / دورانِ خون کا جسمانی عارضہ',
+        2: 'باقی ۲ — جسمانی / عضلاتی یا اعصابی مرض',
+        3: 'باقی ۳ — آسیب یا جنات کے اثرات کا امکان',
+        0: 'باقی ۰ (۴) — سحر / جادو یا بندش کا امکان'
+      };
+      var rNieber7 = (abjName + dayNum1to7) % 7;
+      if (rNieber7 === 0) rNieber7 = 7;
+      var mapNieber7 = {
+        1: 'باقی ۱ (شمس) — جنّی مسئلہ / اثر',
+        2: 'باقی ۲ (قمر) — قبضہ یا تسلط',
+        3: 'باقی ۳ (مریخ) — پیٹ میں جادو یا حسد',
+        4: 'باقی ۴ (عطارد) — نظرِ بد',
+        5: 'باقی ۵ (مشتری) — خون کے مسائل (مثلاً فشارِ خون)',
+        6: 'باقی ۶ (زہرہ) — صفرا / جگر سے متعلق جسمانی مسئلہ',
+        7: 'باقی ۷ (زحل) — سوداوی / مزاجی مسئلہ'
+      };
+      var rFlueck4 = (abjName + abjMother + lunarDay) % 4;
+      var mapFlueck4 = {
+        0: 'باقی ۰ — کوئی خاص روحانی خرابی نہیں (خیر)',
+        1: 'باقی ۱ — جسمانی / طبی مسئلہ',
+        2: 'باقی ۲ — انسانی نظر یا بیرونی اثر (کارتوت)',
+        3: 'باقی ۳ — غیر مرئی روحانی اثر (اسرت)'
+      };
+      var activeBody = '';
+      if (_activeIndTabV41 === 'urdu4') {
+        activeBody = '<div style="font-weight:800; color:#1e3a8a; font-size:0.95rem;">' + mapUrdu4[rUrdu4] + '</div>' +
+          '<div style="font-size:0.79rem; color:#475569; margin-top:4px;">حساب: نام (' + abjName + ') + دن ' + dayObj.name + ' (' + dayObj.abj + ') = ' + (abjName + dayObj.abj) + ' ÷ 4</div>';
+      } else if (_activeIndTabV41 === 'nieber7') {
+        activeBody = '<div style="font-weight:800; color:#1e3a8a; font-size:0.95rem;">' + mapNieber7[rNieber7] + '</div>' +
+          '<div style="font-size:0.79rem; color:#475569; margin-top:4px;">حساب: نام (' + abjName + ') + ہفتے کا دن ' + dayObj.name + ' (' + dayNum1to7 + ') ÷ 7 (تحقیقی حوالہ: Nieber 2020)</div>';
+      } else {
+        activeBody = '<div style="font-weight:800; color:#1e3a8a; font-size:0.95rem;">' + mapFlueck4[rFlueck4] + '</div>' +
+          '<div style="font-size:0.79rem; color:#475569; margin-top:4px;">حساب: نام (' + abjName + ') + والدہ (' + abjMother + ') + قمری تاریخ (' + lunarDay + ') ÷ 4 (تحقیقی حوالہ: Flueckiger 2006)</div>';
+      }
+      host.innerHTML =
+        '<div style="font-weight:800; color:#0f214d; font-size:0.92rem; margin-bottom:7px;">🔢 روایتی عددی اشارے (صرف معالج کی رہنمائی کے لیے)</div>' +
+        '<div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; margin-bottom:8px;">' +
+          '<button type="button" class="ar-unibtn ' + (_activeIndTabV41==='urdu4'?'active':'') + '" style="font-size:0.74rem; padding:4px;" onclick="selectTradIndTabV41(\'urdu4\')">اردو جدول (÷4)</button>' +
+          '<button type="button" class="ar-unibtn ' + (_activeIndTabV41==='nieber7'?'active':'') + '" style="font-size:0.74rem; padding:4px;" onclick="selectTradIndTabV41(\'nieber7\')">سات اثرات (÷7)</button>' +
+          '<button type="button" class="ar-unibtn ' + (_activeIndTabV41==='flueck4'?'active':'') + '" style="font-size:0.74rem; padding:4px;" onclick="selectTradIndTabV41(\'flueck4\')">ابجد فال (÷4)</button>' +
+        '</div>' +
+        '<div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:9px; padding:9px;">' + activeBody + '</div>' +
+        '<div style="font-size:0.77rem; line-height:1.75; color:#7c2d12; background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:7px 9px; margin-top:8px;">' +
+          '<b>نوٹ:</b> یہ عددی اشارے مختلف روایات اور معالجین کے تجربات پر مبنی ایک ابتدائی رہنمائی ہیں، حتمی تشخیص نہیں۔ مکمل اطمینان اور درست علاج کے لیے مریض کی علامات، احوال اور تشخیص کے دیگر مراحل بھی ضرور طے کریں۔' +
+        '</div>';
+    };
+    function mountTradIndCardV41() {
+      var formScreen = document.getElementById('scr_form');
+      if (formScreen && !document.getElementById('arTraditionalNumIndicatorsV41')) {
+        var card = document.createElement('div');
+        card.id = 'arTraditionalNumIndicatorsV41';
+        card.className = 'card';
+        card.style.cssText = 'border:1.5px solid #d4af37; background:#fffdf7; margin-top:10px;';
+        var wrap = formScreen.querySelector('.wrap');
+        if (wrap) wrap.appendChild(card);
+      }
+      ['pName', 'patientName', 'mName', 'motherName'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el && !el._v41IndBound) {
+          el._v41IndBound = true;
+          el.addEventListener('input', window.renderTraditionalNumIndicatorsV41);
+          el.addEventListener('change', window.renderTraditionalNumIndicatorsV41);
+        }
+      });
+      window.renderTraditionalNumIndicatorsV41();
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mountTradIndCardV41);
+    else setTimeout(mountTradIndCardV41, 200);
+  })();
 
 </script>
 </body>
