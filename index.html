@@ -7452,7 +7452,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
   // ================= MODULE 12: REFRESH-STAY + ADMIN 3 PRACTITIONERS + SAVE ADMIN PIN + HOME HEADER SHARE ICON (v2.1.15) =================
   (function() {
-    var BUILD_VER = 'v2.1.27';
+    var BUILD_VER = 'v2.1.28';
     try {
       var prevVer = localStorage.getItem('alraqi_app_build_ver');
       if (prevVer !== BUILD_VER) {
@@ -7498,7 +7498,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       sp.id = 'arBuildVerBadge';
       sp.style.cssText = 'opacity:0.78; font-size:0.74rem; margin-right:6px;';
       sp.setAttribute('dir', 'ltr');
-      sp.textContent = '• v2.1.27';
+      sp.textContent = '• v2.1.28';
       pill.appendChild(sp);
     }
 
@@ -8900,7 +8900,10 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       loginAt: new Date().toISOString()
     };
     try {
-      localStorage.setItem('al_mualij_session_v14', JSON.stringify(sess));
+      localStorage.setItem('al_mualij_active_user_session_v1', JSON.stringify(sess));
+      localStorage.setItem('ALRAQI_ACTIVE_SESSION_V1', JSON.stringify(sess));
+      localStorage.setItem('al_raqi_ever_signed_up_v28', '1');
+      if (typeof window.completeLogin === 'function') { window.completeLogin(sess); }
       localStorage.setItem('al_mualij_saved_login_creds_v16', JSON.stringify({ username: handle, gmail: gmail, fullName: displayName }));
       var pCfg = JSON.parse(localStorage.getItem('al_raqi_practitioner_profile_v1') || '{}');
       if (!pCfg.name) pCfg.name = displayName;
@@ -8932,7 +8935,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
     setTimeout(function(){
       var modal = document.getElementById('clientLoginGateModal');
-      if (modal) modal.style.display = 'none';
+      if (modal) modal.style.setProperty('display', 'none', 'important');
       if (typeof window.refreshAuthUiV21 === 'function') {
         try { window.refreshAuthUiV21(); } catch(e){}
       }
@@ -8945,17 +8948,60 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     var alertBox = document.getElementById('loginStatusAlertBox');
     if (!alertBox || !alertBox.parentNode) return;
 
+    // 1. Fix broken logo in modal header by copying hydrated home logo src
+    var homeLogo = document.querySelector('#scr_home img[data-ar-logo="1"]');
+    modal.querySelectorAll('img[data-ar-logo="1"]').forEach(function(img){
+      if (homeLogo && homeLogo.src && homeLogo.src.indexOf('data:') === 0) {
+        img.src = homeLogo.src;
+        img.style.cssText = 'width:58px; height:58px; border-radius:50%; object-fit:cover; border:2px solid #d4af37; display:block; margin:0 auto 6px;';
+      } else {
+        img.style.display = 'none';
+      }
+    });
+
+    // 2. Professional clean subtitle
+    var subP = modal.querySelector('.ar-v2-modal-hero p');
+    if (subP) subP.textContent = 'اپنے اکاؤنٹ میں سائن ان کریں';
+
+    // 3. Clean top-left close X button (replaces clunky bottom Close button)
+    var cardBox = alertBox.parentNode;
+    if (cardBox && !document.getElementById('v28_modalCloseX')) {
+      cardBox.style.position = 'relative';
+      var xBtn = document.createElement('button');
+      xBtn.id = 'v28_modalCloseX';
+      xBtn.type = 'button';
+      xBtn.textContent = '✕';
+      xBtn.onclick = function(){ modal.style.setProperty('display', 'none', 'important'); };
+      xBtn.style.cssText = 'position:absolute; top:12px; left:12px; width:30px; height:30px; border-radius:50%; border:1px solid rgba(255,255,255,0.35); background:rgba(11,25,54,0.45); color:#fff; font-size:0.9rem; cursor:pointer; z-index:5; display:flex; align-items:center; justify-content:center;';
+      cardBox.appendChild(xBtn);
+    }
+
+    // 4. Clean official-style Google/Gmail button + sleek expandable Gmail input + "یا" divider
+    var gSvg = '<svg width="18" height="18" viewBox="0 0 48 48" style="flex-shrink:0;"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
     var box = document.createElement('div');
     box.id = 'v23_quickGmailCard';
-    box.style.cssText = 'background:#f0fdf4; border:1.5px solid #16a34a; border-radius:12px; padding:11px 12px; margin-bottom:12px;';
+    box.style.cssText = 'margin-bottom:12px;';
     box.innerHTML =
-      '<div style="font-weight:800; color:#065f46; font-size:0.9rem; margin-bottom:6px;">📧 جی میل سے ۱ کلک آسان لاگ ان / سائن اپ</div>' +
-      '<div style="font-size:0.76rem; color:#334155; margin-bottom:7px;">طویل فارم اور پاسورڈ کے بغیر براہِ راست اپنے جی میل ایڈریس سے فوری داخل ہوں:</div>' +
-      '<input type="email" id="v23_quickGmailInput" dir="ltr" placeholder="yourname@gmail.com" style="width:100%; margin-bottom:6px; padding:8px 10px; border:1px solid #86efac; border-radius:8px; font-size:0.88rem; box-sizing:border-box;">' +
-      '<input type="text" id="v23_quickGmailName" placeholder="آپ کا نام (نئے اکاؤنٹ کے لیے — اختیاری)" style="width:100%; margin-bottom:8px; padding:7px 10px; border:1px solid #cbd5e1; border-radius:8px; font-family:inherit; font-size:0.84rem; box-sizing:border-box;">' +
-      '<button type="button" onclick="submitQuickGmailAuthV23()" style="width:100%; padding:9px 12px; border:none; border-radius:9px; background:#065f46; color:#fff; font-family:inherit; font-size:0.9rem; font-weight:700; cursor:pointer;">✅ جی میل سے فوری آگے بڑھیں</button>';
+      '<button type="button" id="v28_gmailToggleBtn" onclick="var p=document.getElementById(\'v28_gmailFieldsPane\'); if(p){p.style.display=(p.style.display===\'none\'?\'block\':\'none\'); var i=document.getElementById(\'v23_quickGmailInput\'); if(i && p.style.display===\'block\') i.focus();}" style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px; padding:10px 14px; border-radius:10px; border:1.5px solid #cbd5e1; background:#ffffff; color:#0f172a; font-family:inherit; font-size:0.95rem; font-weight:700; cursor:pointer; box-shadow:0 2px 6px rgba(15,23,42,0.06);">' + gSvg + '<span>جی میل کے ساتھ جاری رکھیں</span></button>' +
+      '<div id="v28_gmailFieldsPane" style="display:none; margin-top:9px; padding:10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;">' +
+        '<input type="email" id="v23_quickGmailInput" dir="ltr" autocomplete="email" placeholder="example@gmail.com" style="width:100%; margin-bottom:7px; padding:9px 11px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.9rem; background:#fff; box-sizing:border-box;">' +
+        '<input type="text" id="v23_quickGmailName" autocomplete="name" placeholder="مکمل نام (اختیاری)" style="width:100%; margin-bottom:8px; padding:8px 11px; border:1px solid #cbd5e1; border-radius:8px; font-family:inherit; font-size:0.88rem; background:#fff; box-sizing:border-box;">' +
+        '<button type="button" onclick="submitQuickGmailAuthV23()" style="width:100%; padding:9px 12px; border:none; border-radius:8px; background:#1e3a8a; color:#fff; font-family:inherit; font-size:0.92rem; font-weight:700; cursor:pointer;">جاری رکھیں</button>' +
+      '</div>' +
+      '<div style="display:flex; align-items:center; gap:10px; margin:12px 0 4px; color:#94a3b8; font-size:0.82rem;"><span style="flex:1; height:1px; background:#e2e8f0;"></span><span>یا</span><span style="flex:1; height:1px; background:#e2e8f0;"></span></div>';
 
     alertBox.parentNode.insertBefore(box, alertBox);
+
+    // 5. Clean up bottom buttons & forgot-password link inside login pane
+    var lp = document.getElementById('clientLoginFormPane');
+    if (lp) {
+      lp.querySelectorAll('button').forEach(function(b){
+        if ((b.textContent || '').trim() === 'بند کریں') b.style.display = 'none';
+        if ((b.textContent || '').indexOf('پاسورڈ بھول گئے') !== -1) b.textContent = 'پاسورڈ بھول گئے؟';
+      });
+      var grid2 = lp.querySelector('.ar-eq-grid-2');
+      if (grid2) grid2.style.gridTemplateColumns = '1fr';
+    }
   }
 
   // ---- 2. QAMAR DAR AQRAB, UROOJ/HUBOOT, RIJAL-UL-GHAIB, QIBLA & ECLIPSES ----
@@ -9849,7 +9895,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       var chkDiv = document.createElement('label');
       chkDiv.id = 'v27_saveCredsCheckWrap';
       chkDiv.style.cssText = 'display:flex; align-items:center; gap:7px; font-size:0.84rem; font-weight:700; color:#065f46; margin-bottom:10px; cursor:pointer;';
-      chkDiv.innerHTML = '<input type="checkbox" id="v27_saveCredsChk" checked style="width:16px; height:16px; accent-color:#065f46;"> <span>اپنا یوزر نام اور پاسورڈ محفوظ رکھیں (صرف لاگ ان کے لیے)</span>';
+      chkDiv.innerHTML = '<input type="checkbox" id="v27_saveCredsChk" checked style="width:16px; height:16px; accent-color:#065f46;"> <span>مجھے یاد رکھیں</span>';
       var btnRow = loginPane.querySelector('.ar-eq-grid-2');
       if (btnRow) loginPane.insertBefore(chkDiv, btnRow);
       else loginPane.appendChild(chkDiv);
@@ -9859,7 +9905,8 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     try {
       var saved = JSON.parse(localStorage.getItem(K_CREDS) || 'null');
       if (saved) {
-        if (uIn && !uIn.value && saved.username) uIn.value = saved.username;
+        if (uIn && String(uIn.value || "").trim().toUpperCase() === "OWNER_ADMIN") uIn.value = "";
+        if (uIn && !uIn.value && saved.username && String(saved.username).toUpperCase() !== "OWNER_ADMIN") uIn.value = saved.username;
         if (pIn && !pIn.value && saved.password) pIn.value = saved.password;
         var gIn = document.getElementById('v23_quickGmailInput');
         var gNm = document.getElementById('v23_quickGmailName');
@@ -9889,17 +9936,38 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       };
     }
 
-    // 3. First-Launch Gate: if NO active session exists yet, show Sign-In / Gmail Sign-Up BEFORE running app!
+    // 3. Smart Auth Gate (Already signed in OR saved password -> NEVER show modal! First time -> Sign-Up; Returning logged-out -> Sign-In)
     if (!window._v27FirstLaunchChecked) {
       window._v27FirstLaunchChecked = true;
-      var hasSess = false;
+      var isAuth = false;
       try {
-        var sObj = JSON.parse(localStorage.getItem(K_SESS) || 'null');
-        if (sObj && (sObj.username || sObj.gmail)) hasSess = true;
+        if (typeof window.isPractitionerOrAdminAuthenticated === 'function' && window.isPractitionerOrAdminAuthenticated()) isAuth = true;
+        if (localStorage.getItem('al_mualij_admin_unlocked_persistent_v16') === 'true') isAuth = true;
+        var s1 = JSON.parse(localStorage.getItem('al_mualij_active_user_session_v1') || 'null');
+        var s2 = JSON.parse(localStorage.getItem('ALRAQI_ACTIVE_SESSION_V1') || 'null');
+        if ((s1 && (s1.username || s1.code || s1.active)) || (s2 && (s2.username || s2.code || s2.active))) isAuth = true;
+        // If credentials were saved previously, auto-restore session silently so user NEVER sees login screen again!
+        var savedC = JSON.parse(localStorage.getItem(K_CREDS) || 'null');
+        if (!isAuth && savedC && (savedC.username || savedC.gmail) && String(savedC.username || '').toUpperCase() !== 'OWNER_ADMIN') {
+          if (typeof window.completeLogin === 'function') {
+            window.completeLogin({ username: savedC.username || savedC.gmail, name: savedC.fullName || savedC.username, code: savedC.code || savedC.username, gmail: savedC.gmail || '' });
+          }
+          isAuth = true;
+        }
       } catch(e){}
-      if (!hasSess) {
-        var modal = document.getElementById('clientLoginGateModal');
-        if (modal) modal.style.display = 'flex';
+
+      var modal = document.getElementById('clientLoginGateModal');
+      if (isAuth) {
+        if (modal) modal.style.setProperty('display', 'none', 'important');
+      } else if (modal) {
+        modal.style.display = 'flex';
+        var everSigned = false;
+        try {
+          everSigned = (localStorage.getItem('al_raqi_ever_signed_up_v28') === '1') || (JSON.parse(localStorage.getItem('al_mualij_licensed_users_v1') || '[]').length > 0);
+        } catch(e){}
+        if (typeof window.switchAuthTabV21 === 'function') {
+          window.switchAuthTabV21(everSigned ? 'login' : 'signup');
+        }
       }
     }
   }
