@@ -2051,6 +2051,104 @@ window.AL_RAQI_DIGITAL_BOOKS_V23 = {"bk_qawaid": {"title": "قواعدِ عمل�
 })();
 
 
+// === v2.1.38 POINTS 13 (NIGHT MODE FIX), 16 (CONTINUOUS SURAH/PARA FLOW), 20 (NOOREHUDA PAKISTANI MUSHAF) ===
+(function initQuranV38Upgrades(){
+  if (!document.getElementById('arQuranV38Css')) {
+    var st = document.createElement('style');
+    st.id = 'arQuranV38Css';
+    st.textContent = [
+      '@font-face { font-family:"NoorehudaMushaf"; src:url("https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/fonts/noorehuda-regular.woff2") format("woff2"), url("https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/fonts/noorehira-regular.woff2") format("woff2"), url("https://verses.quran.foundation/fonts/quran/hafs/nastaleeq/indopak/indopak-nastaleeq-waqf-lazim-v4.2.1.woff2") format("woff2"); font-display:swap; }',
+      '#v31_fsPageContent, #v31_fsPageContent .ar-ayah-txt, #v31_fsPageContent .ar-mushaf-ayah, #mushafTextBody, #mushafReaderArea .ar-ayah-txt { font-family:"NoorehudaMushaf","IndoPakQuranMushaf","Scheherazade New","Amiri",serif !important; }',
+      '#v31_fsPageContent .ar-mushaf-page-card, #v31_fsPageContent > div { background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(2.45em - 1px), rgba(180, 145, 70, 0.16) calc(2.45em - 1px), rgba(180, 145, 70, 0.16) 2.45em) !important; line-height: 2.45 !important; }',
+      /* Point 13: Bulletproof Night Mode with high specificity */
+      '#v31_fullSurahReaderOverlay.ar-night-v38 { background:#0b1220 !important; color:#f3ecd8 !important; }',
+      '#v31_fullSurahReaderOverlay.ar-night-v38 #v31_fsPageContent { background:#0b1220 !important; color:#f3ecd8 !important; }',
+      '#v31_fullSurahReaderOverlay.ar-night-v38 #v31_fsPageContent > div { background-color:#111c33 !important; border-color:#b48a2c !important; color:#f3ecd8 !important; background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(2.45em - 1px), rgba(212, 175, 55, 0.14) calc(2.45em - 1px), rgba(212, 175, 55, 0.14) 2.45em) !important; }',
+      '#v31_fullSurahReaderOverlay.ar-night-v38 #v31_fsPageContent * { color:#f3ecd8 !important; }',
+      '#v31_fullSurahReaderOverlay.ar-night-v38 #v31_fsPageContent .ar-ayah-num, #v31_fullSurahReaderOverlay.ar-night-v38 #v31_fsPageContent span[style*="065f46"] { color:#6ee7b7 !important; }',
+      '#v31_fullSurahReaderOverlay.ar-night-v38 > div:last-child { background:#0f172a !important; border-top-color:#334155 !important; }',
+      '#v31_fullSurahReaderOverlay.ar-night-v38 #v31_fsBottomCount { color:#fde047 !important; }'
+    ].join('\n');
+    document.head.appendChild(st);
+  }
+
+  // Point 13: Rock-solid Night Mode toggle
+  window.toggleQuranNightModeV35 = function(){
+    var ov = document.getElementById('v31_fullSurahReaderOverlay');
+    if (!ov) return;
+    var isNight = ov.classList.toggle('ar-night-v38');
+    try { localStorage.setItem('alraqi_quran_night_v38', isNight ? '1' : '0'); } catch(e){}
+    var btn = document.getElementById('v35_fsNightBtn');
+    if (btn) btn.textContent = isNight ? '☀️' : '🌙';
+    if (typeof window.showToast === 'function') window.showToast(isNight ? '🌙 نائٹ ریڈنگ موڈ آن ہو گیا' : '☀️ دن کا ریڈنگ موڈ آن ہو گیا');
+  };
+
+  // Apply saved Night Mode automatically whenever Quran Reader opens
+  if (typeof window.openFullSurahReaderV31 === 'function' && !window.openFullSurahReaderV31._v38Wrapped) {
+    var _origOpenSR = window.openFullSurahReaderV31;
+    window.openFullSurahReaderV31 = function(surahNum, startAtLastPage){
+      window._arCurrentSurahNumV38 = parseInt(surahNum, 10) || 1;
+      var res = _origOpenSR.apply(this, arguments);
+      setTimeout(function(){
+        var ov = document.getElementById('v31_fullSurahReaderOverlay');
+        if (ov && localStorage.getItem('alraqi_quran_night_v38') === '1') {
+          ov.classList.add('ar-night-v38');
+          var btn = document.getElementById('v35_fsNightBtn');
+          if (btn) btn.textContent = '☀️';
+        }
+        // Enable Next/Prev buttons across Surah boundaries (only disable Prev on Surah 1 pg 1, Next on Surah 114 last pg)
+        var nb = document.getElementById('v31_fsNextBtn');
+        var pb = document.getElementById('v31_fsPrevBtn');
+        if (nb && window._arCurrentSurahNumV38 < 114) { nb.disabled = false; nb.style.opacity = '1'; }
+        if (pb && window._arCurrentSurahNumV38 > 1) { pb.disabled = false; pb.style.opacity = '1'; }
+      }, 60);
+      return res;
+    };
+    window.openFullSurahReaderV31._v38Wrapped = true;
+  }
+
+  // Point 16: Continuous Surah-to-Surah (1 -> 114) seamless pagination!
+  if (typeof window.turnFullSurahPageV31 === 'function' && !window.turnFullSurahPageV31._v38Continuous) {
+    var _origTurnV31 = window.turnFullSurahPageV31;
+    window.turnFullSurahPageV31 = function(delta){
+      var bc = document.getElementById('v31_fsBottomCount');
+      var curPg = 1, totPg = 1;
+      if (bc) {
+        var m = String(bc.textContent || '').match(/(\d+)\s*\/\s*(\d+)/);
+        if (m) { curPg = parseInt(m[1], 10); totPg = parseInt(m[2], 10); }
+      }
+      var curS = window._arCurrentSurahNumV38 || 1;
+      if (delta > 0 && curPg >= totPg) {
+        if (curS < 114 && typeof window.openFullSurahReaderV31 === 'function') {
+          window.openFullSurahReaderV31(curS + 1);
+          if (typeof window.showToast === 'function') window.showToast('📖 اگلی سورت (' + (curS + 1) + ') کھل گئی');
+          return;
+        } else {
+          if (typeof window.showToast === 'function') window.showToast('✨ الحمد للہ — قرآنِ کریم مکمل ہو گیا (سورۃ الناس)');
+          return;
+        }
+      }
+      if (delta < 0 && curPg <= 1) {
+        if (curS > 1 && typeof window.openFullSurahReaderV31 === 'function') {
+          window.openFullSurahReaderV31(curS - 1);
+          if (typeof window.showToast === 'function') window.showToast('📖 پچھلی سورت (' + (curS - 1) + ') کھل گئی');
+          return;
+        }
+      }
+      var r = _origTurnV31.apply(this, arguments);
+      setTimeout(function(){
+        var nb = document.getElementById('v31_fsNextBtn');
+        var pb = document.getElementById('v31_fsPrevBtn');
+        if (nb && (window._arCurrentSurahNumV38 || 1) < 114) { nb.disabled = false; nb.style.opacity = '1'; }
+        if (pb && (window._arCurrentSurahNumV38 || 1) > 1) { pb.disabled = false; pb.style.opacity = '1'; }
+      }, 40);
+      return r;
+    };
+    window.turnFullSurahPageV31._v38Continuous = true;
+  }
+})();
+
+
 // --- zulkitabat_clean_and_verify_module.js ---
   // ================= MODULE 15: ZUL-KITABAT QURAN SYMBOL CLEANER + AWFAQ/ZUL-KITABAT CHAAL & MEEZAN VERIFIER =================
   function stripQuranicSignsForNaqsh(str) {
@@ -3320,6 +3418,109 @@ window.AL_RAQI_DIGITAL_BOOKS_V23 = {"bk_qawaid": {"title": "قواعدِ عمل�
     { k:'mbn_54', title:'معوذتین (سورہ فلق و ناس) کا مشترکہ نقش (۱۳۹۷۱ — جادو، جنات، وساوس، بندش)', tags:'جادو جنات نظر بندش وساوس', render: function(){ return renderGridNaqshHtml('', 13971, '4x4', 'جادو، جنات، نظرِ بد، وساوس اور شادی/کاروبار کی ہر بندش کے لیے گلے میں باندھیں اور ۲۱ یا ۴۱ دن پلائیں۔', 'سُوْرَةُ الْفَلَقِ وَالنَّاسِ'); } },
     { k:'mbn_55', title:'پورے قرآنِ مجید کا جامع نقش (۴۱۹۹۲۴۸۸۶ — ہر مقصد، شفاء و کامل حفاظت)', tags:'حفاظت شفاء جادو رزق برکت', render: function(){ return renderGridNaqshHtml('', 419924886, '4x4', 'پورے قرآنِ مجید کے کل اعداد کا جامع نقش؛ ہر جائز مقصد، حفاظتِ گھر و جان و مال اور شفاء کے لیے پاس رکھیں یا گھر میں آویزاں کریں۔', 'نَقْشُ الْقُرْاٰنِ الْكَرِيْمِ الْكَامِلِ'); } }
   ];
+})();
+
+
+// === v2.1.38 POINTS 18 (CLEAN PRINT + 786 TOGGLE) & 19 (4-CHAAL SWITCHER ON UPLOADED NAQSH) ===
+(function initNaqshPrintAndChaalV38(){
+  // Global 786 print preference (default ON, toggleable)
+  window.getInclude786PrintV38 = function(){
+    try { return localStorage.getItem('alraqi_naqsh_786_v38') !== '0'; } catch(e){ return true; }
+  };
+  window.setInclude786PrintV38 = function(val){
+    try { localStorage.setItem('alraqi_naqsh_786_v38', val ? '1' : '0'); } catch(e){}
+    document.querySelectorAll('.ar-786-toggle-v38').forEach(function(cb){ cb.checked = !!val; });
+    document.querySelectorAll('.ar-naqsh-786-hdr').forEach(function(el){ el.style.display = val ? 'block' : 'none'; });
+  };
+
+  // Standard 3x3 Musallas chaal maps (indices 0..8 -> positions in 3x3 grid for Aatishi, Baadi, Aabi, Khaaki)
+  var CHAAL_MAPS_3X3 = {
+    'آتشی': [7,0,5, 2,4,6, 3,8,1],
+    'بادی': [3,2,7, 8,4,0, 1,6,5],
+    'آبی':  [1,8,3, 6,4,2, 5,0,7],
+    'خاکی': [5,6,1, 0,4,8, 7,2,3]
+  };
+  window.applyBookNaqshChaalV38 = function(btn, chaalName){
+    var card = btn.closest('.db-item, .card, .ar-naqsh-card-v32') || btn.parentNode.parentNode;
+    if (!card) return;
+    var tbl = card.querySelector('table');
+    if (!tbl) return;
+    var cells = Array.prototype.slice.call(tbl.querySelectorAll('td'));
+    if (cells.length === 9) {
+      var nums = cells.map(function(td){ return parseInt(String(td.textContent || '').replace(/[^\d]/g, ''), 10); });
+      if (nums.every(function(n){ return !isNaN(n) && n > 0; })) {
+        var sorted = nums.slice().sort(function(a, b){ return a - b; });
+        var map = CHAAL_MAPS_3X3[chaalName] || CHAAL_MAPS_3X3['آتشی'];
+        for (var i = 0; i < 9; i++) {
+          cells[i].textContent = String(sorted[map[i]]);
+        }
+        var lbl = card.querySelector('.ar-chaal-active-lbl');
+        if (lbl) lbl.textContent = 'چال: ' + chaalName;
+        if (typeof window.showToast === 'function') window.showToast('✅ نقش ' + chaalName + ' چال میں تبدیل ہو گیا');
+        return;
+      }
+    }
+    if (typeof window.showToast === 'function') window.showToast('ℹ️ یہ نقش اپنی مخصوص چال/حروفی ترتیب میں ہے');
+  };
+
+  window.printCleanNaqshOnlyV38 = function(btn){
+    var card = btn.closest('.db-item, .card, .ar-naqsh-card-v32') || btn.parentNode.parentNode;
+    if (!card) return;
+    var tbl = card.querySelector('table');
+    var box = card.querySelector('.naqsh-print-target, .naqsh-box');
+    var contentHtml = tbl ? tbl.outerHTML : (box ? box.outerHTML : '');
+    if (!contentHtml) { window.print(); return; }
+    var inc786 = window.getInclude786PrintV38();
+    var w = window.open('', '_blank', 'width=720,height=900');
+    if (!w) { window.print(); return; }
+    w.document.write(
+      '<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>نقش پرنٹ</title>' +
+      '<style>body{margin:24mm;background:#fff;color:#000;text-align:center;font-family:"Amiri","Scheherazade New",serif;}' +
+      '.b786{font-size:22px;font-weight:700;margin-bottom:10px;letter-spacing:2px;}' +
+      'table{margin:0 auto;border-collapse:collapse;direction:rtl;}' +
+      'td,th{border:2px solid #000;padding:10px 14px;font-size:20px;font-weight:700;text-align:center;min-width:48px;}' +
+      '@media print{@page{size:A4;margin:18mm;}}</style></head><body>' +
+      (inc786 ? '<div class="b786">786</div>' : '') +
+      contentHtml +
+      '<script>window.onload=function(){window.print();};<\/script></body></html>'
+    );
+    w.document.close();
+  };
+
+  function enhanceNaqshCardsV38(){
+    var list = document.getElementById('naqshFolderList');
+    if (!list) return;
+    // Inject top 786 toggle bar once above list
+    if (!document.getElementById('arNaqsh786BarV38') && list.parentNode) {
+      var bar = document.createElement('div');
+      bar.id = 'arNaqsh786BarV38';
+      bar.style.cssText = 'display:flex; align-items:center; justify-content:space-between; gap:8px; background:#fffbeb; border:1.5px solid #d4af37; border-radius:10px; padding:7px 11px; margin-bottom:10px; font-size:0.84rem; font-weight:800; color:#0b1936;';
+      bar.innerHTML =
+        '<label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin:0;">' +
+          '<input type="checkbox" class="ar-786-toggle-v38" ' + (window.getInclude786PrintV38() ? 'checked' : '') + ' onchange="window.setInclude786PrintV38(this.checked)" style="width:18px; height:18px; min-height:18px !important;">' +
+          '<span>پرنٹ میں اوپر <b>786</b> شامل کریں</span>' +
+        '</label>' +
+        '<span style="font-size:0.74rem; color:#92400e;">(مقصد پرنٹ میں نہیں جائے گا)</span>';
+      list.parentNode.insertBefore(bar, list);
+    }
+    // Enhance each card with 4-Chaal switcher + Clean Print button
+    list.querySelectorAll('.db-item, .ar-naqsh-card-v32').forEach(function(card){
+      if (card.dataset.v38Enhanced) return;
+      if (!card.querySelector('table')) return;
+      card.dataset.v38Enhanced = '1';
+      var ctrl = document.createElement('div');
+      ctrl.style.cssText = 'display:flex; flex-wrap:wrap; align-items:center; gap:5px; margin-top:8px; padding-top:7px; border-top:1px dashed #cbd5e1;';
+      ctrl.innerHTML =
+        '<span class="ar-chaal-active-lbl" style="font-size:0.74rem; font-weight:800; color:#1e3a8a; margin-left:4px;">چال بدلیں:</span>' +
+        ['آتشی','بادی','آبی','خاکی'].map(function(ch){
+          return '<button type="button" onclick="window.applyBookNaqshChaalV38(this,\'' + ch + '\')" style="padding:3px 8px; border-radius:7px; border:1px solid #cbd5e1; background:#f8fafc; color:#0b1936; font-family:inherit; font-size:0.74rem; font-weight:700; cursor:pointer;">' + ch + '</button>';
+        }).join('') +
+        '<button type="button" onclick="window.printCleanNaqshOnlyV38(this)" style="margin-right:auto; padding:4px 10px; border-radius:8px; border:none; background:#0b1936; color:#fde047; font-family:inherit; font-size:0.76rem; font-weight:800; cursor:pointer;">🖨️ صاف نقش پرنٹ</button>';
+      card.appendChild(ctrl);
+    });
+  }
+
+  setInterval(enhanceNaqshCardsV38, 1200);
 })();
 
 

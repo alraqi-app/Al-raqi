@@ -960,7 +960,9 @@ html, body, #alRaqiV2Root,
 }
 @font-face {
   font-family: 'IndoPakQuranMushaf';
-  src: url('https://verses.quran.foundation/fonts/quran/hafs/nastaleeq/indopak/indopak-nastaleeq-waqf-lazim-v4.2.1.woff2') format('woff2');
+  src: url('https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/fonts/noorehuda-regular.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/fonts/noorehira-regular.woff2') format('woff2'),
+       url('https://verses.quran.foundation/fonts/quran/hafs/nastaleeq/indopak/indopak-nastaleeq-waqf-lazim-v4.2.1.woff2') format('woff2');
   font-display: swap;
 }
 #alRaqiV2Root .ar-arabic-text:not(h1):not(h2):not(h3), #alRaqiV2Root .ar-arabic-text:not(h1):not(h2):not(h3) * {
@@ -969,6 +971,12 @@ html, body, #alRaqiV2Root,
 }
 #alRaqiV2Root h1.ar-arabic-text, #alRaqiV2Root h2.ar-arabic-text, #alRaqiV2Root h3.ar-arabic-text {
   font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', Tahoma, sans-serif !important;
+}
+/* v2.1.38 Point 1: Header Brand Title below Monogram strictly in Arabic Mushaf/Amiri script */
+#alRaqiV2Root .ar-hero-header h1.ar-arabic-text {
+  font-family: 'Amiri', 'IndoPakQuranMushaf', 'Scheherazade New', serif !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2px !important;
 }
 /* Home Screen: 10-tile side-by-side icon + text, 100dvh exact mobile fit (zero dead space, zero overflow) */
 #alRaqiV2Root #scr_home.active {
@@ -1039,7 +1047,7 @@ html, body, #alRaqiV2Root,
 }
 
 
-/* === AL-RAQI v2.1.36 UNIFIED DESIGN TOKENS & MOBILE RTL POLISH === */
+/* === AL-RAQI v2.1.38 UNIFIED DESIGN TOKENS & MOBILE RTL POLISH === */
 :root {
   --ar-navy: #0b1936;
   --ar-navy-mid: #162b56;
@@ -2627,7 +2635,7 @@ html, body, #alRaqiV2Root,
     var file = (packName === 'maktaba') ? 'alraqi_pack_maktaba.js' : 'alraqi_pack_tabeer.js';
     _packPromises[packName] = new Promise(function(resolve) {
       var sc = document.createElement('script');
-      sc.src = './' + file + '?v=2136';
+      sc.src = './' + file + '?v=2138';
       sc.async = true;
       sc.onload = function() { resolve(true); };
       sc.onerror = function() {
@@ -7674,7 +7682,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
   // Auto-Purge Old PWA Caches & Force Service Worker Update on every new release (v2.1.33)
   (function autoBustOldPwaCacheV33(){
-    var LIVE_VER = 'v2.1.36';
+    var LIVE_VER = 'v2.1.38';
     try {
       var prev = localStorage.getItem('alraqi_live_build_ver_master');
       if (prev !== LIVE_VER) {
@@ -8276,7 +8284,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
   }, true);
 })();
 
-// === PRO UI/UX POLISH v2.1.36 (BACK PILL + FADE + ONLINE DOT + JSON BACKUP) ===
+// === PRO UI/UX POLISH v2.1.38 (BACK PILL + FADE + ONLINE DOT + JSON BACKUP) ===
 (function initProPolishV35(){
   if (!document.getElementById('arProPolishCssV35')) {
     var st = document.createElement('style');
@@ -8285,21 +8293,22 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       '@keyframes arFadeInV35 { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }',
       '.screen.active { animation: arFadeInV35 0.18s ease-out; }',
       '.ar-hdr-corner-actions { display:flex !important; align-items:center !important; gap:6px !important; }',
-      '.ar-hdr-back-pill { padding:4px 10px; border-radius:999px; border:1px solid rgba(253,224,71,0.55); background:rgba(255,255,255,0.12); color:#fde047; font-family:inherit; font-size:0.78rem; font-weight:800; cursor:pointer; }'
+      '.ar-hdr-back-pill { position:absolute !important; top:8px !important; right:10px !important; z-index:6 !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; padding:2px 12px !important; min-height:27px !important; border-radius:999px !important; background:rgba(254,240,138,0.16) !important; border:1px solid rgba(212,175,55,0.78) !important; color:#fef08a !important; font-family:"Jameel Noori Nastaleeq","Noto Nastaliq Urdu",Tahoma,sans-serif !important; font-size:0.80rem !important; font-weight:700 !important; cursor:pointer !important; }'
     ].join('\n');
     document.head.appendChild(st);
   }
 
   function enhanceHeadersAndSettingsV35(){
     // 1. Add sleek "← پیچھے" pill right beside "ہوم" on every inner screen header
-    document.querySelectorAll('.screen .ar-hdr-corner-actions').forEach(function(bar){
-      if (bar.closest('#scr_home') || bar.querySelector('.ar-hdr-back-pill')) return;
+    document.querySelectorAll('.screen .ar-hero-header').forEach(function(hdr){
+      if (hdr.closest('#scr_home') || hdr.querySelector('.ar-hdr-back-pill')) return;
+      hdr.style.position = 'relative';
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'ar-hdr-back-pill';
       b.textContent = '← پیچھے';
       b.onclick = function(){ if (typeof window.goBackOneScreen === 'function') window.goBackOneScreen(); };
-      bar.appendChild(b);
+      hdr.insertBefore(b, hdr.firstChild);
     });
 
     // 2. Add Online/Offline indicator + 1-Tap Local Cases JSON Backup/Restore in Settings
@@ -8388,7 +8397,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 })();
 
 
-// === v2.1.36 MASTER ARCHITECTURE & DESIGN SYSTEM (EVENTBUS + DESIGN TOKENS) ===
+// === v2.1.38 MASTER ARCHITECTURE & DESIGN SYSTEM (EVENTBUS + DESIGN TOKENS) ===
 (function initAlRaqiV36Master(){
   // 1. Lightweight Centralized EventBus (prevents future monkey-patch chains)
   if (!window.AlRaqiBus) {
@@ -8429,6 +8438,448 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     };
     _guardedOF4._arPackGuardedV36 = true;
     window.openFolder4 = _guardedOF4;
+  }
+})();
+
+
+// === v2.1.38 POINT 2 (AUTO-SYNC MUALIJ CODE) & POINT 4 (SMART EXISTING PATIENT REUSE) ===
+(function initV37MualijCodeAndSmartCases(){
+  function resolveActiveMualijCodeV37(){
+    try {
+      var prefsRaw = localStorage.getItem('al_mualij_profile_prefs_v1') || localStorage.getItem('alraqi_profile_prefs') || '';
+      if (prefsRaw) {
+        var pf = JSON.parse(prefsRaw);
+        if (pf && pf.mualijCode && String(pf.mualijCode).trim()) return String(pf.mualijCode).trim();
+        if (pf && pf.code && String(pf.code).trim()) return String(pf.code).trim();
+      }
+    } catch(e){}
+    try {
+      var uRaw = localStorage.getItem('alraqi_v2_auth_user') || localStorage.getItem('alraqi_active_user') || localStorage.getItem('alraqi_logged_in_user') || '';
+      if (uRaw) {
+        var u = JSON.parse(uRaw);
+        var c = (u && (u.code || u.mualijCode || u.username)) ? String(u.code || u.mualijCode || u.username).trim() : '';
+        if (c && c !== 'OWNER_ADMIN') return c;
+      }
+    } catch(e){}
+    try {
+      if (localStorage.getItem('alraqi_is_admin') === 'true' || localStorage.getItem('alraqi_v2_is_admin') === 'true' || localStorage.getItem('alraqi_v2_auth_user')) {
+        return 'AFZAL-2026';
+      }
+    } catch(e){}
+    return '';
+  }
+
+  function syncMualijCodeDisplayV37(){
+    var code = resolveActiveMualijCodeV37();
+    if (!code) return;
+    var hm = document.getElementById('homeMualijCode');
+    if (hm && (!hm.textContent || hm.textContent.trim() === '—')) hm.textContent = code;
+    var hl = document.getElementById('homeAppLink');
+    if (hl && !hl.textContent.trim()) hl.textContent = 'https://alraqi-app.github.io/shifa/?code=' + encodeURIComponent(code);
+    var rm = document.getElementById('repMualijCode');
+    if (rm && (!rm.textContent || rm.textContent.trim() === '—')) rm.textContent = code;
+    var sm = document.getElementById('setMualijCode');
+    if (sm && !sm.value.trim()) sm.value = code;
+  }
+
+  // Point 4: Smart Existing Patient Detection (Code OR Name without conflicting Mother/DOB)
+  function normUrV37(s){
+    return String(s || '')
+      .replace(/[\u064B-\u065F\u0670]/g, '')
+      .replace(/[أإآٱ]/g, 'ا')
+      .replace(/[يیى]/g, 'ی')
+      .replace(/[كک]/g, 'ک')
+      .replace(/[هةہ]/g, 'ہ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  function installSmartCaseReuseV37(){
+    if (window._arSmartCaseReuseV37) return;
+    if (typeof window.saveAndOpenReportDashboard !== 'function') return;
+    window._arSmartCaseReuseV37 = true;
+
+    window.saveAndOpenReportDashboard = function(){
+      var p1NameEl = document.getElementById('p1_name');
+      var rawInput = ((p1NameEl || {}).value || '').trim();
+      if (!rawInput) {
+        if (typeof window.showToast === 'function') window.showToast('براہِ کرم سائل کا نام یا کوڈ درج کریں');
+        return;
+      }
+      var CASES_K = 'alraqi_v2_offline_cases_v1';
+      var cases = [];
+      try {
+        cases = (typeof window.getOfflineCases === 'function') ? window.getOfflineCases() : JSON.parse(localStorage.getItem(CASES_K) || '[]');
+      } catch(e){ cases = []; }
+
+      var inNameNorm = normUrV37(rawInput);
+      var inCodeUpper = rawInput.toUpperCase();
+      var inMother = ((document.getElementById('p1_mother') || {}).value || '').trim();
+      var inFather = ((document.getElementById('p1_father') || {}).value || '').trim();
+      var inCity   = ((document.getElementById('p1_location') || {}).value || '').trim();
+      var inDob    = ((document.getElementById('p1_dob') || {}).value || '').trim();
+      var inMotherNorm = normUrV37(inMother);
+
+      // 1. Check exact Patient Code match first (e.g. RQ-105)
+      var matchedGroup = cases.filter(function(c){
+        return c && c.code && String(c.code).trim().toUpperCase() === inCodeUpper;
+      });
+      var matchedByCode = matchedGroup.length > 0;
+
+      // 2. Otherwise check normalized Name match (ignoring records that have a DIFFERENT mother or DIFFERENT DOB)
+      if (!matchedByCode) {
+        matchedGroup = cases.filter(function(c){
+          if (!c || normUrV37(c.name) !== inNameNorm) return false;
+          var cMom = normUrV37(c.mother && c.mother !== '—' ? c.mother : '');
+          var cDob = (c.dob && c.dob !== '—') ? String(c.dob).trim() : '';
+          // If user entered a different mother name -> distinct person
+          if (inMotherNorm && cMom && inMotherNorm !== cMom) return false;
+          // If user entered a different DOB -> distinct person
+          if (inDob && cDob && inDob !== cDob) return false;
+          return true;
+        });
+      }
+
+      var finalName = rawInput;
+      var finalMother = inMother;
+      var finalFather = inFather;
+      var finalCity = inCity;
+      var finalDob = inDob;
+      var visitCount = 1;
+      var code = 'RQ-' + (101 + cases.length);
+      var reusedOld = false;
+
+      if (matchedGroup.length > 0) {
+        // Reuse existing patient record & increment visit automatically!
+        var baseRec = matchedGroup[0];
+        reusedOld = true;
+        code = baseRec.code || code;
+        var maxV = 0;
+        matchedGroup.forEach(function(r){
+          var v = parseInt(r.visit || 1, 10) || 1;
+          if (v > maxV) maxV = v;
+        });
+        visitCount = Math.max(maxV + 1, matchedGroup.length + 1);
+        finalName = baseRec.name || rawInput;
+        if (!finalMother && baseRec.mother && baseRec.mother !== '—') finalMother = baseRec.mother;
+        if (!finalFather && baseRec.father && baseRec.father !== '—') finalFather = baseRec.father;
+        if (!finalCity && baseRec.city && baseRec.city !== '—') finalCity = baseRec.city;
+        if (!finalDob && baseRec.dob && baseRec.dob !== '—') finalDob = baseRec.dob;
+        // Also fill inputs so practitioner sees the loaded profile cleanly
+        if (p1NameEl && matchedByCode) p1NameEl.value = finalName;
+        if (document.getElementById('p1_mother') && !inMother && finalMother) document.getElementById('p1_mother').value = finalMother;
+      }
+
+      var p2Box = document.getElementById('person2-box');
+      var hasP2 = p2Box && p2Box.style.display !== 'none' && ((document.getElementById('p2_name') || {}).value || '').trim();
+      var m = (typeof window.computeRealSpiritualMetrics === 'function')
+        ? window.computeRealSpiritualMetrics(finalName, finalMother, finalDob)
+        : { burj: '—', mufrad: '—', ism: '—', steps: '' };
+
+      var rec = {
+        code: code,
+        visit: visitCount,
+        date: new Date().toISOString().slice(0, 10),
+        name: finalName,
+        father: finalFather || '—',
+        mother: finalMother || '—',
+        city: finalCity || '—',
+        dob: finalDob || '—',
+        p2Name: hasP2 ? ((document.getElementById('p2_name') || {}).value || '').trim() : '',
+        p2Mother: hasP2 ? ((document.getElementById('p2_mother') || {}).value || '').trim() : '',
+        burj: m.burj,
+        mufrad: m.mufrad,
+        ism: m.ism,
+        steps: m.steps
+      };
+      cases.unshift(rec);
+      try { localStorage.setItem(CASES_K, JSON.stringify(cases)); } catch(e){}
+      if (typeof window.openScreen === 'function') window.openScreen('report');
+      if (typeof window.refreshOfflineReportList === 'function') window.refreshOfflineReportList();
+      var sel = document.getElementById('repPatientSel');
+      if (sel) { sel.value = '0'; if (typeof window.loadOfflinePatientToCard === 'function') window.loadOfflinePatientToCard('0'); }
+      var dualBtn = document.getElementById('btnAngleDualWrap');
+      if (dualBtn) dualBtn.style.display = rec.p2Name ? 'block' : 'none';
+      if (typeof window.showToast === 'function') {
+        window.showToast(reusedOld
+          ? ('✅ پرانا ریکارڈ لوڈ ہو گیا — ' + code + ' (وزٹ ' + visitCount + ')')
+          : ('✅ نیا کیس محفوظ ہو گیا — ' + code + ' (وزٹ 1)'));
+      }
+    };
+  }
+
+  function bootV37(){
+    syncMualijCodeDisplayV37();
+    installSmartCaseReuseV37();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootV37);
+  else bootV37();
+  setTimeout(bootV37, 400);
+  setTimeout(bootV37, 1200);
+  if (window.AlRaqiBus && typeof window.AlRaqiBus.on === 'function') {
+    window.AlRaqiBus.on('screen:open', syncMualijCodeDisplayV37);
+  }
+})();
+
+
+// === v2.1.38 MASTER SUITE: POINTS 11 (EASY URDU + EXPAND), 12 (TRUE STEP-BY-STEP BACK),
+//     14 (PURE BLACK MURAQABA), 15 (ZERO-BLINK TASBEEH), 21 (3-ANGLE MIZAJ), 22 (HOW-TO-USE GUIDE) ===
+(function initAlRaqiV38MasterSuite(){
+
+  // --- POINT 12: TRUE SINGLE UNIFIED STEP-BY-STEP BACK STACK (Screens + Sub-Tabs + Modals) ---
+  window._arStepStackV38 = [{ type: 'screen', id: 'home' }];
+  window._arSteppingBackV38 = false;
+
+  window.pushArStepV38 = function(stepObj){
+    if (window._arSteppingBackV38 || !stepObj) return;
+    var st = window._arStepStackV38;
+    var top = st[st.length - 1];
+    if (top && top.type === stepObj.type && top.id === stepObj.id && top.sub === stepObj.sub) return;
+    st.push(stepObj);
+    try { history.pushState({ arV38: true, depth: st.length }, '', '#step_' + st.length); } catch(e){}
+  };
+
+  function applyStepObjV38(step){
+    if (!step) { if (typeof window.openScreen === 'function') window.openScreen('home', true); return; }
+    window._arSteppingBackV38 = true;
+    try {
+      // Close any open full-screen overlays first
+      var qOv = document.getElementById('v31_fullSurahReaderOverlay');
+      if (qOv && qOv.style.display !== 'none') {
+        if (typeof window.closeFullSurahReaderV31 === 'function') window.closeFullSurahReaderV31(true);
+        else qOv.style.display = 'none';
+      }
+      var mOv = document.getElementById('arMuraqabaFsV38');
+      if (mOv) mOv.style.display = 'none';
+      var gOv = document.getElementById('arHowToUseModalV38');
+      if (gOv) gOv.style.display = 'none';
+      var abOv = document.getElementById('arAadadBuroojModalV32');
+      if (abOv) abOv.style.display = 'none';
+
+      if (step.type === 'screen') {
+        if (typeof window.openScreen === 'function') window.openScreen(step.id || 'home', true);
+      } else if (step.type === 'folder') {
+        if (typeof window.openScreen === 'function') window.openScreen('folders', true);
+        if (typeof window.openFolder4 === 'function') window.openFolder4(step.id || 'quran');
+      }
+    } finally {
+      setTimeout(function(){ window._arSteppingBackV38 = false; }, 60);
+    }
+  }
+
+  window.goBackOneScreen = function(){
+    // Priority 1: Close Full-Screen overlays without jumping to Home!
+    var mOv = document.getElementById('arMuraqabaFsV38');
+    if (mOv && mOv.style.display !== 'none') { mOv.style.display = 'none'; return; }
+    var gOv = document.getElementById('arHowToUseModalV38');
+    if (gOv && gOv.style.display !== 'none') { gOv.style.display = 'none'; return; }
+    var fsT = document.getElementById('fsT');
+    if (fsT && fsT.classList.contains('show')) { fsT.classList.remove('show'); return; }
+    var qOv = document.getElementById('v31_fullSurahReaderOverlay');
+    if (qOv && qOv.style.display !== 'none') {
+      if (typeof window.closeFullSurahReaderV31 === 'function') window.closeFullSurahReaderV31(true);
+      else qOv.style.display = 'none';
+      return;
+    }
+    var abOv = document.getElementById('arAadadBuroojModalV32');
+    if (abOv && abOv.style.display !== 'none') { abOv.style.display = 'none'; return; }
+
+    var st = window._arStepStackV38;
+    if (st.length > 1) {
+      st.pop();
+      applyStepObjV38(st[st.length - 1]);
+    } else {
+      applyStepObjV38({ type: 'screen', id: 'home' });
+    }
+  };
+
+  // Capture-phase SINGLE popstate handler that ALWAYS intercepts Android Back
+  window.addEventListener('popstate', function(ev){
+    ev.stopImmediatePropagation();
+    window.goBackOneScreen();
+  }, true);
+
+  // Subscribe to AlRaqiBus to record every screen and Maktaba tab step cleanly
+  if (window.AlRaqiBus && typeof window.AlRaqiBus.on === 'function') {
+    window.AlRaqiBus.on('screen:open', function(p){
+      if (p && p.name) window.pushArStepV38({ type: 'screen', id: p.name });
+    });
+    window.AlRaqiBus.on('maktaba:tab', function(p){
+      if (p && p.tab) window.pushArStepV38({ type: 'folder', id: p.tab });
+    });
+  }
+
+  // --- POINTS 14 & 15: PURE BLACK FULL-SCREEN MURAQABA MODE + ZERO-BLINK TASBEEH ---
+  if (!document.getElementById('arTasbeehV38Css')) {
+    var tst = document.createElement('style');
+    tst.id = 'arTasbeehV38Css';
+    tst.textContent = [
+      /* Point 15: Zero-blink steady calm color on normal full-screen Tasbeeh */
+      '#fsT, #fsT:active, #fsT.flash, #fsT.tapped { background:#0b1936 !important; transition:none !important; animation:none !important; -webkit-tap-highlight-color:transparent !important; }',
+      /* Point 14: Pure Black Muraqaba Full-Screen Overlay */
+      '#arMuraqabaFsV38 { position:fixed; inset:0; z-index:99999; background:#000000 !important; color:#475569; display:none; flex-direction:column; align-items:center; justify-content:center; user-select:none; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }',
+      '#arMuraqabaFsV38 .mq-cnt { font-size:3.2rem; font-weight:700; color:#334155; font-family:system-ui,sans-serif; letter-spacing:2px; }',
+      '#arMuraqabaFsV38 .mq-hint { font-size:0.78rem; color:#1e293b; margin-top:10px; }',
+      '#arMuraqabaFsV38 .mq-exit { position:fixed; top:14px; left:14px; padding:5px 12px; border-radius:999px; border:1px solid #1e293b; background:rgba(15,23,42,0.55); color:#475569; font-family:inherit; font-size:0.76rem; cursor:pointer; }'
+    ].join('\n');
+    document.head.appendChild(tst);
+  }
+
+  window.openMuraqabaPureBlackV38 = function(){
+    var ov = document.getElementById('arMuraqabaFsV38');
+    if (!ov) {
+      ov = document.createElement('div');
+      ov.id = 'arMuraqabaFsV38';
+      ov.innerHTML =
+        '<button type="button" class="mq-exit" onclick="event.stopPropagation(); document.getElementById(\'arMuraqabaFsV38\').style.display=\'none\';">× واپسی</button>' +
+        '<div class="mq-cnt" id="arMqCountV38">0</div>' +
+        '<div class="mq-hint">اسکرین پر کہیں بھی ٹیپ کریں</div>';
+      ov.onclick = function(){
+        if (typeof window.tapTasbeeh === 'function') window.tapTasbeeh(1);
+        var tc = document.getElementById('tCount');
+        var mc = document.getElementById('arMqCountV38');
+        if (mc && tc) mc.textContent = tc.textContent;
+        try { if (navigator.vibrate) navigator.vibrate(18); } catch(e){}
+      };
+      document.body.appendChild(ov);
+    }
+    var tc = document.getElementById('tCount');
+    var mc = document.getElementById('arMqCountV38');
+    if (mc && tc) mc.textContent = tc.textContent;
+    ov.style.display = 'flex';
+    window.pushArStepV38({ type: 'modal', id: 'muraqaba' });
+  };
+
+  function bindMuraqabaBtnV38(){
+    document.querySelectorAll('#scr_tasbeeh button').forEach(function(b){
+      if ((b.textContent || '').indexOf('مراقبہ') !== -1 && !b.dataset.v38Bound) {
+        b.dataset.v38Bound = '1';
+        b.removeAttribute('onclick');
+        b.addEventListener('click', function(ev){ ev.preventDefault(); window.openMuraqabaPureBlackV38(); });
+      }
+    });
+  }
+
+  // --- POINTS 11 & 21: 3-ANGLE COMPLETE MIZAJ (NAME + DOB + WEEKDAY) + EASY MODERN URDU + EXPANDABLE DETAILS ---
+  var WEEKDAY_MIZAJ_V38 = [
+    { day:'اتوار',   planet:'شمس',   mizaj:'آتشی (گرم و خشک)', desc:'اتوار کا دن شمس سے منسوب ہے؛ اس دن پیدا ہونے والوں میں قیادت، ہمت، واضح رائے اور خود اعتمادی غالب رہتی ہے۔ غصے میں اعتدال اور نرمی فائدہ مند رہتی ہے۔' },
+    { day:'پیر',     planet:'قمر',   mizaj:'آبی (سرد و تر)',   desc:'پیر کا دن قمر سے منسوب ہے؛ اس دن کی طبیعت میں نرمی، ہمدردی، حساسیت اور سفر یا تبدیلی کی طرف رجحان زیادہ ہوتا ہے۔ ذہنی سکون اور باقاعدہ آرام ضروری ہے۔' },
+    { day:'منگل',    planet:'مریخ',  mizaj:'آتشی (گرم و خشک)', desc:'منگل کا دن مریخ سے منسوب ہے؛ اس دن والوں میں توانائی، بے باکی اور فوری فیصلہ کرنے کی قوت ہوتی ہے۔ جلد بازی سے بچ کر صبر اختیار کرنا کامیابی دیتا ہے۔' },
+    { day:'بدھ',     planet:'عطارد', mizaj:'بادی / خاکی (متوازن)', desc:'بدھ کا دن عطارد سے منسوب ہے؛ ذہانت، گفتگو کا سلیقہ، حساب کتاب اور سیکھنے کی صلاحیت نمایاں رہتی ہے۔ یکسوئی برقرار رکھنا بہترین نتائج دیتا ہے۔' },
+    { day:'جمعرات',  planet:'مشتری', mizaj:'بادی (گرم و تر)',  desc:'جمعرات کا دن مشتری سے منسوب ہے؛ کشادہ دلی، خیر خواہی، علمی شوق اور باوقار مزاج پایا جاتا ہے۔ شکر گزاری اور صدقہ برکت بڑھاتا ہے۔' },
+    { day:'جمعہ',    planet:'زہرہ',  mizaj:'آبی (سرد و تر)',   desc:'جمعہ کا دن زہرہ سے منسوب ہے؛ محبت، سلیقہ مندی، ملنساری اور گھریلو ہم آہنگی غالب رہتی ہے۔ نرمی اور توازن ان کی سب سے بڑی طاقت ہے۔' },
+    { day:'ہفتہ',    planet:'زحل',   mizaj:'خاکی (سرد و خشک)', desc:'ہفتہ کا دن زحل سے منسوب ہے؛ سنجیدگی، مستقل مزاجی، گہری سوچ اور محنت کی عادت نمایاں ہوتی ہے۔ مایوسی سے بچ کر مثبت سوچ رکھنا مفید رہتا ہے۔' }
+  ];
+
+  function sync3AngleMizajCardV38(){
+    var box = document.getElementById('rBox_dobCompat');
+    if (!box) return;
+    var dobEl = document.getElementById('p1_dob');
+    var dobVal = (dobEl && dobEl.value) ? dobEl.value.trim() : '';
+    // Fallback to selected case DOB on report screen
+    if (!dobVal) {
+      var sel = document.getElementById('repPatientSel');
+      if (sel && sel.value !== '' && typeof window.getOfflineCases === 'function') {
+        var cs = window.getOfflineCases();
+        var rec = cs[parseInt(sel.value, 10)];
+        if (rec && rec.dob && rec.dob !== '—') dobVal = rec.dob;
+      }
+    }
+    var wdBox = document.getElementById('arWeekdayMizajBoxV38');
+    if (!wdBox) {
+      wdBox = document.createElement('div');
+      wdBox.id = 'arWeekdayMizajBoxV38';
+      wdBox.style.cssText = 'margin-top:8px; background:#fff; border:1.5px solid #cbd5e1; border-right:4px solid #1e3a8a; border-radius:10px; padding:8px 10px; font-size:0.86rem; line-height:1.85;';
+      box.appendChild(wdBox);
+    }
+    if (dobVal && /^\d{4}-\d{2}-\d{2}$/.test(dobVal)) {
+      var pts = dobVal.split('-');
+      var dObj = new Date(parseInt(pts[0],10), parseInt(pts[1],10)-1, parseInt(pts[2],10));
+      var info = WEEKDAY_MIZAJ_V38[dObj.getDay()] || WEEKDAY_MIZAJ_V38[0];
+      box.style.display = 'block';
+      wdBox.innerHTML =
+        '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">' +
+          '<b style="color:#0b1936;">📅 پیدائش کے دن کا مزاج: ' + info.day + ' (' + info.planet + ')</b>' +
+          '<span style="background:#eff6ff; color:#1e3a8a; border:1px solid #bfdbfe; border-radius:999px; padding:2px 9px; font-size:0.76rem; font-weight:800;">' + info.mizaj + '</span>' +
+        '</div>' +
+        '<details style="margin-top:6px;">' +
+          '<summary style="cursor:pointer; color:#065f46; font-weight:800; font-size:0.82rem;">مزید تفصیل اور آسان عملی رہنمائی دیکھیں ▼</summary>' +
+          '<div style="margin-top:6px; padding:7px 9px; background:#f8fafc; border-radius:8px; color:#1e293b;">' + info.desc + '</div>' +
+        '</details>';
+    } else {
+      wdBox.innerHTML = '<div style="color:#64748b; font-size:0.82rem;">📅 پیدائش کے دن کا مزاج دیکھنے کے لیے تشخیص فارم میں تاریخِ پیدائش درج کریں۔</div>';
+    }
+  }
+
+  // --- POINT 22: PROMINENT "📖 رہنما" (HOW TO USE) BUTTON ON HOME HEADER + FULL GUIDE MODAL ---
+  window.openHowToUseGuideV38 = function(){
+    var ov = document.getElementById('arHowToUseModalV38');
+    if (!ov) {
+      ov = document.createElement('div');
+      ov.id = 'arHowToUseModalV38';
+      ov.style.cssText = 'position:fixed; inset:0; z-index:99990; background:rgba(9,21,46,0.72); display:none; align-items:center; justify-content:center; padding:12px; direction:rtl;';
+      ov.innerHTML =
+        '<div style="background:#ffffff; width:100%; max-width:520px; max-height:88dvh; border-radius:16px; border:2px solid #d4af37; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 16px 40px rgba(0,0,0,0.35);">' +
+          '<div style="background:linear-gradient(135deg,#09152e,#1e3a8a); color:#fde047; padding:12px 14px; display:flex; align-items:center; justify-content:space-between;">' +
+            '<b style="font-size:1.05rem;">📖 الراقی ایپ — مکمل رہنمائے استعمال</b>' +
+            '<button type="button" onclick="document.getElementById(\'arHowToUseModalV38\').style.display=\'none\'" style="background:rgba(255,255,255,0.16); color:#fff; border:1px solid #fde047; border-radius:8px; padding:3px 10px; font-family:inherit; font-weight:800; cursor:pointer;">بند کریں ✕</button>' +
+          '</div>' +
+          '<div style="padding:14px; overflow-y:auto; font-size:0.90rem; line-height:1.95; color:#1e293b; display:grid; gap:10px;">' +
+            '<div style="background:#f8fafc; border-right:4px solid #1e3a8a; padding:9px 11px; border-radius:10px;"><b>1. تشخیص فارم اور رپورٹ کارڈ:</b> سائل کا نام، والدہ کا نام اور تاریخِ پیدائش درج کریں۔ پہلے سے موجود مریض کا صرف نام یا کوڈ لکھنے پر ایپ خودکار پرانا ریکارڈ اور اگلا وزٹ اٹھا لیتی ہے۔ رپورٹ میں نام، تاریخِ پیدائش اور پیدائش کے دن — تینوں زاویوں سے مکمل مزاج اور منفرد اسمِ اعظم ملتا ہے۔</div>' +
+            '<div style="background:#f8fafc; border-right:4px solid #065f46; padding:9px 11px; border-radius:10px;"><b>2. تعبیرِ رؤیا (خوابوں کی تعبیر):</b> سائل کی جنس، رتبہ، وقت اور 9 حالتوں میں سے متعلقہ بٹن منتخب کریں۔ انگریزی یا دیگر زبان کا خواب پیسٹ کرتے ہی خودکار اردو ترجمہ ہو کر مستند تعبیر سامنے آتی ہے۔</div>' +
+            '<div style="background:#f8fafc; border-right:4px solid #b45309; padding:9px 11px; border-radius:10px;"><b>3. مکتبۂ الراقی (5 حصے):</b><br>• <b>قرآنِ کریم:</b> خالص پاکستانی مصحف خط، مسلسل سورت در سورت تلاوت، اور رات کے لیے 🌙 نائٹ موڈ۔<br>• <b>وظائف و اذکار:</b> 81+ مجرب وظائف، اوپر پن سرچ بار اور 1 کلک ذوالکتابت۔<br>• <b>اسماء الحسنیٰ:</b> 3 طریقوں سے فوری کاپی (اسم / عدد / اسم+عدد)۔<br>• <b>نقوش و ذوالکتابت:</b> 55+ نقوش، 4 چالوں کی تبدیلی، اوپر 786 کا ٹوگل اور صاف A4 پرنٹ۔<br>• <b>کتب و خواصِ اعداد:</b> 1 تا 9 اعداد، 4 عناصر اور 12 بروج کے مکمل خواص۔</div>' +
+            '<div style="background:#f8fafc; border-right:4px solid #7c3aed; padding:9px 11px; border-radius:10px;"><b>4. ساعات اور ہجری کیلنڈر:</b> ہجری و عیسوی تاریخ، طلوع و غروبِ آفتاب، لائیو ساعت کا الٹا ٹائمر، ہر کوکب کے مطابق «اس وقت کیا کریں» مشورہ، اور مشکل اصطلاحات کی آسان لغت۔</div>' +
+            '<div style="background:#f8fafc; border-right:4px solid #0f766e; padding:9px 11px; border-radius:10px;"><b>5. تسبیح و مراقبہ موڈ:</b> عام فل اسکرین تسبیح بغیر آنکھوں کی چمک کے، اور <b>مراقبہ موڈ</b> میں مکمل سیاہ اسکرین جہاں کہیں بھی ٹیپ کرنے سے گنتی آگے بڑھتی ہے۔</div>' +
+            '<div style="background:#fffbeb; border-right:4px solid #d4af37; padding:9px 11px; border-radius:10px;"><b>6. بیک اپ، آف لائن موڈ اور واپسی:</b> سیٹنگز میں 1 کلک مقامی JSON بیک اپ و محفوظ ری اسٹور، اور ہر اندرونی صفحے پر دائیں کونے میں «← پیچھے» و بائیں کونے میں «ہوم» بٹن موجود ہے۔</div>' +
+          '</div>' +
+        '</div>';
+      ov.onclick = function(e){ if (e.target === ov) ov.style.display = 'none'; };
+      document.body.appendChild(ov);
+    }
+    ov.style.display = 'flex';
+    window.pushArStepV38({ type: 'modal', id: 'guide' });
+  };
+
+  function mountHomeGuidePillV38(){
+    var homeHdr = document.querySelector('#scr_home .ar-hero-header');
+    if (homeHdr && !document.getElementById('arHomeGuidePillV38')) {
+      homeHdr.style.position = 'relative';
+      var gb = document.createElement('button');
+      gb.id = 'arHomeGuidePillV38';
+      gb.type = 'button';
+      gb.textContent = '📖 رہنما';
+      gb.style.cssText = 'position:absolute; top:8px; right:10px; z-index:6; display:inline-flex; align-items:center; justify-content:center; padding:2px 11px; min-height:27px; border-radius:999px; background:rgba(254,240,138,0.18); border:1px solid rgba(212,175,55,0.82); color:#fef08a; font-family:"Jameel Noori Nastaleeq","Noto Nastaliq Urdu",Tahoma,sans-serif; font-size:0.80rem; font-weight:700; cursor:pointer;';
+      gb.onclick = window.openHowToUseGuideV38;
+      homeHdr.insertBefore(gb, homeHdr.firstChild);
+    }
+    var setBox = document.getElementById('arHardRefreshBoxV33');
+    if (setBox && !document.getElementById('arSettingsGuideBtnV38')) {
+      var sb = document.createElement('button');
+      sb.id = 'arSettingsGuideBtnV38';
+      sb.type = 'button';
+      sb.className = 'ar-unibtn';
+      sb.style.cssText = 'width:100%; margin-top:7px; background:#eff6ff; border-color:#93c5fd; color:#1e3a8a;';
+      sb.textContent = '📖 الراقی ایپ کا مکمل رہنمائے استعمال (How to Use)';
+      sb.onclick = window.openHowToUseGuideV38;
+      setBox.appendChild(sb);
+    }
+  }
+
+  function bootV38Suite(){
+    bindMuraqabaBtnV38();
+    mountHomeGuidePillV38();
+    sync3AngleMizajCardV38();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootV38Suite);
+  else bootV38Suite();
+  setTimeout(bootV38Suite, 500);
+  setTimeout(bootV38Suite, 1500);
+  if (window.AlRaqiBus && typeof window.AlRaqiBus.on === 'function') {
+    window.AlRaqiBus.on('screen:open', function(p){
+      if (p && p.name === 'report') setTimeout(sync3AngleMizajCardV38, 150);
+      if (p && p.name === 'tasbeeh') setTimeout(bindMuraqabaBtnV38, 100);
+    });
   }
 })();
 
@@ -9109,11 +9560,11 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
     banner.innerHTML =
       '<div style="background:linear-gradient(135deg,#065f46,#047857); color:#fff; border:1.5px solid #d4af37; border-radius:11px; padding:8px 8px; text-align:center; box-shadow:0 2px 8px rgba(6,95,70,0.18);">' +
-        '<div style="font-size:0.74rem; color:#fde047; font-weight:800; margin-bottom:2px;">🌙 آج کی ہجری تاریخ</div>' +
+        '<div style="font-size:0.74rem; color:#fde047; font-weight:800; margin-bottom:2px;">🌙 ہجری</div>' +
         '<div style="font-size:0.96rem; font-weight:900; color:#ffffff; line-height:1.45;">' + hStr + '</div>' +
       '</div>' +
       '<div style="background:linear-gradient(135deg,#09152e,#1e3a8a); color:#fff; border:1.5px solid #d4af37; border-radius:11px; padding:8px 8px; text-align:center; box-shadow:0 2px 8px rgba(11,25,54,0.18);">' +
-        '<div style="font-size:0.74rem; color:#fde047; font-weight:800; margin-bottom:2px;">📅 آج کی عیسوی تاریخ</div>' +
+        '<div style="font-size:0.74rem; color:#fde047; font-weight:800; margin-bottom:2px;">📅 عیسوی</div>' +
         '<div style="font-size:0.96rem; font-weight:900; color:#ffffff; line-height:1.45;">' + gStr + '</div>' +
       '</div>';
 
@@ -9150,6 +9601,96 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     ].join('\n');
     document.head.appendChild(st);
   })();
+
+
+// === v2.1.38 POINTS 7 & 10: SUNRISE/SUNSET HIGHLIGHT + PLAIN-URDU SAAET GLOSSARY ===
+(function initSaaatSunriseAndGlossaryV38(){
+  function syncSunriseSunsetBarV38(){
+    var scr = document.getElementById('scr_saaat');
+    if (!scr) return;
+    var banner = document.getElementById('arSaaatDualDateBannerV34');
+    if (!banner || !banner.parentNode) return;
+    var bar = document.getElementById('arSaaatSunTimesBarV38');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'arSaaatSunTimesBarV38';
+      bar.style.cssText = 'grid-column:1 / -1; width:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:6px; direction:rtl;';
+      banner.parentNode.insertBefore(bar, banner.nextSibling);
+    }
+    var dayBody = document.getElementById('offDaySaatBody');
+    var sr = '—', ss = '—';
+    if (dayBody) {
+      var rows = dayBody.querySelectorAll('tr');
+      if (rows.length >= 1) {
+        var t0 = (rows[0].querySelectorAll('td')[3] || {}).textContent || '';
+        var p0 = t0.split(/\s*[-–]\s*/);
+        if (p0[0]) sr = p0[0].trim();
+      }
+      if (rows.length >= 12) {
+        var t11 = (rows[11].querySelectorAll('td')[3] || {}).textContent || '';
+        var p11 = t11.split(/\s*[-–]\s*/);
+        if (p11[1]) ss = p11[1].trim();
+      }
+    }
+    bar.innerHTML =
+      '<div style="background:linear-gradient(135deg,#fffbeb,#fef3c7); border:1.5px solid #f59e0b; border-radius:10px; padding:6px 8px; text-align:center;">' +
+        '<div style="font-size:0.74rem; font-weight:800; color:#92400e;">🌅 طلوعِ آفتاب</div>' +
+        '<div dir="ltr" style="font-size:0.92rem; font-weight:900; color:#78350f; margin-top:1px;">' + sr + '</div>' +
+      '</div>' +
+      '<div style="background:linear-gradient(135deg,#fff7ed,#ffedd5); border:1.5px solid #ea580c; border-radius:10px; padding:6px 8px; text-align:center;">' +
+        '<div style="font-size:0.74rem; font-weight:800; color:#9a3412;">🌇 غروبِ آفتاب</div>' +
+        '<div dir="ltr" style="font-size:0.92rem; font-weight:900; color:#7c2d12; margin-top:1px;">' + ss + '</div>' +
+      '</div>';
+  }
+
+  function mountSaaatGlossaryV38(){
+    var scr = document.getElementById('scr_saaat');
+    if (!scr || document.getElementById('arSaaatGlossaryCardV38')) return;
+    var wrap = scr.querySelector('.wrap');
+    if (!wrap) return;
+    var card = document.createElement('div');
+    card.id = 'arSaaatGlossaryCardV38';
+    card.className = 'card';
+    card.style.cssText = 'margin-top:10px; border-right:4px solid #d4af37; background:#fffdf7;';
+    card.innerHTML =
+      '<details>' +
+        '<summary style="cursor:pointer; font-weight:800; color:#0b1936; font-size:0.96rem; list-style:none; display:flex; align-items:center; justify-content:space-between;">' +
+          '<span>❓ مشکل اصطلاحات کا آسان اردو مطلب (کلک کریں)</span><span style="color:#b45309;">▼</span>' +
+        '</summary>' +
+        '<div style="margin-top:10px; display:grid; gap:6px; font-size:0.86rem; line-height:1.85; color:#1e293b;">' +
+          '<div>• <b>سعدِ اکبر (نہایت مبارک وقت):</b> سب سے بہترین اور بابرکت گھڑی — رزق، نکاح، شفا، محبت اور بڑے نیک کاموں کے لیے موزوں۔</div>' +
+          '<div>• <b>سعدِ اصغر (مبارک اور خوشگوار وقت):</b> صلح، محبت، خوشی، سفر اور گھریلو سکون کے لیے عمدہ وقت۔</div>' +
+          '<div>• <b>سعد (اچھا وقت):</b> عام نیک مقاصد، ملاقات، خط و کتابت اور روزمرہ خیر کے کاموں کے لیے مناسب۔</div>' +
+          '<div>• <b>ممتزج (درمیانہ / ملا جلا وقت):</b> نیت اور معاملے کے مطابق اثر دیتا ہے — لکھنے پڑھنے، تعلیم اور حساب کتاب کے لیے موزوں۔</div>' +
+          '<div>• <b>نحسِ اصغر (ہلکی احتیاط کا وقت):</b> جلد بازی اور جھگڑے سے بچیں؛ دفاعی کاموں اور رکاوٹ دور کرنے میں محتاط رہیں۔</div>' +
+          '<div>• <b>نحسِ اکبر (سخت احتیاط / بھاری وقت):</b> نئے خیر کے کام، نکاح یا اہم معاہدے اس وقت شروع نہ کریں؛ صرف حفاظت و صدقہ بہتر ہے۔</div>' +
+          '<div>• <b>جلالی / جمالی:</b> جلالی = سخت، پُراثر اور رعب دار کیفیت؛ جمالی = نرم، پُرسکون اور محبت و رحمت والی کیفیت۔</div>' +
+          '<div>• <b>قمر در عقرب:</b> مہینے کے تقریباً ڈھائی دن جب چاند برج عقرب میں ہوتا ہے — نئے اہم کام شروع کرنے سے احتیاط کی جاتی ہے۔</div>' +
+          '<div>• <b>ایامِ بیض:</b> ہر اسلامی مہینے کی 13، 14 اور 15 تاریخ (چاندنی راتیں) — روزہ، دعا اور وظائف کے لیے بابرکت دن۔</div>' +
+        '</div>' +
+      '</details>';
+    wrap.appendChild(card);
+  }
+
+  
+  if (!document.getElementById('arSaaatTableColFixV38')) {
+    var cst = document.createElement('style');
+    cst.id = 'arSaaatTableColFixV38';
+    cst.textContent = [
+      '#scr_saaat table { table-layout: fixed !important; width: 100% !important; }',
+      '#scr_saaat table th:nth-child(1), #scr_saaat table td:nth-child(1) { width: 16% !important; padding: 6px 2px !important; font-weight: 800 !important; white-space: nowrap !important; text-align: center !important; }',
+      '#scr_saaat table th:nth-child(2), #scr_saaat table td:nth-child(2) { width: 19% !important; text-align: center !important; }',
+      '#scr_saaat table th:nth-child(3), #scr_saaat table td:nth-child(3) { width: 29% !important; text-align: center !important; }',
+      '#scr_saaat table th:nth-child(4), #scr_saaat table td:nth-child(4) { width: 36% !important; font-size: 0.70rem !important; direction: ltr !important; text-align: center !important; }'
+    ].join('\n');
+    document.head.appendChild(cst);
+  }
+
+  function runV38Saaat(){ syncSunriseSunsetBarV38(); mountSaaatGlossaryV38(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', runV38Saaat);
+  else runV38Saaat();
+  setInterval(syncSunriseSunsetBarV38, 2500);
+})();
 
 /* =========================================================================
    MODULE 17: V2.1.23 FINAL POLISH — DIRECT GMAIL AUTH + CLASSIC RESTORE
@@ -9652,7 +10193,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
       '.quran-ayah, .quran-text, .mushaf-ayah, .ar-mushaf-line, #mushafTextBody p, #mushafReaderArea .ar-ayah-txt, #wazaifManzilList .ar-arabic-text, [data-ar-quran="1"] {',
       '  font-size: ' + rem + 'rem !important;',
       '}',
-      '#scr_folders .ar-arabic-text:not(b), #scr_folders .ar-inline-acc .ar-arabic-text, #scr_folders .ar-inline-acc .ar-arabic-text *, #scr_report .ar-arabic-text:not(h1):not(h2):not(h3) {',
+      '#v31_fsPageContent .ar-ayah-txt, #fPane_quran .ar-ayah-txt, #fPane_wazaif .ar-arabic-text:not(h1):not(h2):not(h3):not(button), #wazaifUnifiedList .ar-arabic-text:not(button) {',
       '  font-size: ' + rem + 'rem !important;',
       '}'
     ].join('\n');
@@ -9823,6 +10364,18 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     }
     var tipText = PLANET_DO_NOW_V26[curPlanetName] || 'اس ساعت کے مزاج کے مطابق خیر، ذکر و دعا اور موزوں روحانی عمل اختیار کریں۔';
 
+    
+    var PLANET_ADVICE_V38 = {
+      'شمس': 'ساعتِ شمس (سعد / جلالی): عزت، سربلندی، افسران سے ملاقات، سرکاری معاملات اور اہم کاروباری فیصلوں کے لیے بہترین وقت ہے۔',
+      'قمر': 'ساعتِ قمر (سعد): سفر، ملاقات، خط و کتابت، گھریلو سکون، شفا اور دلوں کی نرمی کے کاموں کے لیے نہایت موزوں وقت ہے۔',
+      'مریخ': 'ساعتِ مریخ (نحسِ اصغر): جلد بازی، غصے اور بحث سے بچیں؛ صرف دفاعی دعا، حفاظت اور رکاوٹ دور کرنے میں احتیاط سے کام لیں۔',
+      'عطارد': 'ساعتِ عطارد (ممتزج): لکھنے پڑھنے، تعلیم، حساب کتاب، تجارتی معاہدے، نقش نگاری اور علمی کاموں کے لیے عمدہ وقت ہے۔',
+      'مشتری': 'ساعتِ مشتری (سعدِ اکبر): نہایت بابرکت گھڑی! رزق میں وسعت، نکاح، صلح، شفا اور ہر بڑے خیر کے کام کے آغاز کے لیے بہترین ہے۔',
+      'زہرہ': 'ساعتِ زہرہ (سعدِ اصغر): محبت، گھریلو ہم آہنگی، خوشی، رشتہ داری کی مضبوطی اور دلجوئی کے امور کے لیے پُرسکون وقت ہے۔',
+      'زحل': 'ساعتِ زحل (نحسِ اکبر): سخت احتیاط کا وقت — نئے خیر کے کام یا اہم معاہدے مؤخر کریں؛ استغفار، صدقہ اور حفاظت کا ورد بہتر ہے۔'
+    };
+    var _pKey38 = String((cur && cur.planet) || '').trim();
+    Object.keys(PLANET_ADVICE_V38).forEach(function(pk){ if (_pKey38.indexOf(pk) !== -1) tipText = PLANET_ADVICE_V38[pk]; });
     var html = '';
     if (remHtml || nxt) {
       html += '<div style="display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:8px;">';
@@ -10606,23 +11159,45 @@ window.MASTER_THREE_BOOKS_DREAMS = [
   ];
 
   function findMatchingAsmaV31(targetNum, prefType){
-    var exact = ASMA_DB_V31.filter(function(a){ return a.v === targetNum; });
-    var sorted = ASMA_DB_V31.slice().sort(function(a, b){
-      var da = Math.abs(a.v - targetNum) + (prefType && a.t !== prefType ? 25 : 0);
-      var db = Math.abs(b.v - targetNum) + (prefType && b.t !== prefType ? 25 : 0);
-      return da - db;
-    });
-    // Also check 2-name exact sum match!
+    var n = Math.max(1, parseInt(targetNum, 10) || 1);
+    var exact = ASMA_DB_V31.filter(function(a){ return a.v === n; });
+    // Check 2-name exact sum match
     var pair = null;
     for (var i = 0; i < ASMA_DB_V31.length && !pair; i++) {
       for (var j = i + 1; j < ASMA_DB_V31.length; j++) {
-        if (ASMA_DB_V31[i].v + ASMA_DB_V31[j].v === targetNum) {
+        if (ASMA_DB_V31[i].v + ASMA_DB_V31[j].v === n) {
           pair = [ASMA_DB_V31[i], ASMA_DB_V31[j]];
           break;
         }
       }
     }
-    return { exact: exact, pair: pair, closest: sorted.slice(0, 3) };
+    // v2.1.37 Fix: Use modular Abjad + Mufrad Adad + Jalali/Jamali pool so high-Abjad names NEVER get stuck on یا غفار (1281)!
+    var pool = prefType ? ASMA_DB_V31.filter(function(a){ return a.t === prefType; }) : ASMA_DB_V31.slice();
+    if (pool.length < 5) pool = ASMA_DB_V31.slice();
+    var mufrad = n;
+    while (mufrad > 9) { mufrad = String(mufrad).split('').reduce(function(x, y){ return x + (+y); }, 0); }
+
+    var picked = [];
+    if (exact.length) {
+      picked.push(exact[0]);
+    } else {
+      // Check if an Asma is genuinely close (within ±35 of targetNum)
+      var closeMatch = pool.slice().sort(function(a, b){ return Math.abs(a.v - n) - Math.abs(b.v - n); })[0];
+      if (closeMatch && Math.abs(closeMatch.v - n) <= 35) {
+        picked.push(closeMatch);
+      } else {
+        // Deterministic unique selection by (targetNum + mufrad) % pool.length
+        var idx1 = (n + mufrad * 7) % pool.length;
+        picked.push(pool[idx1]);
+      }
+    }
+    // Add 2 more distinct complementary Asma from the pool
+    var baseIdx = (n + mufrad * 3) % pool.length;
+    for (var k = 0; k < pool.length && picked.length < 3; k++) {
+      var cand = pool[(baseIdx + k * 5) % pool.length];
+      if (picked.indexOf(cand) === -1) picked.push(cand);
+    }
+    return { exact: exact, pair: pair, closest: picked.slice(0, 3) };
   }
 
   window.sendPractitionerSelectionToReportV31 = function(textToAdd){
