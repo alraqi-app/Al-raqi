@@ -1813,9 +1813,9 @@ window.AL_RAQI_DIGITAL_BOOKS_V23 = {"bk_qawaid": {"title": "قواعدِ عمل�
         .catch(function(){ cb([]); });
     }
 
-    // Calibrated like a standard 16-line Quran Mushaf page (~740 Arabic characters per page)
+    // Calibrated like a standard 16-line Quran Mushaf page (~980 Arabic characters per page)
     function paginateAyahsV32(ayahs, surahNum){
-      var MAX_CHARS = 740;
+      var MAX_CHARS = 980;
       var pages = [];
       var cur = [];
       var curChars = 0;
@@ -2059,11 +2059,10 @@ window.AL_RAQI_DIGITAL_BOOKS_V23 = {"bk_qawaid": {"title": "قواعدِ عمل�
     st.textContent = [
       '@font-face { font-family:"NoorehudaMushaf"; src:url("https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/fonts/noorehuda-regular.woff2") format("woff2"), url("https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/fonts/noorehira-regular.woff2") format("woff2"), url("https://verses.quran.foundation/fonts/quran/hafs/nastaleeq/indopak/indopak-nastaleeq-waqf-lazim-v4.2.1.woff2") format("woff2"); font-display:swap; }',
       '#v31_fsPageContent, #v31_fsPageContent .ar-ayah-txt, #v31_fsPageContent .ar-mushaf-ayah, #mushafTextBody, #mushafReaderArea .ar-ayah-txt { font-family:"NoorehudaMushaf","IndoPakQuranMushaf","Scheherazade New","Amiri",serif !important; }',
-      '#v31_fsPageContent .ar-mushaf-page-card, #v31_fsPageContent > div { background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(2.45em - 1px), rgba(180, 145, 70, 0.16) calc(2.45em - 1px), rgba(180, 145, 70, 0.16) 2.45em) !important; line-height: 2.45 !important; }',
       /* Point 13: Bulletproof Night Mode with high specificity */
       '#v31_fullSurahReaderOverlay.ar-night-v38 { background:#0b1220 !important; color:#f3ecd8 !important; }',
       '#v31_fullSurahReaderOverlay.ar-night-v38 #v31_fsPageContent { background:#0b1220 !important; color:#f3ecd8 !important; }',
-      '#v31_fullSurahReaderOverlay.ar-night-v38 #v31_fsPageContent > div { background-color:#111c33 !important; border-color:#b48a2c !important; color:#f3ecd8 !important; background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(2.45em - 1px), rgba(212, 175, 55, 0.14) calc(2.45em - 1px), rgba(212, 175, 55, 0.14) 2.45em) !important; }',
+      '#v31_fullSurahReaderOverlay.ar-night-v38 #v31_fsPageContent > div { background-color:#111c33 !important; border-color:#b48a2c !important; color:#f3ecd8 !important; }',
       '#v31_fullSurahReaderOverlay.ar-night-v38 #v31_fsPageContent * { color:#f3ecd8 !important; }',
       '#v31_fullSurahReaderOverlay.ar-night-v38 #v31_fsPageContent .ar-ayah-num, #v31_fullSurahReaderOverlay.ar-night-v38 #v31_fsPageContent span[style*="065f46"] { color:#6ee7b7 !important; }',
       '#v31_fullSurahReaderOverlay.ar-night-v38 > div:last-child { background:#0f172a !important; border-top-color:#334155 !important; }',
@@ -2146,6 +2145,16 @@ window.AL_RAQI_DIGITAL_BOOKS_V23 = {"bk_qawaid": {"title": "قواعدِ عمل�
     };
     window.turnFullSurahPageV31._v38Continuous = true;
   }
+})();
+
+(function fixDoubleSurahTitleV40(){
+  function cleanTitle(){
+    var el = document.getElementById('v31_fsTitle') || document.querySelector('#v31_fullSurahReaderOverlay h3, #v31_fullSurahReaderOverlay b');
+    if (el && el.textContent && /سورة\s+سورة|سورہ\s+سورہ/.test(el.textContent)) {
+      el.textContent = el.textContent.replace(/(سورة|سورہ|سورۃ)\s+(سورة|سورہ|سورۃ)\s+/g, '$1 ');
+    }
+  }
+  setInterval(cleanTitle, 500);
 })();
 
 
@@ -2678,9 +2687,16 @@ window.AL_RAQI_DIGITAL_BOOKS_V23 = {"bk_qawaid": {"title": "قواعدِ عمل�
 
     out.innerHTML =
       '<div id="zulPrintBoxV34" class="ar-naqsh-ar-box" style="background:#fff; border:2px solid #d4af37; border-radius:12px; padding:12px; margin-top:10px; text-align:center;">' +
-        '<div style="font-size:0.86rem; font-weight:800; color:#1e3a8a; margin-bottom:6px;">' + (sizeNames[n] || 'ذوالکتابت') + ' — ' + (chaalNames[chaal] || '') + ' | کل ابجد: <span dir="ltr">' + abjad + '</span></div>' +
-        '<div data-ar-quran="1" style="font-family:\'IndoPakQuranMushaf\',\'Amiri Quran\',serif !important; font-size:1.05rem; color:#065f46; margin-bottom:8px; padding-bottom:6px; border-bottom:1px dashed #cbd5e1;">' + clean + '</div>' +
+        '</div>' +
+      '<div class="no-print" style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:8px 10px; margin-top:8px; text-align:center;">' +
+        '<div style="font-size:0.82rem; font-weight:800; color:#1e3a8a;">' + (sizeNames[n] || 'ذوالکتابت') + ' | کل ابجد: <span dir="ltr">' + abjad + '</span></div>' +
+        '<div data-ar-quran="1" style="font-family:\'NoorehudaMushaf\',\'IndoPakQuranMushaf\',serif !important; font-size:0.98rem; color:#065f46; margin-top:4px;">' + clean + '</div>' +
+        (words.length > 15 ? '<div style="margin-top:6px; font-size:0.76rem; color:#92400e; background:#fffbeb; border:1px solid #f59e0b; border-radius:7px; padding:5px 8px;">💡 مشورہ: چوکور اور خوبصورت ذوالکتابت کے لیے 1 مختصر آیت (3 تا 12 الفاظ) منتخب کریں، یا پوری سورت کے لیے عددی اوفاقی نقش بنائیں۔</div>' : '') +
+      '</div>' +
+      '<div class="ar-pure-naqsh-box" style="background:#fff; border:2px solid #0f172a; border-radius:10px; padding:10px; margin-top:8px; text-align:center;">' +
+        '<div class="ar-naqsh-786-hdr" style="font-size:1.05rem; font-weight:800; color:#000; margin-bottom:6px; letter-spacing:2px; display:' + ((typeof window.getInclude786PrintV38==='function' && !window.getInclude786PrintV38()) ? 'none' : 'block') + ';">786</div>' +
         tblHtml +
+        '<div style="text-align:right; font-size:0.70rem; color:#475569; margin-top:5px;">' + (chaalNames[chaal] || '') + '</div>' +
       '</div>' +
       '<div style="margin-top:8px; padding:7px 10px; background:#ecfdf5; border:1px solid #86efac; border-radius:8px; font-size:0.82rem; color:#065f46; font-weight:700;">' +
         '✅ قانونِ ذوالکتابت کی تصدیق: تمام ' + n + ' اجزاء بغیر کسی لفظ کو توڑے ہر افقی سطر اور ہر عمودی کالم میں بالکل ایک بار (تکسیرِ مربع/مثلث) مکمل موجود ہیں۔' +
@@ -3221,9 +3237,15 @@ window.AL_RAQI_DIGITAL_BOOKS_V23 = {"bk_qawaid": {"title": "قواعدِ عمل�
 
   // Authentic Atishi (آتشی) 3x3 Musallas & 4x4 Murabba grid renderer (clean white-label, zero watermarks)
   function renderGridNaqshHtml(title, total, type, note, extraTop, extraBottom){
-    var html = '<div class="ar-naqsh-ar-box" style="text-align:center; background:#fff; border:2px solid #0f172a; border-radius:10px; padding:10px; max-width:340px; margin:0 auto;">';
-    if (extraTop) html += '<div data-ar-quran="1" class="ar-arabic-text" style="font-size:1.05rem; color:#09152e; margin-bottom:6px; font-weight:700;">' + extraTop + '</div>';
-    if (total) html += '<div style="font-size:0.78rem; color:#475569; margin-bottom:5px; font-weight:700;">کل عدد: ' + toUrduDigits(total) + '</div>';
+    var html = '';
+    if (extraTop || total) {
+      html += '<div class="no-print ar-naqsh-meta-outside" style="text-align:center; background:#f8fafc; border:1px solid #cbd5e1; border-radius:9px; padding:7px 9px; max-width:340px; margin:0 auto 8px;">';
+      if (extraTop) html += '<div data-ar-quran="1" class="ar-arabic-text" style="font-size:1.02rem; color:#09152e; font-weight:700;">' + extraTop + '</div>';
+      if (total) html += '<div style="font-size:0.78rem; color:#475569; margin-top:3px; font-weight:700;">کل عدد: ' + toUrduDigits(total) + '</div>';
+      html += '</div>';
+    }
+    html += '<div class="ar-naqsh-ar-box" data-naqsh-total="' + (total || '') + '" data-naqsh-type="' + (type || '') + '" style="text-align:center; background:#fff; border:2px solid #0f172a; border-radius:10px; padding:10px; max-width:340px; margin:0 auto;">';
+    html += '<div class="ar-naqsh-786-hdr" style="font-size:1.05rem; font-weight:800; color:#000; margin-bottom:6px; letter-spacing:2px;">786</div>';
 
     var grid = [];
     if (type === '3x3' && total) {
@@ -3701,6 +3723,85 @@ window.AL_RAQI_DIGITAL_BOOKS_V23 = {"bk_qawaid": {"title": "قواعدِ عمل�
     });
   }
   setInterval(enhanceWazaifFullPageBtnsV39, 1200);
+})();
+
+
+// === v2.1.40 UPLOADED NAQSH 4-CHAAL LINKER (3x3 + 4x4) + CORNER CHAAL LABEL ===
+(function initUploadedNaqshChaalV40(){
+  var CHAAL_3X3 = {
+    'آتشی': [7,0,5, 2,4,6, 3,8,1],
+    'بادی': [3,2,7, 8,4,0, 1,6,5],
+    'آبی':  [1,8,3, 6,4,2, 5,0,7],
+    'خاکی': [5,6,1, 0,4,8, 7,2,3]
+  };
+  var CHAAL_4X4 = {
+    'آتشی': [0,14,13,3, 11,5,6,8, 7,9,10,4, 12,2,1,15],
+    'بادی': [3,13,14,0, 8,6,5,11, 4,10,9,7, 15,1,2,12],
+    'آبی':  [15,1,2,12, 4,10,9,7, 8,6,5,11, 3,13,14,0],
+    'خاکی': [12,2,1,15, 7,9,10,4, 11,5,6,8, 0,14,13,3]
+  };
+  function toUrD40(n){ return String(n).replace(/\d/g, function(d){ return '۰۱۲۳۴۵۶۷۸۹'[+d]; }); }
+  function parseUrD40(s){
+    var en = String(s || '').replace(/[۰-۹]/g, function(c){ return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(c)); }).replace(/[٠-٩]/g, function(c){ return String('٠١٢٣٤٥٦٧٨٩'.indexOf(c)); }).replace(/[^\d]/g, '');
+    return parseInt(en, 10);
+  }
+
+  window.switchUploadedNaqshChaalV40 = function(btn, chaalName){
+    var wrap = btn.closest('.ar-naqsh-ctrl-v40').previousElementSibling;
+    var box = (wrap && wrap.classList.contains('ar-naqsh-ar-box')) ? wrap : (btn.parentNode.parentNode.querySelector('.ar-naqsh-ar-box'));
+    if (!box) return;
+    var tbl = box.querySelector('table');
+    if (!tbl) return;
+    var cells = Array.prototype.slice.call(tbl.querySelectorAll('td'));
+    var nums = cells.map(function(td){ return parseUrD40(td.textContent); });
+    if ((cells.length === 9 || cells.length === 16) && nums.every(function(n){ return !isNaN(n) && n > 0; })) {
+      var sorted = nums.slice().sort(function(a, b){ return a - b; });
+      var map = (cells.length === 9 ? CHAAL_3X3[chaalName] : CHAAL_4X4[chaalName]);
+      for (var i = 0; i < cells.length; i++) {
+        cells[i].textContent = toUrD40(sorted[map[i]]);
+      }
+      var corner = box.querySelector('.ar-chaal-corner-v40');
+      if (corner) corner.textContent = chaalName + ' چال';
+      if (typeof window.showToast === 'function') window.showToast('✅ نقش ' + chaalName + ' چال میں تبدیل ہو گیا');
+      return;
+    }
+    if (typeof window.showToast === 'function') window.showToast('ℹ️ یہ نقش حروفی/آیتی ترتیب میں ہے');
+  };
+
+  function attachChaalToBoxesV40(){
+    document.querySelectorAll('.ar-naqsh-ar-box').forEach(function(box){
+      // Sync 786 visibility
+      var h786 = box.querySelector('.ar-naqsh-786-hdr');
+      if (h786 && typeof window.getInclude786PrintV38 === 'function') {
+        h786.style.display = window.getInclude786PrintV38() ? 'block' : 'none';
+      }
+      if (box.dataset.v40ChaalAttached) return;
+      box.dataset.v40ChaalAttached = '1';
+      // Add subtle corner chaal label inside bottom-right of box
+      if (!box.querySelector('.ar-chaal-corner-v40')) {
+        var cLbl = document.createElement('div');
+        cLbl.className = 'ar-chaal-corner-v40';
+        cLbl.style.cssText = 'text-align:right; font-size:0.70rem; color:#475569; margin-top:4px; font-weight:700;';
+        cLbl.textContent = 'آتشی چال';
+        box.appendChild(cLbl);
+      }
+      // Attach 4-Chaal Switcher directly below .ar-naqsh-ar-box
+      var tbl = box.querySelector('table');
+      var cells = tbl ? tbl.querySelectorAll('td') : [];
+      if (cells.length === 9 || cells.length === 16) {
+        var bar = document.createElement('div');
+        bar.className = 'no-print ar-naqsh-ctrl-v40';
+        bar.style.cssText = 'display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:5px; max-width:340px; margin:7px auto 4px;';
+        bar.innerHTML =
+          '<span style="font-size:0.74rem; font-weight:800; color:#1e3a8a;">چال بدلیں:</span>' +
+          ['آتشی','بادی','آبی','خاکی'].map(function(ch){
+            return '<button type="button" onclick="window.switchUploadedNaqshChaalV40(this,\'' + ch + '\')" style="padding:3px 9px; border-radius:7px; border:1px solid #cbd5e1; background:#f8fafc; color:#0b1936; font-family:inherit; font-size:0.74rem; font-weight:800; cursor:pointer;">' + ch + '</button>';
+          }).join('');
+        box.parentNode.insertBefore(bar, box.nextSibling);
+      }
+    });
+  }
+  setInterval(attachChaalToBoxesV40, 800);
 })();
 
 

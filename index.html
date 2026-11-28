@@ -972,7 +972,7 @@ html, body, #alRaqiV2Root,
 #alRaqiV2Root h1.ar-arabic-text, #alRaqiV2Root h2.ar-arabic-text, #alRaqiV2Root h3.ar-arabic-text {
   font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', Tahoma, sans-serif !important;
 }
-/* v2.1.39 Point 1: Header Brand Title below Monogram strictly in Arabic Mushaf/Amiri script */
+/* v2.1.40 Point 1: Header Brand Title below Monogram strictly in Arabic Mushaf/Amiri script */
 #alRaqiV2Root .ar-hero-header h1.ar-arabic-text {
   font-family: 'Amiri', 'IndoPakQuranMushaf', 'Scheherazade New', serif !important;
   font-weight: 700 !important;
@@ -1047,7 +1047,7 @@ html, body, #alRaqiV2Root,
 }
 
 
-/* === AL-RAQI v2.1.39 UNIFIED DESIGN TOKENS & MOBILE RTL POLISH === */
+/* === AL-RAQI v2.1.40 UNIFIED DESIGN TOKENS & MOBILE RTL POLISH === */
 :root {
   --ar-navy: #0b1936;
   --ar-navy-mid: #162b56;
@@ -2635,7 +2635,7 @@ html, body, #alRaqiV2Root,
     var file = (packName === 'maktaba') ? 'alraqi_pack_maktaba.js' : 'alraqi_pack_tabeer.js';
     _packPromises[packName] = new Promise(function(resolve) {
       var sc = document.createElement('script');
-      sc.src = './' + file + '?v=2139';
+      sc.src = './' + file + '?v=2140';
       sc.async = true;
       sc.onload = function() { resolve(true); };
       sc.onerror = function() {
@@ -4566,8 +4566,12 @@ html, body, #alRaqiV2Root,
         return '<td dir="ltr" style="border:1.8px solid #0f172a; padding:8px 10px; min-width:44px; font-weight:700; font-size:0.96rem;">' + val + '</td>';
       }).join('') + '</tr>';
     }).join('');
-    out.innerHTML = '<div style="font-size:0.86rem; color:#1e3a8a; font-weight:700; margin-bottom:6px;">نقشِ ' + dim + '×' + dim + ' — ' + chaalLbl + ' | کل عدد: <span dir="ltr">' + num + '</span>' + (kasar ? ' (کسر: ' + kasar + ')' : '') + '</div>' +
-      '<div id="activeGeneratedNaqshBox" style="display:inline-block; background:#fff; padding:6px;"><table style="border-collapse:collapse; margin:0 auto;">' + htmlRows + '</table></div>';
+    out.innerHTML = '<div class="no-print" style="font-size:0.78rem; color:#475569; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:5px 9px; margin-bottom:8px;">معلوماتِ معالج — نقش ' + dim + '×' + dim + ' | کل عدد: <span dir="ltr">' + num + '</span>' + (kasar ? ' (کسر: ' + kasar + ')' : '') + '</div>' +
+      '<div id="activeGeneratedNaqshBox" style="display:inline-block; background:#fff; border:2px solid #0f172a; border-radius:10px; padding:10px 12px; text-align:center;">' +
+        '<div class="ar-naqsh-786-hdr" style="font-size:1.05rem; font-weight:800; color:#000; margin-bottom:6px; letter-spacing:2px; display:' + ((typeof window.getInclude786PrintV38==='function' && !window.getInclude786PrintV38()) ? 'none' : 'block') + ';">786</div>' +
+        '<table style="border-collapse:collapse; margin:0 auto;">' + htmlRows + '</table>' +
+        '<div style="text-align:right; font-size:0.70rem; color:#475569; margin-top:5px; font-weight:700;">' + chaalLbl + '</div>' +
+      '</div>';
   };
 
   
@@ -7682,7 +7686,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 
   // Auto-Purge Old PWA Caches & Force Service Worker Update on every new release (v2.1.33)
   (function autoBustOldPwaCacheV33(){
-    var LIVE_VER = 'v2.1.39';
+    var LIVE_VER = 'v2.1.40';
     try {
       var prev = localStorage.getItem('alraqi_live_build_ver_master');
       if (prev !== LIVE_VER) {
@@ -8168,7 +8172,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
     function restoreScreenAfterBoot() {
       ensureHomeHeaderSharePillB15();
       ensureSaveAdminPinCheckboxB15();
-      // [v2.1.39 Point 9] Smart Refresh: Fresh launch -> Home; Pull-to-refresh/reload -> stay on current active screen!
+      // [v2.1.40 Point 9] Smart Refresh: Fresh launch -> Home; Pull-to-refresh/reload -> stay on current active screen!
       var targetScr = 'home';
       try {
         var navEntries = performance && performance.getEntriesByType ? performance.getEntriesByType('navigation') : [];
@@ -8288,7 +8292,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
   }, true);
 })();
 
-// === PRO UI/UX POLISH v2.1.39 (BACK PILL + FADE + ONLINE DOT + JSON BACKUP) ===
+// === PRO UI/UX POLISH v2.1.40 (BACK PILL + FADE + ONLINE DOT + JSON BACKUP) ===
 (function initProPolishV35(){
   if (!document.getElementById('arProPolishCssV35')) {
     var st = document.createElement('style');
@@ -8401,7 +8405,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 })();
 
 
-// === v2.1.39 MASTER ARCHITECTURE & DESIGN SYSTEM (EVENTBUS + DESIGN TOKENS) ===
+// === v2.1.40 MASTER ARCHITECTURE & DESIGN SYSTEM (EVENTBUS + DESIGN TOKENS) ===
 (function initAlRaqiV36Master(){
   // 1. Lightweight Centralized EventBus (prevents future monkey-patch chains)
   if (!window.AlRaqiBus) {
@@ -8446,7 +8450,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 })();
 
 
-// === v2.1.39 POINT 2 (AUTO-SYNC MUALIJ CODE) & POINT 4 (SMART EXISTING PATIENT REUSE) ===
+// === v2.1.40 POINT 2 (AUTO-SYNC MUALIJ CODE) & POINT 4 (SMART EXISTING PATIENT REUSE) ===
 (function initV37MualijCodeAndSmartCases(){
   function resolveActiveMualijCodeV37(){
     try {
@@ -8627,7 +8631,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 })();
 
 
-// === v2.1.39 MASTER SUITE: POINTS 11 (EASY URDU + EXPAND), 12 (TRUE STEP-BY-STEP BACK),
+// === v2.1.40 MASTER SUITE: POINTS 11 (EASY URDU + EXPAND), 12 (TRUE STEP-BY-STEP BACK),
 //     14 (PURE BLACK MURAQABA), 15 (ZERO-BLINK TASBEEH), 21 (3-ANGLE MIZAJ), 22 (HOW-TO-USE GUIDE) ===
 (function initAlRaqiV38MasterSuite(){
 
@@ -8846,16 +8850,17 @@ window.MASTER_THREE_BOOKS_DREAMS = [
   };
 
   function mountHomeGuidePillV38(){
-    var homeHdr = document.querySelector('#scr_home .ar-hero-header');
-    if (homeHdr && !document.getElementById('arHomeGuidePillV38')) {
-      homeHdr.style.position = 'relative';
+    var oldTop = document.getElementById('arHomeGuidePillV38');
+    if (oldTop && oldTop.closest('.ar-hero-header')) oldTop.remove();
+    var homeWrap = document.querySelector('#scr_home .wrap');
+    if (homeWrap && !document.getElementById('arHomeGuideBottomV40')) {
       var gb = document.createElement('button');
-      gb.id = 'arHomeGuidePillV38';
+      gb.id = 'arHomeGuideBottomV40';
       gb.type = 'button';
-      gb.textContent = '📖 رہنما';
-      gb.style.cssText = 'position:absolute; top:8px; right:76px; z-index:6; display:inline-flex; align-items:center; justify-content:center; padding:2px 11px; min-height:27px; border-radius:999px; background:rgba(254,240,138,0.18); border:1px solid rgba(212,175,55,0.82); color:#fef08a; font-family:"Jameel Noori Nastaleeq","Noto Nastaliq Urdu",Tahoma,sans-serif; font-size:0.80rem; font-weight:700; cursor:pointer;';
+      gb.textContent = '📖 الراقی ایپ — مکمل رہنمائے استعمال';
+      gb.style.cssText = 'width:100%; padding:7px 12px; border-radius:11px; background:#fffbeb; border:1.5px solid #d4af37; color:#0b1936; font-family:"Jameel Noori Nastaleeq","Noto Nastaliq Urdu",Tahoma,sans-serif; font-size:0.88rem; font-weight:800; cursor:pointer; box-shadow:0 2px 6px rgba(11,25,54,0.06);';
       gb.onclick = window.openHowToUseGuideV38;
-      homeHdr.insertBefore(gb, homeHdr.firstChild);
+      homeWrap.appendChild(gb);
     }
     var setBox = document.getElementById('arHardRefreshBoxV33');
     if (setBox && !document.getElementById('arSettingsGuideBtnV38')) {
@@ -8888,7 +8893,7 @@ window.MASTER_THREE_BOOKS_DREAMS = [
 })();
 
 
-// === v2.1.39 MASTER POLISH SUITE (POINTS 12, 13, 14, 15, 16, 17, 18, 19) ===
+// === v2.1.40 MASTER POLISH SUITE (POINTS 12, 13, 14, 15, 16, 17, 18, 19) ===
 (function initAlRaqiV39PolishAndTasbeehSuite(){
 
   // Track active screen in sessionStorage for Point 9 Smart Refresh
